@@ -107,7 +107,7 @@
       </div>
     </div>
     <div class="hidden md:flex items-center gap-5 text-sm">
-      <span class="text-white/40 mono text-xs">v3.2 · AI-CUT</span>
+      <span class="text-white/40 mono text-xs">v3.3 · AI-CUT</span>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 bg-green-400 rounded-full pulse-glow"></span>
         <span class="text-white/50 text-xs mono">ENGINE READY</span>
@@ -118,7 +118,7 @@
   <section class="relative z-10 px-6 lg:px-12 pt-10 pb-6">
     <div class="max-w-7xl mx-auto">
       <div class="flex items-center gap-3 mb-4 flex-wrap">
-        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs mono text-white/70">Direct Link / YouTube</span>
+        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs mono text-white/70">Upload MP4 / Link Langsung</span>
         <span class="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-xs mono text-amber-300 flex items-center gap-1.5">
           <i data-lucide="sparkles" class="w-3 h-3"></i> Smart Auto-Cut
         </span>
@@ -129,7 +129,7 @@
         <span class="gradient-text">di momen paling viral.</span>
       </h1>
       <p class="text-lg text-white/50 max-w-2xl">
-        Engine cerdas menganalisis motion, scene change & brightness. Tempel link video (mp4/webm/youtube), sisanya kami yang potong.
+        Engine cerdas menganalisis motion, scene change & brightness. Upload file MP4 dari komputer kamu, sisanya kami yang potong.
       </p>
     </div>
   </section>
@@ -143,7 +143,7 @@
           <div class="flex gap-2">
             <div class="flex-1 relative">
               <i data-lucide="link-2" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30"></i>
-              <input id="ytUrl" type="text" placeholder="Tempel link .mp4 atau YouTube..."
+              <input id="ytUrl" type="text" placeholder="Tempel link .mp4 atau YouTube (preview only)..."
                      class="w-full bg-black/30 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-orange-500/50 transition placeholder:text-white/20" />
             </div>
             <button id="loadBtn" class="px-5 py-3 bg-gradient-to-br from-orange-500 to-pink-600 rounded-xl text-sm font-semibold hover:opacity-90 transition flex items-center gap-2 shadow-lg shadow-orange-500/20">
@@ -151,16 +151,26 @@
               Load
             </button>
           </div>
-          <div class="flex items-center gap-3 mt-3 flex-wrap">
-            <button id="useSampleBtn" class="text-xs text-white/50 hover:text-orange-400 flex items-center gap-1.5 transition">
-              <i data-lucide="sparkles" class="w-3 h-3"></i>
-              gunakan video sampel
+          
+          <!-- SEPARATOR / UPLOAD AREA -->
+          <div class="flex items-center gap-4 my-4">
+            <div class="flex-1 h-px bg-white/10"></div>
+            <span class="text-xs text-white/30 mono">ATAU</span>
+            <div class="flex-1 h-px bg-white/10"></div>
+          </div>
+          
+          <div class="flex items-center gap-3 flex-wrap">
+            <label for="fileUpload" class="flex-1 cursor-pointer">
+              <div class="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-dashed border-white/15 hover:border-orange-500/50 hover:bg-orange-500/5 transition text-sm text-white/70 hover:text-white">
+                <i data-lucide="upload-cloud" class="w-5 h-5 text-orange-400"></i>
+                <span id="uploadLabel">Upload File MP4 dari Komputer</span>
+              </div>
+              <input id="fileUpload" type="file" accept="video/*" class="hidden" />
+            </label>
+            <button id="useSampleBtn" class="px-4 py-3 rounded-xl border border-white/10 hover:border-white/20 hover:bg-white/5 transition text-xs text-white/60 hover:text-white flex items-center gap-1.5">
+              <i data-lucide="film" class="w-4 h-4"></i>
+              Pakai Sampel
             </button>
-            <span class="text-white/20">·</span>
-            <span class="text-xs text-white/30 flex items-center gap-1">
-              <i data-lucide="info" class="w-3 h-3"></i>
-              YouTube hanya preview. Untuk download gunakan link .mp4
-            </span>
           </div>
         </div>
 
@@ -170,7 +180,7 @@
               <i data-lucide="monitor-play" class="w-4 h-4 text-orange-400"></i>
               <h3 class="font-semibold">Preview Source</h3>
             </div>
-            <div id="previewMeta" class="text-xs mono text-white/40">No source loaded</div>
+            <div id="previewMeta" class="text-xs mono text-white/40 truncate max-w-[200px]">No source loaded</div>
           </div>
 
           <div id="previewWrapper" class="relative bg-black rounded-xl overflow-hidden" style="aspect-ratio: 16/9;">
@@ -179,10 +189,10 @@
                 <i data-lucide="film" class="w-14 h-14"></i>
                 <div class="absolute -inset-2 bg-orange-500/20 blur-xl rounded-full"></div>
               </div>
-              <p class="text-sm">Tempel URL video untuk mulai</p>
+              <p class="text-sm">Upload atau tempel URL untuk mulai</p>
             </div>
             <div id="ytPlayer" class="absolute inset-0 hidden"></div>
-            <video id="sampleVideo" class="absolute inset-0 w-full h-full hidden object-contain" muted loop playsinline crossorigin="anonymous"></video>
+            <video id="sampleVideo" class="absolute inset-0 w-full h-full hidden object-contain bg-black" muted loop playsinline crossorigin="anonymous"></video>
 
             <div class="absolute bottom-0 left-0 right-0 p-4 text-center pointer-events-none">
               <span id="captionText" class="inline-block px-4 py-2 rounded-lg text-white font-bold text-sm sm:text-base" style="display:none;"></span>
@@ -465,7 +475,7 @@
     lucide.createIcons();
 
     const state = {
-      source: null, // 'youtube', 'mp4', 'sample'
+      source: null,
       duration: 10,
       ratio: { w: 16, h: 9, label: '16:9' },
       caption: '',
@@ -507,14 +517,54 @@
       return null;
     }
 
-    // ===== Load Button Logic (YouTube / MP4) =====
+    // ===== Upload File Logic =====
+    document.getElementById('fileUpload').addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      state.source = 'upload';
+      state.analysisData = null;
+
+      const video = document.getElementById('sampleVideo');
+      // Revoke previous object URL if exists
+      if (video.src && video.src.startsWith('blob:')) {
+        URL.revokeObjectURL(video.src);
+      }
+
+      const fileURL = URL.createObjectURL(file);
+      video.src = fileURL;
+      video.classList.remove('hidden');
+      document.getElementById('ytPlayer').classList.add('hidden');
+      document.getElementById('ytPlayer').innerHTML = '';
+      document.getElementById('previewPlaceholder').classList.add('hidden');
+      document.getElementById('liveBadge').classList.remove('hidden');
+      document.getElementById('strategyCard').classList.add('hidden');
+
+      // Update label to show file name
+      document.getElementById('uploadLabel').textContent = file.name.substring(0, 20) + (file.name.length > 20 ? '...' : '');
+
+      video.play().catch(() => {});
+
+      video.onloadedmetadata = async () => {
+        state.sourceDuration = video.duration;
+        document.getElementById('previewMeta').textContent = `Upload · ${Math.round(video.duration)}s · ${video.videoWidth}×${video.videoHeight}`;
+        updateTimeline();
+        toast('File berhasil diunggah. Menjalankan smart analysis...', 'info');
+        await analyzeVideo();
+      };
+
+      video.onerror = () => {
+        toast('Gagal memuat file. Format tidak didukung', 'error');
+      };
+    });
+
+    // ===== Load URL Logic =====
     document.getElementById('loadBtn').addEventListener('click', () => {
       const url = document.getElementById('ytUrl').value.trim();
       if (!url) { toast('Tempel URL dulu', 'warn'); return; }
 
       const ytId = parseYouTube(url);
       if (ytId) {
-        // YOUTUBE FLOW
         state.source = 'youtube';
         state.analysisData = null;
 
@@ -536,9 +586,8 @@
         applyStrategy();
         renderHeatmap();
         updateTimeline();
-        toast('YouTube dimuat. Hanya bisa preview (kebijakan CORS). Untuk download gunakan link .mp4', 'warn');
+        toast('YouTube dimuat. Hanya bisa preview (kebijakan CORS). Untuk download, silakan Upload file MP4', 'warn');
       } else if (url.match(/\.(mp4|webm|ogg)$/i) || url.startsWith('http')) {
-        // DIRECT VIDEO FLOW
         state.source = 'mp4';
         state.analysisData = null;
 
@@ -555,7 +604,7 @@
 
         video.onloadedmetadata = async () => {
           state.sourceDuration = video.duration;
-          document.getElementById('previewMeta').textContent = `MP4/WebM · ${Math.round(video.duration)}s · ${video.videoWidth}×${video.videoHeight}`;
+          document.getElementById('previewMeta').textContent = `MP4 · ${Math.round(video.duration)}s`;
           updateTimeline();
           toast('Video siap. Menjalankan smart analysis...', 'info');
           await analyzeVideo();
@@ -596,7 +645,7 @@
 
       video.onloadedmetadata = async () => {
         state.sourceDuration = video.duration;
-        document.getElementById('previewMeta').textContent = `Sampel · ${Math.round(video.duration)}s · ${video.videoWidth}×${video.videoHeight}`;
+        document.getElementById('previewMeta').textContent = `Sampel · ${Math.round(video.duration)}s`;
         updateTimeline();
         toast('Video sampel dimuat. Menjalankan smart analysis...', 'info');
         await analyzeVideo();
@@ -679,10 +728,7 @@
           }
           edgeStrength = edges / ((w-2) * (h-2) * 2);
 
-          const score = Math.min(100,
-            motion * 2.5 + colorVariance * 0.4 + edgeStrength * 1.2 + (brightness > 60 && brightness < 200 ? 10 : 0)
-          );
-
+          const score = Math.min(100, motion * 2.5 + colorVariance * 0.4 + edgeStrength * 1.2 + (brightness > 60 && brightness < 200 ? 10 : 0));
           frames.push({ time: t, motion, brightness, colorVariance, edgeStrength, score });
           prevData = new Uint8ClampedArray(data);
         } catch (e) {
@@ -709,7 +755,6 @@
 
       renderHeatmap();
       findBestCut(state.duration);
-
       toast(`Analysis selesai · ${frames.length} frames ter-scan`, 'success');
     }
 
@@ -783,9 +828,7 @@
             bestScore = finalScore;
             bestStart = startT;
             const peakFrame = windowFrames.reduce((max, f) => f.motion > max.motion ? f : max, windowFrames[0]);
-            bestReason = peakFrame.motion > 15 ? 'Motion spike terdeteksi' : 
-                         peakFrame.colorVariance > 30 ? 'Scene change intens' : 
-                         'Visual activity tinggi';
+            bestReason = peakFrame.motion > 15 ? 'Motion spike terdeteksi' : peakFrame.colorVariance > 30 ? 'Scene change intens' : 'Visual activity tinggi';
           }
         }
 
@@ -815,12 +858,7 @@
       state.cutStart = start;
       state.cutEnd = start + dur;
       state.cutScore = Math.round(getStrategyScore(start + dur/2, total));
-      const reasons = {
-        hook: 'Pembuka video (hook terkuat)',
-        highlight: 'Momen puncak konten',
-        punchline: 'Bagian twist/climax (3/4 video)',
-        outro: 'Penutup video'
-      };
+      const reasons = { hook: 'Pembuka video (hook terkuat)', highlight: 'Momen puncak konten', punchline: 'Bagian twist/climax (3/4 video)', outro: 'Penutup video' };
       state.cutReason = reasons[state.strategy];
     }
 
@@ -845,11 +883,7 @@
         document.querySelectorAll('.preset-card').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         state.strategy = btn.dataset.strategy;
-        if (state.source === 'youtube') {
-          applyStrategy();
-          renderHeatmap();
-          updateCutUI();
-        }
+        if (state.source === 'youtube') { applyStrategy(); renderHeatmap(); updateCutUI(); }
       });
     });
 
@@ -860,23 +894,14 @@
         state.duration = parseInt(btn.dataset.duration);
         document.getElementById('exportDur').textContent = state.duration + 's';
 
-        if (state.source !== 'youtube' && state.analysisData) {
-          findBestCut(state.duration);
-        } else if (state.source === 'youtube') {
-          applyStrategy();
-          updateCutUI();
-        } else {
-          state.cutStart = 0;
-          state.cutEnd = state.duration;
-          updateCutUI();
-        }
+        if (state.source !== 'youtube' && state.analysisData) findBestCut(state.duration);
+        else if (state.source === 'youtube') { applyStrategy(); updateCutUI(); }
+        else { state.cutStart = 0; state.cutEnd = state.duration; updateCutUI(); }
         updateTimeline();
       });
     });
 
-    document.getElementById('analyzeBtn').addEventListener('click', () => {
-      analyzeVideo();
-    });
+    document.getElementById('analyzeBtn').addEventListener('click', () => { analyzeVideo(); });
 
     document.querySelectorAll('.ratio-card').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -906,10 +931,7 @@
       toast('Caption otomatis dibuat', 'success');
     });
 
-    document.getElementById('captionInput').addEventListener('input', (e) => {
-      state.caption = e.target.value;
-      updateCaption();
-    });
+    document.getElementById('captionInput').addEventListener('input', (e) => { state.caption = e.target.value; updateCaption(); });
 
     document.querySelectorAll('.caption-style-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -968,9 +990,7 @@
         </div>`;
       }).join('');
 
-      document.querySelectorAll('.track-item').forEach(item => {
-        item.addEventListener('click', () => selectTrack(item.dataset.track));
-      });
+      document.querySelectorAll('.track-item').forEach(item => { item.addEventListener('click', () => selectTrack(item.dataset.track)); });
     }
 
     function selectTrack(trackId) {
@@ -1035,11 +1055,7 @@
         }
 
         setTimeout(() => {
-          if (currentAudioCtx === ctx) {
-            ctx.close().catch(() => {});
-            currentAudioCtx = null;
-            renderTracks();
-          }
+          if (currentAudioCtx === ctx) { ctx.close().catch(() => {}); currentAudioCtx = null; renderTracks(); }
         }, previewDuration * 1000);
       } catch (e) {}
     }
@@ -1058,7 +1074,7 @@
 
     document.getElementById('playBtn').addEventListener('click', () => {
       const video = document.getElementById('sampleVideo');
-      if ((state.source === 'sample' || state.source === 'mp4') && video.src) {
+      if (state.source !== 'youtube' && video.src) {
         if (video.paused) {
           video.currentTime = state.cutStart;
           video.play();
@@ -1079,7 +1095,7 @@
 
     setInterval(() => {
       const video = document.getElementById('sampleVideo');
-      if ((state.source === 'sample' || state.source === 'mp4') && !video.paused && video.duration) {
+      if (state.source !== 'youtube' && !video.paused && video.duration) {
         const total = video.duration;
         const pct = (video.currentTime / total) * 100;
         document.getElementById('playhead').style.left = pct + '%';
@@ -1101,7 +1117,6 @@
     }, 100);
 
     // ===== EXPORT & DOWNLOAD =====
-    
     function getSupportedMimeType() {
       const types = [
         'video/webm;codecs=vp9,opus',
@@ -1121,7 +1136,7 @@
       if (state.isExporting) return;
       
       if (!state.source || state.source === 'youtube') {
-        toast('Untuk download: tempel link .mp4 atau gunakan sampel', 'warn');
+        toast('Untuk download: Upload file MP4 atau pakai sampel', 'warn');
         return;
       }
       
@@ -1135,12 +1150,8 @@
       const progressText = document.getElementById('progressText');
       const video = document.getElementById('sampleVideo');
 
-      if (!video.src) {
-        toast('Video belum siap', 'error');
-        return;
-      }
+      if (!video.src) { toast('Video belum siap', 'error'); return; }
       
-      // Pastikan video benar-benar siap untuk dirender
       if (video.readyState < 4) {
         toast('Menunggu video siap...', 'info');
         await new Promise(resolve => {
@@ -1151,7 +1162,6 @@
             }
           };
           video.addEventListener('canplaythrough', onReady);
-          // Fallback if already ready
           if (video.readyState >= 4) resolve();
         });
       }
@@ -1172,13 +1182,11 @@
         canvas.width = cw; canvas.height = ch;
         const ctx = canvas.getContext('2d');
 
-        // Setup AudioContext
         const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioCtxClass();
         if (audioCtx.state === 'suspended') await audioCtx.resume();
         const destination = audioCtx.createMediaStreamDestination();
 
-        // Render backsound ke audio destination
         if (state.backsound && state.backsound !== 't5') {
           const track = tracks.find(t => t.id === state.backsound);
           const bpm = track.bpm;
@@ -1226,26 +1234,17 @@
           }
         }
 
-        // Combine canvas video + audio destination streams
         const videoStream = canvas.captureStream(30);
         const audioTracks = destination.stream.getAudioTracks();
-        const combinedStream = new MediaStream([
-          ...videoStream.getVideoTracks(),
-          ...audioTracks
-        ]);
+        const combinedStream = new MediaStream([...videoStream.getVideoTracks(), ...audioTracks]);
 
         const mimeType = getSupportedMimeType();
         if (!mimeType) throw new Error('Browser tidak mendukung MediaRecorder');
 
-        const recorder = new MediaRecorder(combinedStream, {
-          mimeType: mimeType,
-          videoBitsPerSecond: 2500000
-        });
+        const recorder = new MediaRecorder(combinedStream, { mimeType: mimeType, videoBitsPerSecond: 2500000 });
 
         const chunks = [];
-        recorder.ondataavailable = e => {
-          if (e.data && e.data.size > 0) chunks.push(e.data);
-        };
+        recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
 
         recorder.onstop = () => {
           const blob = new Blob(chunks, { type: mimeType.split(';')[0] });
@@ -1271,7 +1270,6 @@
           toast(`Clip ${state.duration}s berhasil di-download! (${(blob.size / 1024 / 1024).toFixed(1)} MB)`, 'success');
         };
 
-        // Seek ke posisi awal cut
         await new Promise(resolve => {
           const onSeeked = () => { video.removeEventListener('seeked', onSeeked); resolve(); };
           video.addEventListener('seeked', onSeeked);
@@ -1281,7 +1279,6 @@
         video.muted = true;
         await video.play();
 
-        // Mulai recording dan gambar frame
         recorder.start();
         const startTime = performance.now();
         const durationMs = state.duration * 1000;
@@ -1306,11 +1303,7 @@
               sw = video.videoWidth; sh = sw / cRatio;
               sx = 0; sy = (video.videoHeight - sh) / 2;
             }
-            try {
-              ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
-            } catch (e) {
-              console.warn('Draw error:', e);
-            }
+            try { ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch); } catch (e) {}
           }
 
           const captions = state.caption.split('\n').filter(c => c.trim());
@@ -1385,7 +1378,7 @@
     renderTracks();
     updateCaption();
     updateTimeline();
-    setTimeout(() => toast('Selamat datang! Klik "gunakan video sampel" untuk tes download', 'info'), 600);
+    setTimeout(() => toast('Upload file MP4 kamu untuk mulai memotong', 'info'), 600);
   </script>
 </body>
 </html>
