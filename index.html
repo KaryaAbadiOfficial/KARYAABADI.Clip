@@ -1,1172 +1,451 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ClipForge — Smart Video Clip Studio</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-<style>
-  :root {
-    --bg: #0a0612;
-    --fg: #f5f0ff;
-    --muted: #8b7fa8;
-    --accent: #ff5e1a;
-    --accent-2: #00e5ff;
-    --accent-3: #ff2d75;
-    --gold: #ffb800;
-    --card: rgba(255,255,255,0.035);
-    --border: rgba(255,255,255,0.08);
-  }
-  * { font-family: 'Space Grotesk', sans-serif; }
-  body { background: var(--bg); color: var(--fg); overflow-x: hidden; }
-  .mono { font-family: 'JetBrains Mono', monospace; }
-
-  .blob { position: fixed; border-radius: 50%; filter: blur(80px); opacity: 0.35; pointer-events: none; z-index: 0; }
-  .blob-1 { width: 500px; height: 500px; background: #ff5e1a; top: -150px; left: -150px; animation: float-1 18s ease-in-out infinite; }
-  .blob-2 { width: 400px; height: 400px; background: #00e5ff; top: 30%; right: -100px; animation: float-2 22s ease-in-out infinite; }
-  .blob-3 { width: 450px; height: 450px; background: #ff2d75; bottom: -150px; left: 30%; animation: float-3 20s ease-in-out infinite; }
-  @keyframes float-1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(80px,60px) scale(1.1); } }
-  @keyframes float-2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-60px,80px) scale(0.9); } }
-  @keyframes float-3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(40px,-50px) scale(1.15); } }
-
-  .grid-overlay {
-    position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background-image: linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
-  }
-
-  .card { background: var(--card); backdrop-filter: blur(16px); border: 1px solid var(--border); border-radius: 18px; }
-  .chip { transition: all 0.2s ease; cursor: pointer; }
-  .chip:hover { border-color: rgba(255,94,26,0.5); background: rgba(255,94,26,0.06); }
-  .chip.active { background: linear-gradient(135deg, #ff5e1a, #ff2d75); border-color: transparent; color: white; box-shadow: 0 8px 24px rgba(255,94,26,0.35); }
-
-  .ratio-card { transition: all 0.2s; cursor: pointer; }
-  .ratio-card.active { border-color: var(--accent); background: rgba(255,94,26,0.08); box-shadow: 0 0 0 1px var(--accent) inset, 0 8px 24px rgba(255,94,26,0.2); }
-  .ratio-card.active .ratio-shape { background: linear-gradient(135deg, #ff5e1a, #ff2d75); }
-
-  .gradient-text {
-    background: linear-gradient(90deg, #ff5e1a, #ff2d75, #00e5ff, #ff5e1a);
-    background-size: 200% 200%;
-    -webkit-background-clip: text; background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: gradient-shift 8s ease infinite;
-  }
-  @keyframes gradient-shift { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
-
-  @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.6); } 50% { box-shadow: 0 0 0 8px rgba(34,197,94,0); } }
-  .pulse-glow { animation: pulse-glow 2s infinite; }
-
-  @keyframes pulse-rec { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } }
-  .pulse-rec { animation: pulse-rec 1s infinite; }
-
-  ::-webkit-scrollbar { width: 8px; height: 8px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
-
-  .toast { animation: slide-in 0.3s ease forwards; }
-  @keyframes slide-in { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-
-  .spinner { border: 2px solid transparent; border-top-color: #fff; border-right-color: rgba(255,255,255,0.4); border-radius: 50%; animation: spin 0.8s linear infinite; display: inline-block; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .wave-bar { background: linear-gradient(180deg, #ff5e1a, #ff2d75); border-radius: 2px; animation: wave 1.2s ease-in-out infinite; }
-  @keyframes wave { 0%,100% { transform: scaleY(0.3); } 50% { transform: scaleY(1); } }
-
-  input[type="range"] { -webkit-appearance: none; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; outline: none; }
-  input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: linear-gradient(135deg, #ff5e1a, #ff2d75); border-radius: 50%; cursor: pointer; }
-
-  .ratio-shape { background: rgba(255,255,255,0.15); transition: all 0.2s; }
-  .scan-line { position: absolute; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); box-shadow: 0 0 12px var(--gold); animation: scan-down 2s linear infinite; }
-  @keyframes scan-down { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-  .heatmap-bar { transition: all 0.3s ease; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLIP FORGE - AI Auto Clipper</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .aspect-9-16 { aspect-ratio: 9 / 16; }
+        .aspect-1-1 { aspect-ratio: 1 / 1; }
+        .aspect-16-9 { aspect-ratio: 16 / 9; }
+        .aspect-4-5 { aspect-ratio: 4 / 5; }
+    </style>
 </head>
-<body>
-  <div class="blob blob-1"></div>
-  <div class="blob blob-2"></div>
-  <div class="blob blob-3"></div>
-  <div class="grid-overlay"></div>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
 
-  <header class="relative z-10 px-6 lg:px-12 py-5 flex items-center justify-between border-b border-white/5">
-    <div class="flex items-center gap-3">
-      <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-orange-500 to-pink-600 flex items-center justify-center shadow-lg shadow-orange-500/30 relative overflow-hidden">
-        <i data-lucide="clapperboard" class="w-5 h-5 text-white relative z-10"></i>
-        <div class="absolute inset-0 bg-gradient-to-tr from-transparent to-white/20"></div>
-      </div>
-      <div>
-        <div class="text-lg font-bold tracking-tight leading-none">ClipForge</div>
-        <div class="text-[10px] text-white/40 tracking-widest uppercase mt-1">Smart Clip Studio</div>
-      </div>
-    </div>
-    <div class="hidden md:flex items-center gap-5 text-sm">
-      <span class="text-white/40 mono text-xs">v5.0 · AI-CUT + STT</span>
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 bg-green-400 rounded-full pulse-glow"></span>
-        <span class="text-white/50 text-xs mono">ENGINE READY</span>
-      </div>
-    </div>
-  </header>
-
-  <section class="relative z-10 px-6 lg:px-12 pt-10 pb-6">
-    <div class="max-w-7xl mx-auto">
-      <div class="flex items-center gap-3 mb-4 flex-wrap">
-        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs mono text-white/70">Upload MP4</span>
-        <span class="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-xs mono text-amber-300 flex items-center gap-1.5">
-          <i data-lucide="sparkles" class="w-3 h-3"></i> Auto-Cut & Transcribe
-        </span>
-        <span class="text-xs mono text-white/40">10s · 15s · 20s · 30s</span>
-      </div>
-      <h1 class="text-5xl md:text-7xl font-bold tracking-tight leading-[0.95] mb-4">
-        <span class="text-white">Potong Video</span><br>
-        <span class="gradient-text">di momen paling viral.</span>
-      </h1>
-      <p class="text-lg text-white/50 max-w-2xl">
-        Engine cerdas memilih momen terbaik, menambahkan teks otomatis dari suara video, crop rasio, dan download MP4.
-      </p>
-    </div>
-  </section>
-
-  <main class="relative z-10 px-6 lg:px-12 pb-32">
-    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-6">
-
-      <div class="lg:col-span-3 space-y-6">
-        <div class="card p-6">
-          <label id="dropZone" for="fileUpload" class="cursor-pointer block">
-            <div id="dropInner" class="flex flex-col items-center justify-center gap-3 px-4 py-10 rounded-xl border-2 border-dashed border-white/15 hover:border-orange-500/50 hover:bg-orange-500/5 transition text-center">
-              <div class="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center">
-                <i data-lucide="upload-cloud" class="w-7 h-7 text-orange-400"></i>
-              </div>
-              <div>
-                <div class="text-base font-semibold text-white">Klik untuk Upload File MP4</div>
-                <div class="text-xs text-white/40 mt-1" id="uploadLabel">atau tarik lepas file ke sini</div>
-              </div>
+    <div id="app" class="flex flex-col min-h-screen">
+        
+        <!-- Navbar -->
+        <header class="border-b border-slate-800 px-6 py-4 flex justify-between items-center sticky top-0 bg-slate-950 z-50">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="resetView()">
+                <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <h1 class="text-xl font-bold tracking-tight">CLIP FORGE</h1>
             </div>
-            <input id="fileUpload" type="file" accept="video/*" class="hidden" />
-          </label>
-          <button id="useSampleBtn" class="mt-4 w-full text-xs text-white/50 hover:text-orange-400 flex items-center justify-center gap-1.5 transition py-2">
-            <i data-lucide="film" class="w-4 h-4"></i>
-            atau coba dengan video sampel
-          </button>
-        </div>
+            <div class="flex items-center gap-4">
+                <span class="text-xs text-slate-400 hidden md:block">No Login Required. 100% Local.</span>
+                <button class="text-sm px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-md font-medium transition-colors">Create Clips</button>
+            </div>
+        </header>
 
-        <div class="card p-5">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-              <i data-lucide="monitor-play" class="w-4 h-4 text-orange-400"></i>
-              <h3 class="font-semibold">Preview Source</h3>
-            </div>
-            <div id="previewMeta" class="text-xs mono text-white/40 truncate max-w-[200px]">No source loaded</div>
-          </div>
-
-          <div id="previewWrapper" class="relative bg-black rounded-xl overflow-hidden flex items-center justify-center" style="aspect-ratio: 16/9;">
-            <div id="previewPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-white/30">
-              <div class="relative mb-3"><i data-lucide="film" class="w-14 h-14"></i><div class="absolute -inset-2 bg-orange-500/20 blur-xl rounded-full"></div></div>
-              <p class="text-sm">Upload video untuk mulai</p>
-            </div>
-            <video id="sampleVideo" class="absolute inset-0 w-full h-full hidden object-cover bg-black" loop playsinline></video>
-
-            <div class="absolute bottom-0 left-0 right-0 p-4 text-center pointer-events-none">
-              <span id="captionText" class="inline-block px-4 py-2 rounded-lg text-white font-bold text-sm sm:text-base" style="display:none;"></span>
-            </div>
-            <div class="absolute top-3 left-3 flex items-center gap-2 pointer-events-none">
-              <span id="liveBadge" class="hidden px-2 py-1 bg-red-500/80 backdrop-blur rounded text-[10px] mono font-bold tracking-wider">LIVE PREVIEW</span>
-            </div>
-            <div class="absolute top-3 right-3 pointer-events-none">
-              <span id="ratioBadge" class="px-2 py-1 bg-black/60 backdrop-blur rounded text-[10px] mono font-bold tracking-wider">16:9</span>
-            </div>
-            <div id="scanOverlay" class="absolute inset-0 hidden pointer-events-none z-20">
-              <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
-              <div class="scan-line"></div>
-              <div class="absolute inset-0 flex flex-col items-center justify-center">
-                <div class="spinner w-8 h-8 mb-3"></div>
-                <div class="text-sm font-semibold text-amber-300">Analyzing video...</div>
-                <div id="scanProgress" class="text-xs mono text-white/50 mt-1">0%</div>
-              </div>
-            </div>
-          </div>
-
-          <div id="smartCutInfo" class="hidden mt-4 p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
-            <div class="flex items-start gap-3">
-              <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0">
-                <i data-lucide="target" class="w-4 h-4 text-white"></i>
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-sm font-semibold text-amber-200">Auto-cut detected</span>
-                  <span id="cutTimeBadge" class="text-xs mono px-2 py-0.5 bg-amber-500/20 rounded text-amber-100">00:00 → 00:10</span>
+        <!-- Main Content Area -->
+        <main id="mainContent" class="flex-1 overflow-y-auto">
+            
+            <!-- DASHBOARD VIEW -->
+            <section id="dashboardView" class="max-w-7xl mx-auto w-full p-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Turn Long Videos Into <span class="text-indigo-400">Short Clips</span></h2>
+                    <p class="text-lg text-slate-400 mb-8 max-w-2xl mx-auto">AI automatically finds the best moments, edits them, adds captions, reframes the video, and exports ready-to-post MP4 clips.</p>
+                    
                 </div>
-                <div id="cutReason" class="text-xs text-white/60 mt-1">Motion spike terdeteksi</div>
-              </div>
-              <div class="text-right flex-shrink-0">
-                <div id="cutScore" class="text-lg font-bold text-amber-300 mono leading-none">87</div>
-                <div class="text-[10px] mono text-white/40 tracking-widest">SCORE</div>
-              </div>
-            </div>
-          </div>
 
-          <div class="mt-5">
-            <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center gap-2">
-                <span class="text-[11px] mono text-white/40 tracking-widest">SMART TIMELINE</span>
-                <span id="heatmapStatus" class="text-[10px] mono px-1.5 py-0.5 rounded bg-white/5 text-white/40">no data</span>
-              </div>
-              <span id="timelineTime" class="text-xs mono text-white/40">00:00 / 00:10</span>
-            </div>
-            <div class="relative h-20 bg-black/40 rounded-lg overflow-hidden border border-white/5">
-              <div id="heatmapContainer" class="absolute inset-0 flex items-end gap-px px-px pb-0"></div>
-              <div id="durationMarker" class="absolute top-0 bottom-0 bg-gradient-to-r from-orange-500/30 to-pink-500/30 border-2 border-orange-400 z-10" style="left: 0%; width: 33%;">
-                <div class="absolute -top-1 left-0 right-0 flex justify-between">
-                  <span class="w-2 h-2 bg-orange-400 rounded-full -translate-y-1"></span>
-                  <span class="w-2 h-2 bg-orange-400 rounded-full -translate-y-1"></span>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                    <!-- Quick Upload Card -->
+                    <div id="uploadCard" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-slate-900/50 min-h-[200px]" onclick="document.getElementById('fileInput').click()">
+                        <svg class="w-10 h-10 text-slate-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        <h3 class="font-semibold mb-1">Drop your video here</h3>
+                        <p class="text-xs text-slate-500">or Browse Video</p>
+                        <p class="text-xs text-slate-600 mt-4">Support MP4, MOV, WebM</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col justify-between min-h-[200px]">
+                        <h3 class="text-sm text-slate-400 font-medium uppercase tracking-wider">Recent Projects</h3>
+                        <div>
+                            <p class="text-3xl font-bold" id="statProjects">0</p>
+                            <p class="text-xs text-slate-500 mt-1">Stored in your browser</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col justify-between min-h-[200px]">
+                        <h3 class="text-sm text-slate-400 font-medium uppercase tracking-wider">Generated Clips</h3>
+                        <div>
+                            <p class="text-3xl font-bold" id="statClips">0</p>
+                            <p class="text-xs text-slate-500 mt-1">Ready to export</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col justify-between min-h-[200px]">
+                        <h3 class="text-sm text-slate-400 font-medium uppercase tracking-wider">Processing Jobs</h3>
+                        <div>
+                            <p class="text-3xl font-bold text-yellow-400" id="statJobs">0</p>
+                            <p class="text-xs text-slate-500 mt-1">Currently in queue</p>
+                        </div>
+                    </div>
                 </div>
-              </div>
-              <div id="playhead" class="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_white] z-20" style="left: 0%;"></div>
-              <div class="absolute inset-x-0 bottom-0 h-4 flex pointer-events-none bg-gradient-to-t from-black/60 to-transparent">
-                <div class="flex-1 border-r border-white/10 flex items-end justify-center pb-0.5"><span class="text-[9px] mono text-white/40">0s</span></div>
-                <div class="flex-1 border-r border-white/10 flex items-end justify-center pb-0.5"><span class="text-[9px] mono text-white/40" id="tick1">10s</span></div>
-                <div class="flex-1 border-r border-white/10 flex items-end justify-center pb-0.5"><span class="text-[9px] mono text-white/40" id="tick2">20s</span></div>
-                <div class="flex-1 flex items-end justify-center pb-0.5"><span class="text-[9px] mono text-white/40" id="tick3">30s</span></div>
-              </div>
-            </div>
-            <div class="mt-3 flex items-center gap-3">
-              <button id="playBtn" class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition">
-                <i data-lucide="play" class="w-4 h-4"></i>
-              </button>
-              <button id="analyzeBtn" class="hidden px-4 py-2 rounded-lg bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-semibold hover:bg-amber-500/25 transition flex items-center gap-2">
-                <i data-lucide="scan-search" class="w-3.5 h-3.5"></i> Re-analyze
-              </button>
-              <div class="flex-1 text-xs text-white/40">Pilih durasi, sistem otomatis memilih momen terbaik</div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      <div class="lg:col-span-2 space-y-6">
-        <div class="card p-5">
-          <div class="flex items-center gap-2 mb-4">
-            <i data-lucide="timer" class="w-4 h-4 text-orange-400"></i>
-            <h3 class="font-semibold">Durasi Clip</h3>
-            <span class="ml-auto text-xs text-amber-300 mono flex items-center gap-1">
-              <i data-lucide="zap" class="w-3 h-3"></i> auto-cut
-            </span>
-          </div>
-          <div class="grid grid-cols-4 gap-2">
-            <button class="chip active duration-btn py-3 rounded-xl border border-white/10 text-sm font-semibold" data-duration="10">10<span class="text-xs opacity-60 ml-0.5">s</span></button>
-            <button class="chip duration-btn py-3 rounded-xl border border-white/10 text-sm font-semibold" data-duration="15">15<span class="text-xs opacity-60 ml-0.5">s</span></button>
-            <button class="chip duration-btn py-3 rounded-xl border border-white/10 text-sm font-semibold" data-duration="20">20<span class="text-xs opacity-60 ml-0.5">s</span></button>
-            <button class="chip duration-btn py-3 rounded-xl border border-white/10 text-sm font-semibold" data-duration="30">30<span class="text-xs opacity-60 ml-0.5">s</span></button>
-          </div>
-        </div>
+                <input type="file" id="fileInput" class="hidden" accept="video/*" onchange="handleUpload(event)">
 
-        <div class="card p-5">
-          <div class="flex items-center gap-2 mb-4">
-            <i data-lucide="crop" class="w-4 h-4 text-cyan-400"></i>
-            <h3 class="font-semibold">Rasio & Crop Video</h3>
-          </div>
-          <div class="grid grid-cols-4 gap-2">
-            <button class="ratio-card active py-3 px-2 rounded-xl border border-white/10 flex flex-col items-center gap-2" data-ratio="16:9" data-w="16" data-h="9">
-              <div class="ratio-shape w-8 h-[18px] rounded"></div><span class="text-[11px] mono">16:9</span>
-            </button>
-            <button class="ratio-card py-3 px-2 rounded-xl border border-white/10 flex flex-col items-center gap-2" data-ratio="9:16" data-w="9" data-h="16">
-              <div class="ratio-shape w-[18px] h-8 rounded"></div><span class="text-[11px] mono">9:16</span>
-            </button>
-            <button class="ratio-card py-3 px-2 rounded-xl border border-white/10 flex flex-col items-center gap-2" data-ratio="1:1" data-w="1" data-h="1">
-              <div class="ratio-shape w-7 h-7 rounded"></div><span class="text-[11px] mono">1:1</span>
-            </button>
-            <button class="ratio-card py-3 px-2 rounded-xl border border-white/10 flex flex-col items-center gap-2" data-ratio="4:5" data-w="4" data-h="5">
-              <div class="ratio-shape w-6 h-[26px] rounded"></div><span class="text-[11px] mono">4:5</span>
-            </button>
-          </div>
-        </div>
+                <div>
+                    <h3 class="text-xl font-bold mb-6">Recent Projects</h3>
+                    <div id="projectList" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+                </div>
+            </section>
 
-        <!-- CAPTION & SPEECH TO TEXT CARD -->
-        <div class="card p-5">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-              <i data-lucide="captions" class="w-4 h-4 text-pink-400"></i>
-              <h3 class="font-semibold">Teks & Transkripsi</h3>
-            </div>
-            <button id="autoCaptionBtn" class="text-xs text-orange-400 hover:text-orange-300 flex items-center gap-1 transition px-2 py-1 rounded-lg hover:bg-orange-500/10">
-              <i data-lucide="wand-2" class="w-3 h-3"></i> Auto Generate
-            </button>
-          </div>
-          
-          <!-- SPEECH TO TEXT TOGGLE -->
-          <div class="mb-4 p-3 rounded-xl bg-black/30 border border-white/10">
-            <div class="flex items-center justify-between mb-2">
-              <label class="flex items-center gap-2 text-sm cursor-pointer">
-                <input id="sttToggle" type="checkbox" class="hidden peer">
-                <div class="relative w-10 h-5 bg-white/10 peer-checked:bg-pink-500 rounded-full transition after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:after:translate-x-5"></div>
-                <span>Audio to Text (Speech-to-Text)</span>
-              </label>
-              <select id="sttLang" class="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-xs mono text-white/70 focus:outline-none focus:border-pink-500/50">
-                <option value="id-ID">Indonesia</option>
-                <option value="en-US">English (US)</option>
-                <option value="en-GB">English (UK)</option>
-                <option value="es-ES">Español</option>
-                <option value="fr-FR">Français</option>
-                <option value="de-DE">Deutsch</option>
-                <option value="ja-JP">日本語</option>
-                <option value="ko-KR">한국어</option>
-                <option value="zh-CN">中文</option>
-              </select>
-            </div>
-            <div id="sttStatus" class="text-[11px] text-white/40 flex items-center gap-1.5">
-              <i data-lucide="info" class="w-3 h-3"></i>
-              <span>Aktifkan untuk transkripsi suara video. Pastikan volume PC menyala.</span>
-            </div>
-          </div>
+            <!-- PROCESSING VIEW -->
+            <section id="processingView" class="hidden max-w-4xl mx-auto w-full p-8 min-h-[60vh] flex flex-col justify-center">
+                <h2 class="text-2xl font-bold text-center mb-2" id="processingProjectName">Analyzing Video...</h2>
+                <p class="text-slate-400 text-center mb-10">AI is scanning your video to find the best moments. This usually takes a few minutes.</p>
+                
+                <div class="space-y-6 max-w-2xl w-full mx-auto">
+                    <div id="pipelineSteps" class="space-y-4"></div>
+                    <div class="bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
+                        <div id="progressBar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <p class="text-center text-sm text-slate-500" id="progressText">Initializing...</p>
+                </div>
+            </section>
 
-          <textarea id="captionInput" rows="3" placeholder="Tulis caption manual, atau aktifkan Speech-to-Text..."
-                    class="w-full bg-black/30 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:border-pink-500/50 transition resize-none placeholder:text-white/20"></textarea>
-          
-          <div class="mt-3 flex items-center gap-2 flex-wrap">
-            <span class="text-xs text-white/40">Style:</span>
-            <button class="caption-style-btn chip active px-3 py-1 rounded-full border border-white/10 text-xs" data-style="bold">Bold</button>
-            <button class="caption-style-btn chip px-3 py-1 rounded-full border border-white/10 text-xs" data-style="minimal">Minimal</button>
-            <button class="caption-style-btn chip px-3 py-1 rounded-full border border-white/10 text-xs" data-style="neon">Neon</button>
-          </div>
-        </div>
+            <!-- EDITOR VIEW -->
+            <section id="editorView" class="hidden max-w-7xl mx-auto w-full p-4 flex flex-col lg:flex-row gap-4">
+                <!-- Left Sidebar: Clip Gallery -->
+                <aside class="w-full lg:w-72 flex-shrink-0 bg-slate-900 border border-slate-800 rounded-xl p-4 max-h-[80vh] overflow-y-auto scrollbar-hide">
+                    <h3 class="font-bold mb-4">Generated Clips</h3>
+                    <div id="clipsList" class="space-y-3"></div>
+                </aside>
 
-        <div class="card p-5">
-          <div class="flex items-center justify-between mb-4">
-            <div class="flex items-center gap-2">
-              <i data-lucide="music" class="w-4 h-4 text-cyan-400"></i>
-              <h3 class="font-semibold">Backsound</h3>
+                <!-- Center: Video Preview -->
+                <div class="flex-1 flex flex-col gap-4">
+                    <div class="flex gap-2 border-b border-slate-800 pb-2">
+                        <button class="px-3 py-1 text-xs rounded bg-indigo-600" onclick="setAspectRatio('9/16', 'aspect-9-16')">9:16</button>
+                        <button class="px-3 py-1 text-xs rounded bg-slate-800" onclick="setAspectRatio('1/1', 'aspect-1-1')">1:1</button>
+                        <button class="px-3 py-1 text-xs rounded bg-slate-800" onclick="setAspectRatio('16/9', 'aspect-16-9')">16:9</button>
+                        <button class="px-3 py-1 text-xs rounded bg-slate-800" onclick="setAspectRatio('4/5', 'aspect-4-5')">4:5</button>
+                        <div class="flex-1"></div>
+                        <button class="px-3 py-1 text-xs rounded bg-green-600 hover:bg-green-500 font-medium" onclick="exportMP4(true)">Export MP4</button>
+                        <button class="px-3 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600 font-medium" onclick="exportMP4(false)">Batch ZIP</button>
+                    </div>
+                    
+                    <div class="flex-1 bg-slate-900 rounded-xl p-6 flex items-center justify-center">
+                        <div id="videoContainer" class="relative bg-black overflow-hidden mx-auto aspect-9-16 max-h-[60vh] shadow-2xl flex items-center justify-center">
+                            <video id="videoPlayer" class="absolute w-full h-full object-cover" src="" controls></video>
+                            <div id="captionOverlay" class="absolute bottom-10 left-0 right-0 text-center px-4 pointer-events-none">
+                                <span class="bg-black text-white font-extrabold px-2 py-1 rounded text-xl uppercase tracking-wide shadow-lg">Caption loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <input type="range" id="clipRange" min="0" max="100" value="0" class="w-full">
+                        </div>
+                        <div class="flex gap-2 mt-4">
+                            <button class="flex-1 text-xs px-2 py-2 bg-slate-800 rounded hover:bg-slate-700">AI Smart Trim</button>
+                            <button class="flex-1 text-xs px-2 py-2 bg-slate-800 rounded hover:bg-slate-700">Remove Silence</button>
+                            <button class="flex-1 text-xs px-2 py-2 bg-slate-800 rounded hover:bg-slate-700">Add B-Roll</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar: Settings & Captions -->
+                <aside class="w-full lg:w-80 flex-shrink-0 bg-slate-900 border border-slate-800 rounded-xl p-4 max-h-[80vh] overflow-y-auto scrollbar-hide">
+                    <h3 class="font-bold mb-4">Clip Details</h3>
+                    <div class="mb-6 p-3 bg-slate-950 rounded-lg border border-slate-800">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm text-slate-400">Virality Score</span>
+                            <span class="text-sm font-bold text-green-400" id="scoreVirality">94</span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-sm text-slate-400">Hook Score</span>
+                            <span class="text-sm font-bold text-indigo-400" id="scoreHook">91</span>
+                        </div>
+                        <div class="mt-3 p-2 bg-indigo-950/50 border border-indigo-800 rounded text-xs text-indigo-300">
+                            <strong>Why this clip?</strong><br> Strong opening statement, clear context, and emotional payoff.
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-xs text-slate-400 uppercase font-semibold">Hook Generator</label>
+                        <select class="w-full mt-2 bg-slate-950 border border-slate-800 rounded p-2 text-sm" onchange="updateHook(this.value)">
+                            <option>Most people get this completely wrong.</option>
+                            <option>Here's the mistake nobody tells you about.</option>
+                            <option>If I started again, I would do this first.</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-xs text-slate-400 uppercase font-semibold">Caption Editor</label>
+                        <textarea id="captionEditor" class="w-full mt-2 bg-slate-950 border border-slate-800 rounded p-2 text-sm h-24" oninput="updateCaption(this.value)">THIS IS THE MOST IMPORTANT LESSON IN BUSINESS</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="text-xs text-slate-400 uppercase font-semibold">Caption Style</label>
+                        <div class="grid grid-cols-3 gap-2 mt-2">
+                            <button class="text-xs p-2 bg-slate-800 rounded border border-indigo-500">Bold</button>
+                            <button class="text-xs p-2 bg-slate-800 rounded">Clean</button>
+                            <button class="text-xs p-2 bg-slate-800 rounded">Viral</button>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-800">
+                        <label class="text-xs text-slate-400 uppercase font-semibold">Export Settings</label>
+                        <select class="w-full mt-2 bg-slate-950 border border-slate-800 rounded p-2 text-sm">
+                            <option>1080×1920 (Standard)</option>
+                            <option>1920×1080 (HD Landscape)</option>
+                            <option>1080×1080 (Square)</option>
+                        </select>
+                    </div>
+                </aside>
+            </section>
+        </main>
+
+        <!-- Export Modal -->
+        <div id="exportModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 max-w-md w-full text-center">
+                <h3 class="text-xl font-bold mb-6" id="exportTitle">Exporting Clip...</h3>
+                <div class="bg-slate-800 rounded-full h-2 overflow-hidden mb-4">
+                    <div id="exportBar" class="bg-green-500 h-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+                <p class="text-sm text-slate-400" id="exportStatus">Preparing...</p>
+                <button id="exportDownloadBtn" class="hidden mt-6 px-6 py-2 bg-green-600 rounded font-medium hover:bg-green-500" onclick="triggerDownload()">Download MP4</button>
             </div>
-            <div class="flex items-center gap-2">
-              <i data-lucide="volume-2" class="w-3 h-3 text-white/40"></i>
-              <input id="volSlider" type="range" min="0" max="100" value="80" class="w-20">
-              <span id="volLabel" class="text-xs mono text-white/40 w-8 text-right">80%</span>
-            </div>
-          </div>
-          <div id="trackList" class="space-y-2"></div>
         </div>
-      </div>
     </div>
 
-    <div class="fixed bottom-0 left-0 right-0 z-30 bg-black/75 backdrop-blur-xl border-t border-white/10 px-6 lg:px-12 py-4">
-      <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
-        <div class="flex items-center gap-5 flex-wrap">
-          <div class="flex items-center gap-2"><span class="text-[10px] mono text-white/40 tracking-widest">DURASI</span><span id="exportDur" class="text-sm font-bold text-orange-400 mono">10s</span></div>
-          <div class="w-px h-4 bg-white/10"></div>
-          <div class="flex items-center gap-2"><span class="text-[10px] mono text-white/40 tracking-widest">RASIO</span><span id="exportRatio" class="text-sm font-bold text-cyan-400 mono">16:9</span></div>
-          <div class="w-px h-4 bg-white/10 hidden sm:block"></div>
-          <div class="hidden sm:flex items-center gap-2"><span class="text-[10px] mono text-white/40 tracking-widest">CUT</span><span id="exportCut" class="text-sm font-bold text-amber-400 mono">00:00→00:10</span></div>
-          <div class="w-px h-4 bg-white/10 hidden md:block"></div>
-          <div class="hidden md:flex items-center gap-2"><span class="text-[10px] mono text-white/40 tracking-widest">FORMAT</span><span id="exportFormat" class="text-sm font-bold text-green-400 mono">MP4</span></div>
-        </div>
-        <div class="flex items-center gap-3">
-          <div id="progressWrap" class="hidden items-center gap-3">
-            <div class="w-32 h-1.5 bg-white/10 rounded-full overflow-hidden"><div id="progressBar" class="h-full bg-gradient-to-r from-orange-500 to-pink-500 transition-all" style="width: 0%;"></div></div>
-            <span id="progressText" class="text-xs mono text-white/60 w-10">0%</span>
-          </div>
-          <button id="exportBtn" class="px-6 py-3 bg-gradient-to-br from-orange-500 to-pink-600 rounded-xl font-semibold text-sm hover:opacity-90 transition flex items-center gap-2 shadow-lg shadow-orange-500/30 disabled:opacity-50 disabled:cursor-not-allowed">
-            <i data-lucide="download" class="w-4 h-4"></i> Generate &amp; Download
-          </button>
-        </div>
-      </div>
-    </div>
-  </main>
+    <script>
+        // --- State Management ---
+        let projects = JSON.parse(localStorage.getItem('clipForgeProjects')) || [];
+        let currentProject = null;
+        let currentClip = null;
 
-  <div id="toastContainer" class="fixed top-6 right-6 z-50 space-y-2"></div>
-  <canvas id="exportCanvas" class="hidden"></canvas>
+        // --- Mock Data ---
+        const mockPipeline = [
+            { name: "Uploading", desc: "Transfering data to secure servers" },
+            { name: "Extracting Audio", desc: "Isolating voice track" },
+            { name: "Transcribing", desc: "Converting speech to text (Whisper AI)" },
+            { name: "Scene Detection", desc: "Analyzing visual changes" },
+            { name: "Speaker Detection", desc: "Identifying who is speaking" },
+            { name: "Highlight Detection", desc: "Finding high-engagement moments" },
+            { name: "Clip Scoring", desc: "Ranking virality and context" },
+            { name: "Caption Generation", desc: "Creating dynamic subtitles" },
+            { name: "Finalizing", desc: "Preparing project for editor" }
+        ];
+        
+        const mockClips = [
+            { id: 1, name: "Business Mistake", score: 94, topic: "Business", start: 12, end: 48, caption: "MOST PEOPLE MAKE THIS MISTAKE" },
+            { id: 2, name: "The Secret to Success", score: 89, topic: "Motivation", start: 65, end: 95, caption: "THIS IS THE SECRET TO SUCCESS" },
+            { id: 3, name: "Why We Fail", score: 85, topic: "Educational", start: 110, end: 145, caption: "HERE IS WHY WE ACTUALLY FAIL" },
+            { id: 4, name: "My Story", score: 82, topic: "Storytelling", start: 160, end: 200, caption: "IT ALL STARTED FIVE YEARS AGO" }
+        ];
 
-  <script>
-    lucide.createIcons();
+        // --- Init ---
+        function init() {
+            renderDashboard();
+        }
 
-    const state = {
-      source: null, duration: 10, ratio: { w: 16, h: 9, label: '16:9' },
-      caption: '', captionStyle: 'bold', backsound: null, backsoundVolume: 0.8,
-      isPlaying: false, sourceDuration: 30, analysisData: null,
-      cutStart: 0, cutEnd: 10, cutScore: 0, cutReason: '', isExporting: false,
-      isTranscribing: false, recognition: null, sttEnabled: false
-    };
+        function resetView() {
+            document.getElementById('dashboardView').classList.remove('hidden');
+            document.getElementById('processingView').classList.add('hidden');
+            document.getElementById('editorView').classList.add('hidden');
+            renderDashboard();
+        }
 
-    function toast(msg, type = 'info') {
-      const container = document.getElementById('toastContainer');
-      const colors = { info: 'border-cyan-400/40 bg-cyan-400/10 text-cyan-100', success: 'border-green-400/40 bg-green-400/10 text-green-100', error: 'border-red-400/40 bg-red-400/10 text-red-100', warn: 'border-orange-400/40 bg-orange-400/10 text-orange-100' };
-      const icons = { info: 'info', success: 'check-circle', error: 'x-circle', warn: 'alert-triangle' };
-      const el = document.createElement('div');
-      el.className = `toast px-4 py-3 rounded-xl border ${colors[type]} backdrop-blur-md text-sm flex items-center gap-2 min-w-[260px] shadow-xl`;
-      el.innerHTML = `<i data-lucide="${icons[type]}" class="w-4 h-4 flex-shrink-0"></i><span>${msg}</span>`;
-      container.appendChild(el);
-      lucide.createIcons();
-      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(120%)'; setTimeout(() => el.remove(), 300); }, 4500);
-    }
+        // --- Dashboard Logic ---
+        function renderDashboard() {
+            document.getElementById('statProjects').textContent = projects.length;
+            document.getElementById('statClips').textContent = projects.reduce((acc, p) => acc + (p.clips?.length || 0), 0);
+            document.getElementById('statJobs').textContent = projects.filter(p => p.status === 'Processing').length;
 
-    function formatTime(s) {
-      const m = Math.floor(s / 60); const sec = Math.floor(s % 60);
-      return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-    }
+            const list = document.getElementById('projectList');
+            list.innerHTML = '';
 
-    // ===== File Upload Logic =====
-    const dropZone = document.getElementById('dropZone');
-    const dropInner = document.getElementById('dropInner');
-    const fileInput = document.getElementById('fileUpload');
-
-    function handleFile(file) {
-      if (!file || !file.type.startsWith('video/')) { toast('File harus berupa video', 'error'); return; }
-      state.source = 'upload'; state.analysisData = null;
-      const video = document.getElementById('sampleVideo');
-      if (video.src && video.src.startsWith('blob:')) URL.revokeObjectURL(video.src);
-      const fileURL = URL.createObjectURL(file);
-      video.src = fileURL; video.classList.remove('hidden');
-      document.getElementById('previewPlaceholder').classList.add('hidden');
-      document.getElementById('liveBadge').classList.remove('hidden');
-      document.getElementById('uploadLabel').textContent = file.name.length > 30 ? file.name.substring(0, 27) + '...' : file.name;
-      document.getElementById('previewMeta').textContent = 'Loading...';
-      video.play().catch(() => {});
-      video.onloadedmetadata = async () => {
-        state.sourceDuration = video.duration;
-        document.getElementById('previewMeta').textContent = `Upload · ${Math.round(video.duration)}s · ${video.videoWidth}×${video.videoHeight}`;
-        updateTimeline();
-        toast('File diunggah. Menjalankan smart analysis...', 'info');
-        await analyzeVideo();
-      };
-      video.onerror = () => toast('Gagal memuat file. Format tidak didukung', 'error');
-    }
-
-    dropZone.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropInner.classList.add('border-orange-500', 'bg-orange-500/5'); });
-    dropZone.addEventListener('dragleave', () => dropInner.classList.remove('border-orange-500', 'bg-orange-500/5'));
-    dropZone.addEventListener('drop', (e) => {
-      e.preventDefault(); dropInner.classList.remove('border-orange-500', 'bg-orange-500/5');
-      if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
-    });
-
-    // ===== Sample Video =====
-    document.getElementById('useSampleBtn').addEventListener('click', () => {
-      state.source = 'sample';
-      const url = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-      const video = document.getElementById('sampleVideo');
-      video.src = url; video.classList.remove('hidden');
-      document.getElementById('previewPlaceholder').classList.add('hidden');
-      document.getElementById('liveBadge').classList.remove('hidden');
-      video.play().catch(() => {});
-      video.onloadedmetadata = async () => {
-        state.sourceDuration = video.duration;
-        document.getElementById('previewMeta').textContent = `Sampel · ${Math.round(video.duration)}s`;
-        updateTimeline();
-        toast('Video sampel dimuat. Menjalankan smart analysis...', 'info');
-        await analyzeVideo();
-      };
-    });
-
-    // ===== Smart Analysis =====
-    async function analyzeVideo() {
-      const video = document.getElementById('sampleVideo');
-      if (!video || !video.videoWidth) return;
-      const scanOverlay = document.getElementById('scanOverlay');
-      const scanProgress = document.getElementById('scanProgress');
-      const analyzeBtn = document.getElementById('analyzeBtn');
-      scanOverlay.classList.remove('hidden'); analyzeBtn.classList.add('hidden');
-
-      const offscreen = document.createElement('canvas');
-      const w = 160, h = 90; offscreen.width = w; offscreen.height = h;
-      const octx = offscreen.getContext('2d', { willReadFrequently: true });
-      const duration = Math.min(video.duration, 60); const step = 0.5;
-      const frames = []; const wasPaused = video.paused; video.muted = true;
-      let prevData = null;
-
-      for (let t = 0; t < duration; t += step) {
-        await new Promise(resolve => {
-          const onSeeked = () => { video.removeEventListener('seeked', onSeeked); resolve(); };
-          video.addEventListener('seeked', onSeeked); video.currentTime = t;
-        });
-        try {
-          octx.drawImage(video, 0, 0, w, h);
-          const imgData = octx.getImageData(0, 0, w, h); const data = imgData.data;
-          let brightness = 0, rSum = 0, gSum = 0, bSum = 0, motion = 0, edgeStrength = 0;
-          for (let i = 0; i < data.length; i += 4) {
-            const r = data[i], g = data[i+1], b = data[i+2];
-            brightness += (r + g + b) / 3; rSum += r; gSum += g; bSum += b;
-          }
-          const pixels = data.length / 4; brightness /= pixels;
-          const rAvg = rSum / pixels, gAvg = gSum / pixels, bAvg = bSum / pixels;
-          const colorVariance = (Math.abs(rAvg - gAvg) + Math.abs(gAvg - bAvg) + Math.abs(rAvg - bAvg)) / 3;
-          if (prevData) {
-            let diff = 0, samples = 0;
-            for (let i = 0; i < data.length; i += 16) {
-              diff += Math.abs(data[i] - prevData[i]) + Math.abs(data[i+1] - prevData[i+1]) + Math.abs(data[i+2] - prevData[i+2]);
-              samples++;
+            if (projects.length === 0) {
+                list.innerHTML = `<div class="col-span-full text-center py-12 text-slate-600 border border-dashed border-slate-800 rounded-xl">No projects yet. Upload a video to get started.</div>`;
+                return;
             }
-            motion = diff / (samples * 3);
-          }
-          let edges = 0;
-          for (let y = 1; y < h - 1; y++) {
-            for (let x = 1; x < w - 1; x++) {
-              const idx = (y * w + x) * 4; const idxRight = (y * w + (x + 1)) * 4; const idxDown = ((y + 1) * w + x) * 4;
-              const lum = (data[idx] + data[idx+1] + data[idx+2]) / 3;
-              const lumR = (data[idxRight] + data[idxRight+1] + data[idxRight+2]) / 3;
-              const lumD = (data[idxDown] + data[idxDown+1] + data[idxDown+2]) / 3;
-              edges += Math.abs(lum - lumR) + Math.abs(lum - lumD);
-            }
-          }
-          edgeStrength = edges / ((w-2) * (h-2) * 2);
-          const score = Math.min(100, motion * 2.5 + colorVariance * 0.4 + edgeStrength * 1.2 + (brightness > 60 && brightness < 200 ? 10 : 0));
-          frames.push({ time: t, motion, brightness, colorVariance, edgeStrength, score });
-          prevData = new Uint8ClampedArray(data);
-        } catch (e) {
-          frames.push({ time: t, motion: 0, brightness: 0, colorVariance: 0, edgeStrength: 0, score: 0 });
-        }
-        scanProgress.textContent = Math.round((t / duration) * 100) + '%';
-      }
 
-      const maxScore = Math.max(...frames.map(f => f.score), 1);
-      frames.forEach(f => f.normalized = Math.round((f.score / maxScore) * 100));
-      state.analysisData = frames;
-      video.currentTime = 0; if (wasPaused) video.pause();
-      scanOverlay.classList.add('hidden'); analyzeBtn.classList.remove('hidden');
-      document.getElementById('heatmapStatus').textContent = `${frames.length} frames`;
-      document.getElementById('heatmapStatus').className = 'text-[10px] mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300';
-      renderHeatmap(); findBestCut(state.duration);
-      toast(`Analysis selesai · ${frames.length} frames ter-scan`, 'success');
-    }
-
-    function renderHeatmap() {
-      const container = document.getElementById('heatmapContainer'); container.innerHTML = '';
-      const total = state.sourceDuration || 30; const barCount = Math.min(60, Math.floor(total));
-      for (let i = 0; i < barCount; i++) {
-        const t = (i / barCount) * total;
-        const frame = state.analysisData.find(f => Math.abs(f.time - t) < 0.5) || state.analysisData.reduce((closest, f) => Math.abs(f.time - t) < Math.abs(closest.time - t) ? f : closest, state.analysisData[0]);
-        const score = frame ? frame.normalized : 0;
-        const bar = document.createElement('div'); bar.className = 'heatmap-bar flex-1';
-        bar.style.cssText = `height: ${Math.max(8, score)}%; background: ${scoreColor(score)}; opacity: ${0.5 + score / 200};`;
-        container.appendChild(bar);
-      }
-    }
-
-    function scoreColor(score) {
-      if (score > 75) return 'linear-gradient(180deg, #ff5e1a, #ff2d75)';
-      if (score > 50) return 'linear-gradient(180deg, #ffb800, #ff5e1a)';
-      if (score > 25) return 'linear-gradient(180deg, #00e5ff, #0099ff)';
-      return 'rgba(255,255,255,0.15)';
-    }
-
-    function findBestCut(duration) {
-      const total = state.sourceDuration || 30;
-      if (state.analysisData) {
-        let bestStart = 0, bestScore = 0, bestReason = '';
-        const frames = state.analysisData;
-        for (let i = 0; i < frames.length; i++) {
-          const startT = frames[i].time; const endT = startT + duration;
-          if (endT > total) break;
-          const windowFrames = frames.filter(f => f.time >= startT && f.time < endT);
-          if (windowFrames.length === 0) continue;
-          const avgScore = windowFrames.reduce((s, f) => s + f.normalized, 0) / windowFrames.length;
-          const peakMotion = Math.max(...windowFrames.map(f => f.motion));
-          const finalScore = avgScore + Math.min(20, peakMotion * 0.3);
-          if (finalScore > bestScore) {
-            bestScore = finalScore; bestStart = startT;
-            const peakFrame = windowFrames.reduce((max, f) => f.motion > max.motion ? f : max, windowFrames[0]);
-            bestReason = peakFrame.motion > 15 ? 'Motion spike terdeteksi' : peakFrame.colorVariance > 30 ? 'Scene change intens' : 'Visual activity tinggi';
-          }
-        }
-        state.cutStart = bestStart; state.cutEnd = bestStart + duration;
-        state.cutScore = Math.round(Math.min(100, bestScore)); state.cutReason = bestReason;
-      } else {
-        state.cutStart = 0; state.cutEnd = duration;
-      }
-      updateCutUI();
-    }
-
-    function updateCutUI() {
-      const total = state.sourceDuration || 30;
-      const startPct = (state.cutStart / total) * 100; const widthPct = (state.duration / total) * 100;
-      document.getElementById('durationMarker').style.left = startPct + '%';
-      document.getElementById('durationMarker').style.width = widthPct + '%';
-      document.getElementById('smartCutInfo').classList.remove('hidden');
-      document.getElementById('cutTimeBadge').textContent = `${formatTime(state.cutStart)} → ${formatTime(state.cutEnd)}`;
-      document.getElementById('cutScore').textContent = state.cutScore;
-      document.getElementById('cutReason').textContent = state.cutReason;
-      document.getElementById('exportCut').textContent = `${formatTime(state.cutStart)}→${formatTime(state.cutEnd)}`;
-      document.getElementById('timelineTime').textContent = `${formatTime(state.cutStart)} / ${formatTime(state.cutEnd)}`;
-    }
-
-    document.querySelectorAll('.duration-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active'); state.duration = parseInt(btn.dataset.duration);
-        document.getElementById('exportDur').textContent = state.duration + 's';
-        if (state.analysisData) findBestCut(state.duration);
-        else { state.cutStart = 0; state.cutEnd = state.duration; updateCutUI(); }
-        updateTimeline();
-      });
-    });
-
-    document.getElementById('analyzeBtn').addEventListener('click', () => analyzeVideo());
-
-    document.querySelectorAll('.ratio-card').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.ratio-card').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        state.ratio = { w: parseInt(btn.dataset.w), h: parseInt(btn.dataset.h), label: btn.dataset.ratio };
-        document.getElementById('exportRatio').textContent = btn.dataset.ratio;
-        document.getElementById('ratioBadge').textContent = btn.dataset.ratio;
-        document.getElementById('previewWrapper').style.aspectRatio = `${state.ratio.w}/${state.ratio.h}`;
-      });
-    });
-
-    // ===== Speech To Text Logic =====
-    const sttToggle = document.getElementById('sttToggle');
-    const sttStatus = document.getElementById('sttStatus');
-    const sttLang = document.getElementById('sttLang');
-    let finalTranscript = '';
-
-    sttToggle.addEventListener('change', function() {
-      state.sttEnabled = this.checked;
-      if (state.sttEnabled) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        if (!SpeechRecognition) {
-          toast('Browser tidak mendukung Speech Recognition. Gunakan Chrome/Edge', 'error');
-          sttToggle.checked = false; state.sttEnabled = false; return;
-        }
-        sttStatus.innerHTML = '<span class="text-pink-400 flex items-center gap-1.5"><i data-lucide="mic" class="w-3 h-3"></i> Mikrofon aktif. Putar video dari posisi cut untuk transkripsi.</span>';
-        lucide.createIcons();
-        toast('Speech-to-Text Aktif. Putar video untuk mulai transkripsi', 'info');
-      } else {
-        stopTranscription();
-        sttStatus.innerHTML = '<i data-lucide="info" class="w-3 h-3"></i> <span>Aktifkan untuk transkripsi suara video. Pastikan volume PC menyala.</span>';
-        lucide.createIcons();
-      }
-    });
-
-    function startTranscription() {
-      if (!state.sttEnabled || state.isTranscribing) return;
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return;
-      
-      state.recognition = new SpeechRecognition();
-      state.recognition.lang = sttLang.value;
-      state.recognition.continuous = true;
-      state.recognition.interimResults = true;
-
-      finalTranscript = document.getElementById('captionInput').value;
-      if (finalTranscript && !finalTranscript.endsWith('\n')) finalTranscript += '\n';
-
-      state.recognition.onstart = () => {
-        state.isTranscribing = true;
-        document.getElementById('liveBadge').classList.remove('hidden');
-        document.getElementById('liveBadge').innerHTML = '<span class="w-2 h-2 bg-red-500 rounded-full pulse-rec inline-block mr-1"></span> TRANSCRIBING';
-      };
-
-      state.recognition.onresult = (event) => {
-        let interimTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript.trim() + '\n';
-          } else {
-            interimTranscript += event.results[i][0].transcript;
-          }
-        }
-        document.getElementById('captionInput').value = finalTranscript + interimTranscript;
-        state.caption = document.getElementById('captionInput').value;
-        updateCaption();
-      };
-
-      state.recognition.onerror = (event) => {
-        if (event.error === 'no-speech') return;
-        if (event.error === 'not-allowed') {
-          toast('Izin mikrofon ditolak', 'error');
-          sttToggle.checked = false; state.sttEnabled = false;
-        }
-      };
-
-      state.recognition.onend = () => {
-        state.isTranscribing = false;
-        document.getElementById('liveBadge').innerHTML = 'LIVE PREVIEW';
-        // Auto restart if still enabled and video still playing
-        if (state.sttEnabled && !document.getElementById('sampleVideo').paused) {
-          try { state.recognition.start(); } catch(e) {}
-        }
-      };
-
-      try {
-        state.recognition.start();
-      } catch(e) {
-        console.error("STT Error:", e);
-      }
-    }
-
-    function stopTranscription() {
-      if (state.recognition) {
-        try { state.recognition.stop(); } catch(e) {}
-        state.recognition = null;
-      }
-      state.isTranscribing = false;
-      document.getElementById('liveBadge').innerHTML = 'LIVE PREVIEW';
-    }
-
-    // ===== Caption Auto Generate =====
-    const captionTemplates = [
-      ["Wait for it...", "This is INSANE!", "Mind = blown", "Drop a follow"],
-      ["POV: you found gold", "No way this is real", "Literally crying", "Share this now"],
-      ["This changed everything", "I can't believe it", "Save this for later", "Comment below"]
-    ];
-
-    document.getElementById('autoCaptionBtn').addEventListener('click', () => {
-      const template = captionTemplates[Math.floor(Math.random() * captionTemplates.length)];
-      const sceneCount = Math.max(2, Math.ceil(state.duration / 5));
-      const captions = [];
-      for (let i = 0; i < sceneCount; i++) captions.push(template[i % template.length]);
-      state.caption = captions.join('\n');
-      document.getElementById('captionInput').value = state.caption;
-      updateCaption();
-      toast('Caption template dibuat', 'success');
-    });
-
-    document.getElementById('captionInput').addEventListener('input', (e) => {
-      state.caption = e.target.value; updateCaption();
-    });
-
-    document.querySelectorAll('.caption-style-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('.caption-style-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active'); state.captionStyle = btn.dataset.style; updateCaption();
-      });
-    });
-
-    function updateCaption() {
-      const text = state.caption.split('\n').filter(c => c.trim())[0] || '';
-      const captionEl = document.getElementById('captionText');
-      if (text) {
-        captionEl.textContent = text;
-        captionEl.style.display = 'inline-block';
-        if (state.captionStyle === 'bold') {
-          captionEl.style.cssText = 'display:inline-block; background:rgba(0,0,0,0.8); text-shadow: 0 2px 8px rgba(0,0,0,0.6); border:2px solid #fff; color:#fff; padding:6px 14px; border-radius:8px; font-weight:700;';
-        } else if (state.captionStyle === 'minimal') {
-          captionEl.style.cssText = 'display:inline-block; background:rgba(0,0,0,0.4); backdrop-filter:blur(6px); color:#fff; padding:6px 14px; border-radius:8px; font-weight:600;';
-        } else if (state.captionStyle === 'neon') {
-          captionEl.style.cssText = 'display:inline-block; background:rgba(255,94,26,0.15); border:1.5px solid #ff5e1a; color:#fff; padding:6px 14px; border-radius:8px; font-weight:700; text-shadow:0 0 12px #ff5e1a, 0 0 24px #ff5e1a; box-shadow:0 0 24px rgba(255,94,26,0.4);';
-        }
-      } else { captionEl.style.display = 'none'; }
-    }
-
-    // ===== Backsound =====
-    const tracks = [
-      { id: 't1', name: 'Lofi Chill', bpm: 75, color: '#ff5e1a', type: 'sine', desc: 'Santai & atmospheric' },
-      { id: 't2', name: 'Energetic Beat', bpm: 120, color: '#00e5ff', type: 'square', desc: 'Upbeat & punchy' },
-      { id: 't3', name: 'Cinematic Rise', bpm: 90, color: '#ff2d75', type: 'sawtooth', desc: 'Epic & dramatis' },
-      { id: 't4', name: 'Pop Vibe', bpm: 110, color: '#a855f7', type: 'triangle', desc: 'Catchy & fun' },
-      { id: 't5', name: 'No Backsound', bpm: 0, color: '#666', type: 'sine', desc: 'Video original saja' },
-    ];
-
-    let currentAudioCtx = null;
-
-    function renderTracks() {
-      const list = document.getElementById('trackList');
-      list.innerHTML = tracks.map(t => {
-        const isActive = state.backsound === t.id;
-        const isPlaying = isActive && currentAudioCtx;
-        return `
-        <div class="track-item flex items-center gap-3 p-3 rounded-xl border ${isActive ? 'bg-orange-500/10 border-orange-500/40' : 'border-white/5 hover:border-white/15'} transition cursor-pointer" data-track="${t.id}">
-          <button class="play-track w-9 h-9 rounded-full ${isActive ? 'bg-gradient-to-br from-orange-500 to-pink-600' : 'bg-white/10 hover:bg-white/20'} flex items-center justify-center flex-shrink-0 transition">
-            ${isPlaying ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>' : '<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><polygon points="6,4 20,12 6,20"/></svg>'}
-          </button>
-          <div class="flex-1 min-w-0">
-            <div class="text-sm font-medium truncate">${t.name}</div>
-            <div class="text-[11px] text-white/40 mono">${t.bpm > 0 ? t.bpm + ' BPM · ' : ''}${t.desc}</div>
-          </div>
-          <div class="flex items-end gap-0.5 h-5">
-            ${Array.from({length: 10}).map((_, i) => `<div class="w-0.5 ${isActive ? 'wave-bar' : 'bg-white/15'}" style="height:${20 + Math.sin(i * 0.8) * 30 + Math.random() * 30}%; ${isActive ? 'animation-delay:' + (i * 0.1) + 's;' : ''}"></div>`).join('')}
-          </div>
-        </div>`;
-      }).join('');
-      document.querySelectorAll('.track-item').forEach(item => { item.addEventListener('click', () => selectTrack(item.dataset.track)); });
-    }
-
-    function selectTrack(trackId) {
-      const track = tracks.find(t => t.id === trackId);
-      if (!track) return;
-      if (currentAudioCtx) { currentAudioCtx.close().catch(() => {}); currentAudioCtx = null; }
-      state.backsound = trackId;
-      if (track.bpm === 0) { renderTracks(); toast('Backsound dimatikan', 'info'); return; }
-      playBeatPreview(track); renderTracks();
-      toast(`Backsound: ${track.name}`, 'success');
-    }
-
-    function playBeatPreview(track) {
-      try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        if (ctx.state === 'suspended') ctx.resume();
-        currentAudioCtx = ctx;
-        const bpm = track.bpm; const beatDuration = 60 / bpm; const previewDuration = 8;
-        const beats = Math.floor(previewDuration / beatDuration);
-        const masterGain = ctx.createGain();
-        masterGain.gain.value = state.backsoundVolume * 0.25;
-        masterGain.connect(ctx.destination);
-        const freqSets = { 't1': [220, 277, 330, 277], 't2': [330, 440, 550, 660], 't3': [196, 247, 330, 392], 't4': [261, 329, 392, 523] };
-        const freqs = freqSets[track.id] || [440, 554, 659, 880];
-        for (let i = 0; i < beats; i++) {
-          const time = ctx.currentTime + i * beatDuration;
-          const freq = freqs[i % freqs.length];
-          const osc = ctx.createOscillator(); const gain = ctx.createGain();
-          osc.type = track.type; osc.frequency.value = freq;
-          gain.gain.setValueAtTime(0, time); gain.gain.linearRampToValueAtTime(0.4, time + 0.01);
-          gain.gain.exponentialRampToValueAtTime(0.01, time + beatDuration * 0.7);
-          osc.connect(gain); gain.connect(masterGain);
-          osc.start(time); osc.stop(time + beatDuration);
-          if (i % 2 === 0) {
-            const bass = ctx.createOscillator(); const bassGain = ctx.createGain();
-            bass.type = 'sine'; bass.frequency.value = freq / 3;
-            bassGain.gain.setValueAtTime(0, time); bassGain.gain.linearRampToValueAtTime(0.5, time + 0.01);
-            bassGain.gain.exponentialRampToValueAtTime(0.01, time + beatDuration);
-            bass.connect(bassGain); bassGain.connect(masterGain);
-            bass.start(time); bass.stop(time + beatDuration * 1.2);
-          }
-          const noise = ctx.createBufferSource();
-          const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.04, ctx.sampleRate);
-          const data = buffer.getChannelData(0);
-          for (let j = 0; j < data.length; j++) data[j] = Math.random() * 2 - 1;
-          noise.buffer = buffer;
-          const noiseGain = ctx.createGain();
-          const filter = ctx.createBiquadFilter();
-          filter.type = 'highpass'; filter.frequency.value = 7000;
-          noiseGain.gain.setValueAtTime(0.12, time + beatDuration * 0.5);
-          noiseGain.gain.exponentialRampToValueAtTime(0.001, time + beatDuration * 0.7);
-          noise.connect(filter); filter.connect(noiseGain); noiseGain.connect(masterGain);
-          noise.start(time + beatDuration * 0.5); noise.stop(time + beatDuration * 0.7);
-        }
-        setTimeout(() => { if (currentAudioCtx === ctx) { ctx.close().catch(() => {}); currentAudioCtx = null; renderTracks(); } }, previewDuration * 1000);
-      } catch (e) {}
-    }
-
-    document.getElementById('volSlider').addEventListener('input', (e) => {
-      state.backsoundVolume = e.target.value / 100;
-      document.getElementById('volLabel').textContent = e.target.value + '%';
-    });
-
-    function updateTimeline() {
-      const total = state.sourceDuration || 30;
-      document.getElementById('tick1').textContent = Math.round(total * 0.25) + 's';
-      document.getElementById('tick2').textContent = Math.round(total * 0.5) + 's';
-      document.getElementById('tick3').textContent = Math.round(total * 0.75) + 's';
-    }
-
-    // ===== Play/Pause & STT Sync =====
-    document.getElementById('playBtn').addEventListener('click', () => {
-      const video = document.getElementById('sampleVideo');
-      if (state.source && video.src) {
-        if (video.paused) {
-          video.currentTime = state.cutStart;
-          video.muted = false; // Unmute agar mikrofon bisa menangkap suara video
-          video.play();
-          state.isPlaying = true;
-          document.getElementById('playBtn').innerHTML = '<i data-lucide="pause" class="w-4 h-4"></i>';
-          if (state.sttEnabled) startTranscription();
-        } else {
-          video.pause();
-          state.isPlaying = false;
-          document.getElementById('playBtn').innerHTML = '<i data-lucide="play" class="w-4 h-4"></i>';
-          if (state.sttEnabled) stopTranscription();
-        }
-        lucide.createIcons();
-      } else {
-        toast('Upload video dulu', 'warn');
-      }
-    });
-
-    setInterval(() => {
-      const video = document.getElementById('sampleVideo');
-      if (state.source && !video.paused && video.duration) {
-        const total = video.duration;
-        const pct = (video.currentTime / total) * 100;
-        document.getElementById('playhead').style.left = pct + '%';
-
-        if (video.currentTime >= state.cutEnd) {
-          video.currentTime = state.cutStart;
-          // Auto loop for transcription if STT is on
-          if (!state.sttEnabled) {
-            video.pause();
-            state.isPlaying = false;
-            document.getElementById('playBtn').innerHTML = '<i data-lucide="play" class="w-4 h-4"></i>';
-            video.muted = true;
-            lucide.createIcons();
-          }
+            projects.forEach(p => {
+                list.innerHTML += `
+                    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-indigo-500 transition-colors cursor-pointer group" onclick="openProject('${p.id}')">
+                        <div class="aspect-video bg-slate-800 relative flex items-center justify-center">
+                            <svg class="w-12 h-12 text-slate-600 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                            ${p.status === 'Processing' ? `<div class="absolute inset-0 bg-black/50 flex items-center justify-center text-xs text-yellow-400 font-bold animate-pulse">PROCESSING...</div>` : ''}
+                        </div>
+                        <div class="p-4">
+                            <h4 class="font-semibold truncate">${p.name}</h4>
+                            <div class="flex justify-between text-xs text-slate-500 mt-2">
+                                <span>${p.clips?.length || 0} Clips</span>
+                                <span>${p.duration || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
         }
 
-        const captions = state.caption.split('\n').filter(c => c.trim());
-        if (captions.length > 0) {
-          const relTime = video.currentTime - state.cutStart;
-          const sceneIdx = Math.min(Math.floor((relTime / state.duration) * captions.length), captions.length - 1);
-          const captionEl = document.getElementById('captionText');
-          if (captionEl.textContent !== captions[sceneIdx]) {
-            captionEl.textContent = captions[sceneIdx];
-          }
-        }
-      }
-    }, 100);
+        function handleUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-    // ===== EXPORT & DOWNLOAD (MP4 PRIORITY) =====
-    function getSupportedMimeType() {
-      const types = [
-        'video/mp4;codecs=avc1,mp4a.40.2',
-        'video/mp4;codecs=h264,aac',
-        'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
-        'video/mp4',
-        'video/webm;codecs=vp9,opus',
-        'video/webm;codecs=vp8,opus',
-        'video/webm'
-      ];
-      for (const type of types) {
-        if (window.MediaRecorder && MediaRecorder.isTypeSupported(type)) return type;
-      }
-      return '';
-    }
+            const projectId = 'CF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            const videoURL = URL.createObjectURL(file);
+            
+            const newProject = {
+                id: projectId,
+                name: file.name.replace(/\.[^/.]+$/, ""),
+                videoURL: videoURL, // Note: This is a Blob URL, valid only for this session
+                duration: "00:00",
+                status: "Processing",
+                clips: []
+            };
 
-    document.getElementById('exportBtn').addEventListener('click', async () => {
-      if (state.isExporting) return;
-      if (!state.source) { toast('Upload file MP4 dulu untuk download', 'warn'); return; }
-      
-      // Stop transcription before exporting
-      if (state.isTranscribing) {
-        stopTranscription();
-        document.getElementById('sampleVideo').pause();
-        document.getElementById('sampleVideo').muted = true;
-      }
-      
-      await exportClip();
-    });
-
-    async function exportClip() {
-      const btn = document.getElementById('exportBtn');
-      const progressWrap = document.getElementById('progressWrap');
-      const progressBar = document.getElementById('progressBar');
-      const progressText = document.getElementById('progressText');
-      const video = document.getElementById('sampleVideo');
-
-      if (!video.src) { toast('Video belum siap', 'error'); return; }
-      
-      if (video.readyState < 4) {
-        toast('Menunggu video siap...', 'info');
-        await new Promise(resolve => {
-          const onReady = () => { 
-            if (video.readyState >= 4) { video.removeEventListener('canplaythrough', onReady); resolve(); }
-          };
-          video.addEventListener('canplaythrough', onReady);
-          if (video.readyState >= 4) resolve();
-        });
-      }
-
-      state.isExporting = true;
-      btn.disabled = true;
-      btn.innerHTML = '<div class="spinner w-4 h-4"></div> Processing...';
-      progressWrap.classList.remove('hidden');
-      progressWrap.classList.add('flex');
-
-      try {
-        const canvas = document.getElementById('exportCanvas');
-        const baseSize = 720;
-        const ratio = state.ratio.w / state.ratio.h;
-        let cw, ch;
-        if (state.ratio.w >= state.ratio.h) { cw = baseSize; ch = Math.round(baseSize / ratio); }
-        else { ch = baseSize; cw = Math.round(baseSize * ratio); }
-        canvas.width = cw; canvas.height = ch;
-        const ctx = canvas.getContext('2d');
-
-        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = new AudioCtxClass();
-        if (audioCtx.state === 'suspended') await audioCtx.resume();
-        const destination = audioCtx.createMediaStreamDestination();
-
-        if (state.backsound && state.backsound !== 't5') {
-          const track = tracks.find(t => t.id === state.backsound);
-          const bpm = track.bpm; const beatDuration = 60 / bpm;
-          const beats = Math.floor(state.duration / beatDuration);
-          const masterGain = audioCtx.createGain();
-          masterGain.gain.value = state.backsoundVolume * 0.25;
-          masterGain.connect(destination);
-          const freqSets = { 't1': [220, 277, 330, 277], 't2': [330, 440, 550, 660], 't3': [196, 247, 330, 392], 't4': [261, 329, 392, 523] };
-          const freqs = freqSets[track.id] || [440, 554, 659, 880];
-          for (let i = 0; i < beats; i++) {
-            const time = audioCtx.currentTime + i * beatDuration;
-            const freq = freqs[i % freqs.length];
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.type = track.type; osc.frequency.value = freq;
-            gain.gain.setValueAtTime(0, time); gain.gain.linearRampToValueAtTime(0.4, time + 0.01);
-            gain.gain.exponentialRampToValueAtTime(0.01, time + beatDuration * 0.7);
-            osc.connect(gain); gain.connect(masterGain);
-            osc.start(time); osc.stop(time + beatDuration);
-            if (i % 2 === 0) {
-              const bass = audioCtx.createOscillator(); const bassGain = audioCtx.createGain();
-              bass.type = 'sine'; bass.frequency.value = freq / 3;
-              bassGain.gain.setValueAtTime(0, time); bassGain.gain.linearRampToValueAtTime(0.5, time + 0.01);
-              bassGain.gain.exponentialRampToValueAtTime(0.01, time + beatDuration);
-              bass.connect(bassGain); bassGain.connect(masterGain);
-              bass.start(time); bass.stop(time + beatDuration * 1.2);
-            }
-            const noise = audioCtx.createBufferSource();
-            const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.04, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let j = 0; j < data.length; j++) data[j] = Math.random() * 2 - 1;
-            noise.buffer = buffer;
-            const noiseGain = audioCtx.createGain();
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = 'highpass'; filter.frequency.value = 7000;
-            noiseGain.gain.setValueAtTime(0.1, time + beatDuration * 0.5);
-            noiseGain.gain.exponentialRampToValueAtTime(0.001, time + beatDuration * 0.7);
-            noise.connect(filter); filter.connect(noiseGain); noiseGain.connect(masterGain);
-            noise.start(time + beatDuration * 0.5); noise.stop(time + beatDuration * 0.7);
-          }
+            projects.unshift(newProject);
+            localStorage.setItem('clipForgeProjects', JSON.stringify(projects));
+            renderDashboard();
+            startProcessing(projectId);
         }
 
-        const videoStream = canvas.captureStream(30);
-        const audioTracks = destination.stream.getAudioTracks();
-        const combinedStream = new MediaStream([...videoStream.getVideoTracks(), ...audioTracks]);
+        // --- Processing Logic ---
+        function startProcessing(projectId) {
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('processingView').classList.remove('hidden');
+            
+            const project = projects.find(p => p.id === projectId);
+            document.getElementById('processingProjectName').textContent = `Analyzing: ${project.name}`;
 
-        const mimeType = getSupportedMimeType();
-        if (!mimeType) throw new Error('Browser tidak mendukung perekaman video');
+            const stepsContainer = document.getElementById('pipelineSteps');
+            stepsContainer.innerHTML = '';
 
-        const isMP4 = mimeType.includes('mp4');
-        if (isMP4) {
-          toast('Format MP4 didukung, memulai render...', 'success');
-          document.getElementById('exportFormat').textContent = 'MP4';
-        } else {
-          toast('Browser fallback ke WebM (tetap bisa diputar)', 'info');
-          document.getElementById('exportFormat').textContent = 'WebM';
+            let stepIndex = 0;
+
+            const interval = setInterval(() => {
+                if (stepIndex >= mockPipeline.length) {
+                    clearInterval(interval);
+                    finishProcessing(projectId);
+                    return;
+                }
+
+                const step = mockPipeline[stepIndex];
+                const progress = ((stepIndex + 1) / mockPipeline.length) * 100;
+
+                stepsContainer.innerHTML = `
+                    ${stepIndex > 0 ? `<div class="flex items-center gap-3 text-green-400 text-sm"><span>✓</span> ${mockPipeline[stepIndex-1].name}</div>` : ''}
+                    <div class="flex items-center gap-3 text-indigo-400 text-sm font-bold animate-pulse">
+                        <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        ${step.name}... <span class="text-slate-500 font-normal ml-auto">${step.desc}</span>
+                    </div>
+                `;
+
+                document.getElementById('progressBar').style.width = `${progress}%`;
+                document.getElementById('progressText').textContent = `Step ${stepIndex + 1} of ${mockPipeline.length}: ${step.name}`;
+
+                stepIndex++;
+            }, 1200);
         }
 
-        const recorder = new MediaRecorder(combinedStream, { mimeType: mimeType, videoBitsPerSecond: 4000000 });
-        const chunks = [];
-        recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
-
-        recorder.onstop = () => {
-          const finalType = isMP4 ? 'video/mp4' : 'video/webm';
-          const blob = new Blob(chunks, { type: finalType });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          const ext = isMP4 ? 'mp4' : 'webm';
-          a.download = `clipforge-${state.duration}s-${state.ratio.label.replace(':','x')}-${Date.now()}.${ext}`;
-          document.body.appendChild(a); a.click(); document.body.removeChild(a);
-          setTimeout(() => URL.revokeObjectURL(url), 1000);
-
-          btn.disabled = false;
-          btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i> Generate &amp; Download';
-          progressWrap.classList.add('hidden');
-          progressWrap.classList.remove('flex');
-          progressBar.style.width = '0%';
-          progressText.textContent = '0%';
-          state.isExporting = false;
-          audioCtx.close().catch(() => {});
-          toast(`Clip ${state.duration}s berhasil di-download! (${(blob.size / 1024 / 1024).toFixed(1)} MB)`, 'success');
-        };
-
-        await new Promise(resolve => {
-          const onSeeked = () => { video.removeEventListener('seeked', onSeeked); resolve(); };
-          video.addEventListener('seeked', onSeeked);
-          video.currentTime = state.cutStart;
-        });
-
-        video.muted = true;
-        await video.play();
-
-        recorder.start();
-        const startTime = performance.now();
-        const durationMs = state.duration * 1000;
-
-        function drawFrame() {
-          const elapsed = performance.now() - startTime;
-          const progress = Math.min(elapsed / durationMs, 1);
-          progressBar.style.width = (progress * 100) + '%';
-          progressText.textContent = Math.round(progress * 100) + '%';
-
-          ctx.fillStyle = '#000';
-          ctx.fillRect(0, 0, cw, ch);
-
-          if (video.videoWidth && video.videoHeight && video.readyState >= 2) {
-            const vRatio = video.videoWidth / video.videoHeight;
-            const cRatio = cw / ch;
-            let sx, sy, sw, sh;
-            if (vRatio > cRatio) {
-              sh = video.videoHeight; sw = sh * cRatio;
-              sx = (video.videoWidth - sw) / 2; sy = 0;
-            } else {
-              sw = video.videoWidth; sh = sw / cRatio;
-              sx = 0; sy = (video.videoHeight - sh) / 2;
-            }
-            try { ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch); } catch (e) {}
-          }
-
-          const captions = state.caption.split('\n').filter(c => c.trim());
-          if (captions.length > 0) {
-            const sceneIdx = Math.min(Math.floor(progress * captions.length), captions.length - 1);
-            const caption = captions[sceneIdx];
-            const fontSize = Math.round(cw * 0.055);
-            ctx.font = `700 ${fontSize}px Space Grotesk, sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            const x = cw / 2;
-            const y = ch * 0.85;
-            const metrics = ctx.measureText(caption);
-            const padX = cw * 0.025;
-            const padY = cw * 0.015;
-            const bgW = metrics.width + padX * 2;
-            const bgH = fontSize + padY * 2;
-
-            if (state.captionStyle === 'bold') {
-              ctx.fillStyle = 'rgba(0,0,0,0.85)';
-              ctx.fillRect(x - bgW/2, y - bgH/2, bgW, bgH);
-              ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
-              ctx.strokeRect(x - bgW/2, y - bgH/2, bgW, bgH);
-              ctx.fillStyle = '#fff';
-              ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 2;
-              ctx.fillText(caption, x, y);
-              ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
-            } else if (state.captionStyle === 'minimal') {
-              ctx.fillStyle = 'rgba(0,0,0,0.5)';
-              ctx.fillRect(x - bgW/2, y - bgH/2, bgW, bgH);
-              ctx.fillStyle = '#fff';
-              ctx.fillText(caption, x, y);
-            } else if (state.captionStyle === 'neon') {
-              ctx.fillStyle = 'rgba(255,94,26,0.18)';
-              ctx.fillRect(x - bgW/2, y - bgH/2, bgW, bgH);
-              ctx.strokeStyle = '#ff5e1a'; ctx.lineWidth = 2.5;
-              ctx.strokeRect(x - bgW/2, y - bgH/2, bgW, bgH);
-              ctx.fillStyle = '#fff';
-              ctx.shadowColor = '#ff5e1a'; ctx.shadowBlur = 24;
-              ctx.fillText(caption, x, y);
-              ctx.shadowBlur = 0;
-            }
-          }
-
-          const wmSize = Math.round(cw * 0.022);
-          ctx.font = `600 ${wmSize}px JetBrains Mono, monospace`;
-          ctx.textAlign = 'right';
-          ctx.textBaseline = 'bottom';
-          ctx.fillStyle = 'rgba(255,255,255,0.35)';
-          ctx.fillText('CLIPFORGE', cw - 12, ch - 10);
-
-          if (elapsed < durationMs) {
-            requestAnimationFrame(drawFrame);
-          } else {
-            recorder.stop();
-            video.pause();
-          }
+        function finishProcessing(projectId) {
+            const project = projects.find(p => p.id === projectId);
+            project.status = "Ready";
+            project.clips = mockClips;
+            
+            // Update local storage
+            localStorage.setItem('clipForgeProjects', JSON.stringify(projects));
+            
+            openProject(projectId);
         }
-        requestAnimationFrame(drawFrame);
 
-      } catch (err) {
-        console.error('Export error:', err);
-        toast('Gagal export: ' + err.message, 'error');
-        btn.disabled = false;
-        btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i> Generate &amp; Download';
-        progressWrap.classList.add('hidden');
-        progressWrap.classList.remove('flex');
-        state.isExporting = false;
-      }
-    }
+        // --- Editor Logic ---
+        function openProject(projectId) {
+            currentProject = projects.find(p => p.id === projectId);
+            if (!currentProject || currentProject.status !== 'Ready') return;
 
-    renderTracks();
-    updateCaption();
-    updateTimeline();
-    setTimeout(() => toast('Upload video untuk mulai memotong', 'info'), 600);
-  </script>
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('processingView').classList.add('hidden');
+            document.getElementById('editorView').classList.remove('hidden');
+
+            document.getElementById('videoPlayer').src = currentProject.videoURL;
+            renderClips();
+        }
+
+        function renderClips() {
+            const list = document.getElementById('clipsList');
+            list.innerHTML = '';
+            currentProject.clips.forEach(clip => {
+                list.innerHTML += `
+                    <div class="bg-slate-950 border border-slate-800 hover:border-indigo-500 rounded-lg p-3 cursor-pointer transition-colors" onclick="selectClip(${clip.id})">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-bold text-indigo-400">#0${clip.id}</span>
+                            <span class="text-xs bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full font-medium">${clip.score}</span>
+                        </div>
+                        <h4 class="text-sm font-semibold truncate">${clip.name}</h4>
+                        <p class="text-xs text-slate-500">${clip.start}s - ${clip.end}s</p>
+                    </div>
+                `;
+            });
+            selectClip(currentProject.clips[0].id);
+        }
+
+        function selectClip(clipId) {
+            currentClip = currentProject.clips.find(c => c.id === clipId);
+            if (!currentClip) return;
+
+            document.getElementById('scoreVirality').textContent = currentClip.score;
+            document.getElementById('scoreHook').textContent = Math.max(80, currentClip.score - 3);
+            document.getElementById('captionEditor').value = currentClip.caption;
+            updateCaption(currentClip.caption);
+
+            const video = document.getElementById('videoPlayer');
+            video.currentTime = currentClip.start;
+        }
+
+        function setAspectRatio(ratio, className) {
+            const container = document.getElementById('videoContainer');
+            container.className = `relative bg-black overflow-hidden mx-auto ${className} max-h-[60vh] shadow-2xl flex items-center justify-center`;
+            
+            const buttons = document.querySelectorAll('.flex.gap-2 button');
+            // Reset button styles (simplified)
+            // Add logic here to highlight active button
+        }
+
+        function updateCaption(text) {
+            document.querySelector('#captionOverlay span').textContent = text;
+        }
+
+        function updateHook(text) {
+            // Can integrate hook to caption if needed
+        }
+
+        // --- Export Logic ---
+        function exportMP4(isSingle) {
+            const modal = document.getElementById('exportModal');
+            const bar = document.getElementById('exportBar');
+            const status = document.getElementById('exportStatus');
+            const btn = document.getElementById('exportDownloadBtn');
+            const title = document.getElementById('exportTitle');
+
+            modal.classList.remove('hidden');
+            btn.classList.add('hidden');
+            bar.style.width = '0%';
+            title.textContent = isSingle ? "Exporting MP4..." : "Batch Exporting ZIP...";
+            status.textContent = "Preparing...";
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    status.textContent = "Encoding complete!";
+                    btn.classList.remove('hidden');
+                    btn.innerText = isSingle ? "Download MP4" : "Download ZIP";
+                } else {
+                    status.textContent = progress < 50 ? "Rendering frames..." : "Encoding H.264...";
+                }
+                bar.style.width = `${progress}%`;
+            }, 400);
+        }
+
+        function triggerDownload() {
+            // In a real app, this would trigger the Blob download
+            alert("In a production environment, this would download the MP4/ZIP file processed by FFmpeg.");
+            document.getElementById('exportModal').classList.add('hidden');
+        }
+
+        init();
+    </script>
 </body>
 </html>
