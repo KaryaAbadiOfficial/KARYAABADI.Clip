@@ -54,7 +54,6 @@
         .hero p { color: var(--muted); font-size: 18px; max-width: 600px; margin: 0 auto 32px; }
         
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
         .card {
             background: var(--card); border: 1px solid var(--border); border-radius: 12px;
             padding: 16px; display: flex; flex-direction: column; justify-content: space-between;
@@ -220,7 +219,7 @@
                 </div>
             </div>
             <div style="display:flex; gap: 8px; font-size: 12px; color: var(--muted);">
-                <span>* Video di-crop otomatis ke rasio yang dipilih. Export akan merender video nyata.</span>
+                <span>* Video di-crop otomatis. Audio asli akan ikut terender bersama video.</span>
             </div>
         </div>
 
@@ -247,7 +246,7 @@
             </div>
 
             <div class="form-group">
-                <label>Caption Editor (Burned into MP4)</label>
+                <label>Caption Editor (Burned into Video)</label>
                 <textarea class="form-control" id="captionText" oninput="document.getElementById('captionPreview').innerText = this.value">MOST PEOPLE MAKE THIS MISTAKE</textarea>
             </div>
 
@@ -256,8 +255,8 @@
                 <input type="text" class="form-control" id="postTitle" value="The Biggest Business Mistake">
             </div>
 
-            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;" onclick="startExport(false)">Download Single MP4</button>
-            <button class="btn btn-primary" style="width: 100%;" onclick="startExport(true)">Batch Export All (ZIP)</button>
+            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;" onclick="startExport(false)">Download Single Clip</button>
+            <button class="btn btn-primary" style="width: 100%;" onclick="startExport(true)">Batch Export All</button>
         </div>
     </div>
 
@@ -267,7 +266,7 @@
             <h2 id="exportTitle">Exporting Clip...</h2>
             <p style="color: var(--muted); margin-top: 8px;" id="exportStatus">Rendering video via Canvas...</p>
             <div class="progress-bar-bg"><div class="progress-bar-fill" id="exportBar"></div></div>
-            <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Browser is rendering frames. Please keep tab active.</div>
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Browser is rendering frames & capturing audio. Please keep tab active.</div>
             <button class="btn btn-success hidden" id="downloadBtn">Download Ready</button>
         </div>
     </div>
@@ -484,9 +483,14 @@
             document.getElementById('videoContainer').style.aspectRatio = ratio;
         }
 
-        // --- REAL EXPORT LOGIC (MediaRecorder + Canvas) ---
+        // --- REAL EXPORT LOGIC (AudioContext Fix) ---
         async function startExport(isBatch) {
             if (!currentProject) return;
+            
+            // 1. Synchronously create AudioContext during user gesture (button click)
+            // This bypasses browser autoplay policy and ensures audio is captured.
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            
             const modal = document.getElementById('exportModal');
             const bar = document.getElementById('exportBar');
             const status = document.getElementById('exportStatus');
@@ -504,84 +508,96 @@
                 const clip = clipsToExport[i];
                 status.innerText = `Rendering Clip ${i+1} of ${clipsToExport.length}...`;
                 
-                const blob = await renderClipToBlob(clip, (p) => {
+                const result = await renderClipToBlob(clip, audioCtx, (p) => {
                     bar.style.width = `${((i + p) / clipsToExport.length) * 100}%`;
                 });
-                recordedBlobs.push({ name: `clip-forge-${clip.id}.mp4`, blob });
+                recordedBlobs.push({ name: `clip-forge-${clip.id}.${result.ext}`, blob: result.blob });
             }
 
             status.innerText = "Finalizing...";
             bar.style.width = "100%";
 
             if (isBatch) {
-                // Untuk batch, kita unduh satu per satu karena browser tidak bisa membuat ZIP tanpa library tambahan
                 recordedBlobs.forEach(b => {
                     const a = document.createElement('a');
                     a.href = URL.createObjectURL(b.blob);
                     a.download = b.name;
                     a.click();
                 });
+                setTimeout(() => { modal.classList.remove('active'); audioCtx.close(); }, 1000);
             } else {
                 const url = URL.createObjectURL(recordedBlobs[0].blob);
                 btn.onclick = () => {
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = `clip-forge-${currentClip.id}.mp4`;
+                    a.download = recordedBlobs[0].name;
                     a.click();
                     modal.classList.remove('active');
+                    audioCtx.close();
                 };
                 btn.classList.remove('hidden');
-                btn.innerText = "Download MP4";
+                btn.innerText = `Download ${recordedBlobs[0].name.split('.').pop().toUpperCase()}`;
             }
         }
 
-        function renderClipToBlob(clip, progressCb) {
+        function renderClipToBlob(clip, audioCtx, progressCb) {
             return new Promise(async (resolve) => {
                 const file = await getVideoFromDB(currentProject.id);
                 const video = document.createElement('video');
                 video.src = URL.createObjectURL(file);
-                video.muted = true; // Mute to allow autoplay without user gesture
-                await new Promise(r => video.onloadedmetadata = r);
+                video.crossOrigin = "anonymous";
+                video.muted = false; // Must be false for WebAudio to capture
+                video.volume = 1.0;
                 
+                await new Promise(r => video.onloadedmetadata = r);
                 video.currentTime = clip.start;
                 await new Promise(r => video.onseeked = r);
 
                 const canvas = document.createElement('canvas');
                 canvas.width = 720;
-                canvas.height = 1280; // 9:16
+                canvas.height = 1280;
                 const ctx = canvas.getContext('2d');
                 
-                const stream = canvas.captureStream(30);
+                const videoStream = canvas.captureStream(30);
                 
-                // Setup Audio
-                let audioCtx, dest, source;
+                // Setup Audio using the PASSED audioCtx (which is already running)
+                let audioStreamTracks = [];
                 try {
-                    audioCtx = new AudioContext();
-                    source = audioCtx.createMediaElementSource(video);
-                    dest = audioCtx.createMediaStreamDestination();
-                    source.connect(dest);
-                    // Do not connect to speaker to avoid noise
-                } catch (e) { console.warn("Audio capture failed", e); }
+                    if (audioCtx.state === 'suspended') {
+                        await audioCtx.resume();
+                    }
+                    const sourceNode = audioCtx.createMediaElementSource(video);
+                    const destNode = audioCtx.createMediaStreamDestination();
+                    sourceNode.connect(destNode);
+                    // Do NOT connect to audioCtx.destination to keep speakers silent
+                    audioStreamTracks = destNode.stream.getAudioTracks();
+                } catch (e) {
+                    console.warn("Audio capture failed, exporting video only:", e);
+                }
 
                 const mixedStream = new MediaStream([
-                    ...stream.getVideoTracks(),
-                    ...(dest ? dest.stream.getAudioTracks() : [])
+                    ...videoStream.getVideoTracks(),
+                    ...audioStreamTracks
                 ]);
 
-                // Try MP4, fallback to WebM
+                // Determine best codec and extension to ensure audio plays in video players
                 let mimeType = 'video/mp4;codecs=h264,aac';
+                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=h264,opus';
                 if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp9,opus';
+                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp8,opus';
                 if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+                
+                const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
 
-                const recorder = new MediaRecorder(mixedStream, { mimeType });
+                const recorder = new MediaRecorder(mixedStream, { mimeType, videoBitsPerSecond: 5000000 });
                 const chunks = [];
                 recorder.ondataavailable = e => chunks.push(e.data);
                 recorder.onstop = () => {
-                    resolve(new Blob(chunks, { type: mimeType }));
+                    resolve({ blob: new Blob(chunks, { type: mimeType }), ext });
                 };
 
-                recorder.start();
-                video.play();
+                recorder.start(100);
+                video.play().catch(e => console.warn("Play prevented:", e));
 
                 const duration = clip.end - clip.start;
                 const startTime = Date.now();
@@ -589,12 +605,10 @@
                 function drawFrame() {
                     if (video.currentTime >= clip.end || video.ended) {
                         video.pause();
-                        recorder.stop();
-                        if (audioCtx) audioCtx.close();
+                        if (recorder.state !== 'inactive') recorder.stop();
                         return;
                     }
 
-                    // Calculate 9:16 crop (object-fit: cover logic)
                     const vw = video.videoWidth, vh = video.videoHeight;
                     const targetRatio = 9 / 16, videoRatio = vw / vh;
                     let sx, sy, sw, sh;
@@ -609,7 +623,6 @@
 
                     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
 
-                    // Draw Caption
                     const capText = document.getElementById('captionText').value;
                     ctx.font = 'bold 40px Arial';
                     ctx.textAlign = 'center';
@@ -617,13 +630,11 @@
                     ctx.strokeStyle = 'white';
                     ctx.lineWidth = 2;
                     const x = canvas.width / 2, y = canvas.height - 150;
-                    // Background box
                     const metrics = ctx.measureText(capText);
                     ctx.fillRect(x - metrics.width/2 - 10, y - 35, metrics.width + 20, 45);
                     ctx.fillStyle = 'white';
                     ctx.fillText(capText, x, y);
 
-                    // Update progress
                     const elapsed = (Date.now() - startTime) / 1000;
                     progressCb(elapsed / duration);
 
