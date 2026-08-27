@@ -1,363 +1,448 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLIP FORGE - AI Auto Clipper</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-        .aspect-9-16 { aspect-ratio: 9 / 16; }
-        .aspect-1-1 { aspect-ratio: 1 / 1; }
-        .aspect-16-9 { aspect-ratio: 16 / 9; }
-        .aspect-4-5 { aspect-ratio: 4 / 5; }
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+        }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.2s;
+            font-size: 14px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
+        .btn-secondary:hover { background: var(--border); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; font-size: 12px; padding: 4px 8px; }
+        
+        .header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 24px; border-bottom: 1px solid var(--border);
+            position: sticky; top: 0; background: var(--bg); z-index: 50;
+        }
+        .logo { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 800; font-size: 20px; }
+        .logo svg { width: 28px; height: 28px; color: var(--primary); }
+        
+        .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+        .hero { text-align: center; margin-bottom: 48px; }
+        .hero h1 { font-size: 40px; font-weight: 800; margin-bottom: 16px; }
+        .hero h1 span { color: var(--primary); }
+        .hero p { color: var(--muted); font-size: 18px; max-width: 600px; margin: 0 auto 32px; }
+        
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .card {
+            background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+            padding: 16px; display: flex; flex-direction: column; justify-content: space-between;
+            min-height: 180px;
+        }
+        .card h3 { font-size: 12px; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; margin-bottom: 8px; }
+        .card .stat { font-size: 32px; font-weight: 800; }
+        .card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+        
+        .upload-zone {
+            border: 2px dashed var(--border); border-radius: 12px; padding: 24px;
+            text-align: center; cursor: pointer; transition: 0.2s; justify-content: center; align-items: center;
+        }
+        .upload-zone:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.05); }
+        .upload-zone svg { width: 40px; height: 40px; color: var(--muted); margin-bottom: 8px; }
+        
+        .project-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .project-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; cursor: pointer; transition: 0.2s; }
+        .project-card:hover { border-color: var(--primary); }
+        .project-thumb { aspect-ratio: 16/9; background: #000; display: flex; align-items: center; justify-content: center; position: relative; }
+        .project-thumb video { width: 100%; height: 100%; object-fit: cover; }
+        .project-info { padding: 12px; }
+        .project-info h4 { font-size: 14px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .project-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+        .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+        .badge-processing { background: #f59e0b; color: black; }
+        .badge-ready { background: var(--success); color: white; }
+        
+        .editor-layout { display: flex; gap: 16px; height: calc(100vh - 65px); padding: 16px; }
+        .sidebar { width: 300px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow-y: auto; flex-shrink: 0; }
+        .sidebar h3 { font-size: 16px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+        .clip-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+        .clip-item:hover { border-color: var(--primary); }
+        .clip-item.active { border-color: var(--primary); background: rgba(99, 102, 241, 0.1); }
+        .clip-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .clip-id { font-size: 12px; font-weight: 700; color: var(--primary); }
+        .clip-score { font-size: 10px; background: rgba(16, 185, 129, 0.2); color: var(--success); padding: 2px 6px; border-radius: 4px; }
+        .clip-title { font-size: 14px; font-weight: 600; }
+        .clip-time { font-size: 11px; color: var(--muted); }
+        
+        .main-view { flex: 1; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+        .toolbar { display: flex; gap: 8px; background: var(--card); padding: 8px; border-radius: 8px; border: 1px solid var(--border); }
+        .ratio-btn { padding: 6px 12px; font-size: 12px; border: 1px solid var(--border); background: transparent; color: var(--text); border-radius: 4px; cursor: pointer; }
+        .ratio-btn.active { background: var(--primary); border-color: var(--primary); }
+        
+        .preview-area { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .video-container { position: relative; background: black; overflow: hidden; max-height: 70vh; transition: aspect-ratio 0.3s; aspect-ratio: 9/16; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .video-container video { width: 100%; height: 100%; object-fit: cover; }
+        .caption-overlay { position: absolute; bottom: 10%; left: 0; right: 0; text-align: center; padding: 0 16px; pointer-events: none; }
+        .caption-text { display: inline-block; background: black; color: white; font-weight: 800; font-size: 24px; padding: 4px 8px; text-transform: uppercase; border-radius: 4px; }
+        
+        .settings-panel { width: 300px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow-y: auto; flex-shrink: 0; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; text-transform: uppercase; font-weight: 600; }
+        .form-control { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 8px; color: var(--text); font-size: 14px; }
+        textarea.form-control { resize: vertical; height: 80px; font-family: inherit; }
+        
+        .score-box { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 16px; }
+        .score-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; }
+        .score-val { font-weight: 700; }
+        .score-val.high { color: var(--success); }
+        .score-val.med { color: #f59e0b; }
+        .reason-box { background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); border-radius: 6px; padding: 8px; margin-top: 8px; font-size: 12px; color: #a5b4fc; }
+        
+        .processing-view { max-width: 600px; margin: 0 auto; padding: 48px 24px; text-align: center; }
+        .pipeline-step { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; text-align: left; }
+        .pipeline-step.done { opacity: 0.5; }
+        .pipeline-step.active { border-color: var(--primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
+        .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .checkmark { width: 20px; height: 20px; color: var(--success); }
+        
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 32px; width: 100%; max-width: 400px; text-align: center; }
+        .progress-bar-bg { width: 100%; height: 8px; background: var(--bg); border-radius: 4px; margin: 16px 0; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.3s; }
+        
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen">
+<body>
 
-    <div id="app" class="flex flex-col min-h-screen">
+    <div class="header">
+        <div class="logo" onclick="showView('dashboard')">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            CLIP FORGE
+        </div>
+        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Create New Project</button>
+    </div>
+
+    <input type="file" id="fileInput" class="hidden" accept="video/*" onchange="handleUpload(event)">
+
+    <!-- DASHBOARD VIEW -->
+    <div id="dashboardView" class="container">
+        <div class="hero">
+            <h1>Turn Long Videos Into <span>Short Clips</span></h1>
+            <p>AI automatically finds the best moments, edits them, adds captions, reframes the video, and exports ready-to-post MP4 clips. 100% Browser Native. No Login.</p>
+        </div>
         
-        <!-- Navbar -->
-        <header class="border-b border-slate-800 px-6 py-4 flex justify-between items-center sticky top-0 bg-slate-950 z-50">
-            <div class="flex items-center gap-2 cursor-pointer" onclick="resetView()">
-                <svg class="w-8 h-8 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-                <h1 class="text-xl font-bold tracking-tight">CLIP FORGE</h1>
-            </div>
-            <div class="flex items-center gap-4">
-                <span class="text-xs text-slate-400 hidden md:block">No Login Required. 100% Local.</span>
-                <button class="text-sm px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-md font-medium transition-colors">Create Clips</button>
-            </div>
-        </header>
-
-        <!-- Main Content Area -->
-        <main id="mainContent" class="flex-1 overflow-y-auto">
-            
-            <!-- DASHBOARD VIEW -->
-            <section id="dashboardView" class="max-w-7xl mx-auto w-full p-8">
-                <div class="text-center mb-16">
-                    <h2 class="text-4xl md:text-5xl font-extrabold mb-4 tracking-tight">Turn Long Videos Into <span class="text-indigo-400">Short Clips</span></h2>
-                    <p class="text-lg text-slate-400 mb-8 max-w-2xl mx-auto">AI automatically finds the best moments, edits them, adds captions, reframes the video, and exports ready-to-post MP4 clips.</p>
-                    
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-                    <!-- Quick Upload Card -->
-                    <div id="uploadCard" class="border-2 border-dashed border-slate-700 hover:border-indigo-500 rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer transition-colors bg-slate-900/50 min-h-[200px]" onclick="document.getElementById('fileInput').click()">
-                        <svg class="w-10 h-10 text-slate-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                        <h3 class="font-semibold mb-1">Drop your video here</h3>
-                        <p class="text-xs text-slate-500">or Browse Video</p>
-                        <p class="text-xs text-slate-600 mt-4">Support MP4, MOV, WebM</p>
-                    </div>
-
-                    <!-- Stats Cards -->
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col justify-between min-h-[200px]">
-                        <h3 class="text-sm text-slate-400 font-medium uppercase tracking-wider">Recent Projects</h3>
-                        <div>
-                            <p class="text-3xl font-bold" id="statProjects">0</p>
-                            <p class="text-xs text-slate-500 mt-1">Stored in your browser</p>
-                        </div>
-                    </div>
-                    
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col justify-between min-h-[200px]">
-                        <h3 class="text-sm text-slate-400 font-medium uppercase tracking-wider">Generated Clips</h3>
-                        <div>
-                            <p class="text-3xl font-bold" id="statClips">0</p>
-                            <p class="text-xs text-slate-500 mt-1">Ready to export</p>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-6 flex flex-col justify-between min-h-[200px]">
-                        <h3 class="text-sm text-slate-400 font-medium uppercase tracking-wider">Processing Jobs</h3>
-                        <div>
-                            <p class="text-3xl font-bold text-yellow-400" id="statJobs">0</p>
-                            <p class="text-xs text-slate-500 mt-1">Currently in queue</p>
-                        </div>
-                    </div>
-                </div>
-
-                <input type="file" id="fileInput" class="hidden" accept="video/*" onchange="handleUpload(event)">
-
+        <div class="grid-4">
+            <div class="card upload-zone" onclick="document.getElementById('fileInput').click()">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                 <div>
-                    <h3 class="text-xl font-bold mb-6">Recent Projects</h3>
-                    <div id="projectList" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+                    <h3 style="margin-bottom: 4px;">Upload Video</h3>
+                    <p style="font-size: 12px; color: var(--muted);">MP4, MOV, WebM (Saved Locally)</p>
                 </div>
-            </section>
-
-            <!-- PROCESSING VIEW -->
-            <section id="processingView" class="hidden max-w-4xl mx-auto w-full p-8 min-h-[60vh] flex flex-col justify-center">
-                <h2 class="text-2xl font-bold text-center mb-2" id="processingProjectName">Analyzing Video...</h2>
-                <p class="text-slate-400 text-center mb-10">AI is scanning your video to find the best moments. This usually takes a few minutes.</p>
-                
-                <div class="space-y-6 max-w-2xl w-full mx-auto">
-                    <div id="pipelineSteps" class="space-y-4"></div>
-                    <div class="bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-800">
-                        <div id="progressBar" class="bg-indigo-500 h-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                    <p class="text-center text-sm text-slate-500" id="progressText">Initializing...</p>
-                </div>
-            </section>
-
-            <!-- EDITOR VIEW -->
-            <section id="editorView" class="hidden max-w-7xl mx-auto w-full p-4 flex flex-col lg:flex-row gap-4">
-                <!-- Left Sidebar: Clip Gallery -->
-                <aside class="w-full lg:w-72 flex-shrink-0 bg-slate-900 border border-slate-800 rounded-xl p-4 max-h-[80vh] overflow-y-auto scrollbar-hide">
-                    <h3 class="font-bold mb-4">Generated Clips</h3>
-                    <div id="clipsList" class="space-y-3"></div>
-                </aside>
-
-                <!-- Center: Video Preview -->
-                <div class="flex-1 flex flex-col gap-4">
-                    <div class="flex gap-2 border-b border-slate-800 pb-2">
-                        <button class="px-3 py-1 text-xs rounded bg-indigo-600" onclick="setAspectRatio('9/16', 'aspect-9-16')">9:16</button>
-                        <button class="px-3 py-1 text-xs rounded bg-slate-800" onclick="setAspectRatio('1/1', 'aspect-1-1')">1:1</button>
-                        <button class="px-3 py-1 text-xs rounded bg-slate-800" onclick="setAspectRatio('16/9', 'aspect-16-9')">16:9</button>
-                        <button class="px-3 py-1 text-xs rounded bg-slate-800" onclick="setAspectRatio('4/5', 'aspect-4-5')">4:5</button>
-                        <div class="flex-1"></div>
-                        <button class="px-3 py-1 text-xs rounded bg-green-600 hover:bg-green-500 font-medium" onclick="exportMP4(true)">Export MP4</button>
-                        <button class="px-3 py-1 text-xs rounded bg-slate-700 hover:bg-slate-600 font-medium" onclick="exportMP4(false)">Batch ZIP</button>
-                    </div>
-                    
-                    <div class="flex-1 bg-slate-900 rounded-xl p-6 flex items-center justify-center">
-                        <div id="videoContainer" class="relative bg-black overflow-hidden mx-auto aspect-9-16 max-h-[60vh] shadow-2xl flex items-center justify-center">
-                            <video id="videoPlayer" class="absolute w-full h-full object-cover" src="" controls></video>
-                            <div id="captionOverlay" class="absolute bottom-10 left-0 right-0 text-center px-4 pointer-events-none">
-                                <span class="bg-black text-white font-extrabold px-2 py-1 rounded text-xl uppercase tracking-wide shadow-lg">Caption loading...</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                        <div class="flex justify-between items-center mb-2">
-                            <input type="range" id="clipRange" min="0" max="100" value="0" class="w-full">
-                        </div>
-                        <div class="flex gap-2 mt-4">
-                            <button class="flex-1 text-xs px-2 py-2 bg-slate-800 rounded hover:bg-slate-700">AI Smart Trim</button>
-                            <button class="flex-1 text-xs px-2 py-2 bg-slate-800 rounded hover:bg-slate-700">Remove Silence</button>
-                            <button class="flex-1 text-xs px-2 py-2 bg-slate-800 rounded hover:bg-slate-700">Add B-Roll</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Sidebar: Settings & Captions -->
-                <aside class="w-full lg:w-80 flex-shrink-0 bg-slate-900 border border-slate-800 rounded-xl p-4 max-h-[80vh] overflow-y-auto scrollbar-hide">
-                    <h3 class="font-bold mb-4">Clip Details</h3>
-                    <div class="mb-6 p-3 bg-slate-950 rounded-lg border border-slate-800">
-                        <div class="flex justify-between mb-2">
-                            <span class="text-sm text-slate-400">Virality Score</span>
-                            <span class="text-sm font-bold text-green-400" id="scoreVirality">94</span>
-                        </div>
-                        <div class="flex justify-between mb-2">
-                            <span class="text-sm text-slate-400">Hook Score</span>
-                            <span class="text-sm font-bold text-indigo-400" id="scoreHook">91</span>
-                        </div>
-                        <div class="mt-3 p-2 bg-indigo-950/50 border border-indigo-800 rounded text-xs text-indigo-300">
-                            <strong>Why this clip?</strong><br> Strong opening statement, clear context, and emotional payoff.
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="text-xs text-slate-400 uppercase font-semibold">Hook Generator</label>
-                        <select class="w-full mt-2 bg-slate-950 border border-slate-800 rounded p-2 text-sm" onchange="updateHook(this.value)">
-                            <option>Most people get this completely wrong.</option>
-                            <option>Here's the mistake nobody tells you about.</option>
-                            <option>If I started again, I would do this first.</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="text-xs text-slate-400 uppercase font-semibold">Caption Editor</label>
-                        <textarea id="captionEditor" class="w-full mt-2 bg-slate-950 border border-slate-800 rounded p-2 text-sm h-24" oninput="updateCaption(this.value)">THIS IS THE MOST IMPORTANT LESSON IN BUSINESS</textarea>
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="text-xs text-slate-400 uppercase font-semibold">Caption Style</label>
-                        <div class="grid grid-cols-3 gap-2 mt-2">
-                            <button class="text-xs p-2 bg-slate-800 rounded border border-indigo-500">Bold</button>
-                            <button class="text-xs p-2 bg-slate-800 rounded">Clean</button>
-                            <button class="text-xs p-2 bg-slate-800 rounded">Viral</button>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 pt-4 border-t border-slate-800">
-                        <label class="text-xs text-slate-400 uppercase font-semibold">Export Settings</label>
-                        <select class="w-full mt-2 bg-slate-950 border border-slate-800 rounded p-2 text-sm">
-                            <option>1080×1920 (Standard)</option>
-                            <option>1920×1080 (HD Landscape)</option>
-                            <option>1080×1080 (Square)</option>
-                        </select>
-                    </div>
-                </aside>
-            </section>
-        </main>
-
-        <!-- Export Modal -->
-        <div id="exportModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-8 max-w-md w-full text-center">
-                <h3 class="text-xl font-bold mb-6" id="exportTitle">Exporting Clip...</h3>
-                <div class="bg-slate-800 rounded-full h-2 overflow-hidden mb-4">
-                    <div id="exportBar" class="bg-green-500 h-full transition-all duration-300" style="width: 0%"></div>
-                </div>
-                <p class="text-sm text-slate-400" id="exportStatus">Preparing...</p>
-                <button id="exportDownloadBtn" class="hidden mt-6 px-6 py-2 bg-green-600 rounded font-medium hover:bg-green-500" onclick="triggerDownload()">Download MP4</button>
             </div>
+            <div class="card">
+                <h3>Local Projects</h3>
+                <div class="stat" id="statProjects">0</div>
+                <div class="sub">Stored in IndexedDB</div>
+            </div>
+            <div class="card">
+                <h3>Generated Clips</h3>
+                <div class="stat" id="statClips">0</div>
+                <div class="sub">Ready to export</div>
+            </div>
+            <div class="card">
+                <h3>Storage Used</h3>
+                <div class="stat" id="statStorage">0 MB</div>
+                <div class="sub">Browser Quota</div>
+            </div>
+        </div>
+
+        <h2 style="margin-bottom: 16px;">Recent Projects</h2>
+        <div class="project-grid" id="projectList"></div>
+    </div>
+
+    <!-- PROCESSING VIEW -->
+    <div id="processingView" class="hidden processing-view">
+        <h2 id="procTitle">Analyzing Video...</h2>
+        <p style="color: var(--muted); margin-bottom: 32px;">AI is scanning your video to find the best moments.</p>
+        <div id="pipelineSteps"></div>
+    </div>
+
+    <!-- EDITOR VIEW -->
+    <div id="editorView" class="hidden editor-layout">
+        <!-- Left: Clip Gallery -->
+        <div class="sidebar">
+            <h3>Generated Clips</h3>
+            <div id="clipsList"></div>
+        </div>
+
+        <!-- Center: Preview -->
+        <div class="main-view">
+            <div class="toolbar">
+                <button class="ratio-btn active" onclick="setRatio(9/16, this)">9:16</button>
+                <button class="ratio-btn" onclick="setRatio(1/1, this)">1:1</button>
+                <button class="ratio-btn" onclick="setRatio(16/9, this)">16:9</button>
+                <div style="flex:1"></div>
+                <button class="btn btn-success" onclick="startExport(false)">Export MP4</button>
+            </div>
+            <div class="preview-area">
+                <div class="video-container" id="videoContainer">
+                    <video id="videoPlayer" controls></video>
+                    <div class="caption-overlay">
+                        <span class="caption-text" id="captionPreview">CAPTION PREVIEW</span>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex; gap: 8px; font-size: 12px; color: var(--muted);">
+                <span>* Video di-crop otomatis ke rasio yang dipilih. Export akan merender video nyata.</span>
+            </div>
+        </div>
+
+        <!-- Right: Settings -->
+        <div class="settings-panel">
+            <h3 style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Clip Details</h3>
+            
+            <div class="score-box">
+                <div class="score-row"><span>Virality Score</span> <span class="score-val high" id="sVirality">94</span></div>
+                <div class="score-row"><span>Hook Score</span> <span class="score-val high" id="sHook">91</span></div>
+                <div class="score-row"><span>Clarity Score</span> <span class="score-val med" id="sClarity">85</span></div>
+                <div class="reason-box">
+                    <strong>Why this clip?</strong><br> Strong opening statement, clear context, and emotional payoff.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>AI Hook Generator</label>
+                <select class="form-control" id="hookSelect" onchange="updateCaption()">
+                    <option value="MOST PEOPLE MAKE THIS MISTAKE">Option 1: Most people make this mistake</option>
+                    <option value="THE SECRET NOBODY TELLS YOU">Option 2: The secret nobody tells you</option>
+                    <option value="IF I STARTED AGAIN I WOULD DO THIS">Option 3: If I started again...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Caption Editor (Burned into MP4)</label>
+                <textarea class="form-control" id="captionText" oninput="document.getElementById('captionPreview').innerText = this.value">MOST PEOPLE MAKE THIS MISTAKE</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Title for Post</label>
+                <input type="text" class="form-control" id="postTitle" value="The Biggest Business Mistake">
+            </div>
+
+            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;" onclick="startExport(false)">Download Single MP4</button>
+            <button class="btn btn-primary" style="width: 100%;" onclick="startExport(true)">Batch Export All (ZIP)</button>
+        </div>
+    </div>
+
+    <!-- Export Modal -->
+    <div id="exportModal" class="modal-overlay">
+        <div class="modal">
+            <h2 id="exportTitle">Exporting Clip...</h2>
+            <p style="color: var(--muted); margin-top: 8px;" id="exportStatus">Rendering video via Canvas...</p>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" id="exportBar"></div></div>
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Browser is rendering frames. Please keep tab active.</div>
+            <button class="btn btn-success hidden" id="downloadBtn">Download Ready</button>
         </div>
     </div>
 
     <script>
-        // --- State Management ---
-        let projects = JSON.parse(localStorage.getItem('clipForgeProjects')) || [];
+        // --- STATE & DB ---
+        let projects = JSON.parse(localStorage.getItem('cf_projects') || '[]');
         let currentProject = null;
         let currentClip = null;
-
-        // --- Mock Data ---
-        const mockPipeline = [
-            { name: "Uploading", desc: "Transfering data to secure servers" },
-            { name: "Extracting Audio", desc: "Isolating voice track" },
-            { name: "Transcribing", desc: "Converting speech to text (Whisper AI)" },
-            { name: "Scene Detection", desc: "Analyzing visual changes" },
-            { name: "Speaker Detection", desc: "Identifying who is speaking" },
-            { name: "Highlight Detection", desc: "Finding high-engagement moments" },
-            { name: "Clip Scoring", desc: "Ranking virality and context" },
-            { name: "Caption Generation", desc: "Creating dynamic subtitles" },
-            { name: "Finalizing", desc: "Preparing project for editor" }
-        ];
+        let db = null;
         
-        const mockClips = [
-            { id: 1, name: "Business Mistake", score: 94, topic: "Business", start: 12, end: 48, caption: "MOST PEOPLE MAKE THIS MISTAKE" },
-            { id: 2, name: "The Secret to Success", score: 89, topic: "Motivation", start: 65, end: 95, caption: "THIS IS THE SECRET TO SUCCESS" },
-            { id: 3, name: "Why We Fail", score: 85, topic: "Educational", start: 110, end: 145, caption: "HERE IS WHY WE ACTUALLY FAIL" },
-            { id: 4, name: "My Story", score: 82, topic: "Storytelling", start: 160, end: 200, caption: "IT ALL STARTED FIVE YEARS AGO" }
-        ];
+        // Initialize IndexedDB for storing actual video files
+        const DB_NAME = 'ClipForgeDB';
+        const request = indexedDB.open(DB_NAME, 1);
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            if (!db.objectStoreNames.contains('videos')) db.createObjectStore('videos');
+        };
+        request.onsuccess = (e) => { db = e.target.result; refreshDashboard(); };
+        request.onerror = () => { alert("IndexedDB failed. App cannot store videos."); };
 
-        // --- Init ---
-        function init() {
-            renderDashboard();
+        function saveVideoToDB(id, file) {
+            return new Promise((resolve) => {
+                const tx = db.transaction('videos', 'readwrite');
+                tx.objectStore('videos').put(file, id);
+                tx.oncomplete = resolve;
+            });
         }
-
-        function resetView() {
-            document.getElementById('dashboardView').classList.remove('hidden');
-            document.getElementById('processingView').classList.add('hidden');
-            document.getElementById('editorView').classList.add('hidden');
-            renderDashboard();
+        function getVideoFromDB(id) {
+            return new Promise((resolve) => {
+                const tx = db.transaction('videos', 'readonly');
+                const req = tx.objectStore('videos').get(id);
+                req.onsuccess = () => resolve(req.result);
+            });
         }
-
-        // --- Dashboard Logic ---
-        function renderDashboard() {
-            document.getElementById('statProjects').textContent = projects.length;
-            document.getElementById('statClips').textContent = projects.reduce((acc, p) => acc + (p.clips?.length || 0), 0);
-            document.getElementById('statJobs').textContent = projects.filter(p => p.status === 'Processing').length;
-
-            const list = document.getElementById('projectList');
-            list.innerHTML = '';
-
-            if (projects.length === 0) {
-                list.innerHTML = `<div class="col-span-full text-center py-12 text-slate-600 border border-dashed border-slate-800 rounded-xl">No projects yet. Upload a video to get started.</div>`;
-                return;
-            }
-
-            projects.forEach(p => {
-                list.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden hover:border-indigo-500 transition-colors cursor-pointer group" onclick="openProject('${p.id}')">
-                        <div class="aspect-video bg-slate-800 relative flex items-center justify-center">
-                            <svg class="w-12 h-12 text-slate-600 group-hover:text-indigo-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            ${p.status === 'Processing' ? `<div class="absolute inset-0 bg-black/50 flex items-center justify-center text-xs text-yellow-400 font-bold animate-pulse">PROCESSING...</div>` : ''}
-                        </div>
-                        <div class="p-4">
-                            <h4 class="font-semibold truncate">${p.name}</h4>
-                            <div class="flex justify-between text-xs text-slate-500 mt-2">
-                                <span>${p.clips?.length || 0} Clips</span>
-                                <span>${p.duration || 'N/A'}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
+        function deleteVideoFromDB(id) {
+            return new Promise((resolve) => {
+                const tx = db.transaction('videos', 'readwrite');
+                tx.objectStore('videos').delete(id);
+                tx.oncomplete = resolve;
             });
         }
 
-        function handleUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        // --- MOCK AI DATA ---
+        const mockPipeline = [
+            "Extracting Audio", "Transcribing (Whisper)", "Scene Detection", 
+            "Speaker Detection", "Highlight Detection", "Clip Scoring", "Generating Captions"
+        ];
+        const mockClips = [
+            { id: 1, title: "Business Mistake", score: 94, start: 5, end: 20, caption: "MOST PEOPLE MAKE THIS MISTAKE" },
+            { id: 2, title: "Secret to Success", score: 89, start: 25, end: 45, caption: "THE SECRET NOBODY TELLS YOU" },
+            { id: 3, title: "Why We Fail", score: 85, start: 50, end: 70, caption: "HERE IS WHY WE ACTUALLY FAIL" }
+        ];
 
-            const projectId = 'CF-' + Math.random().toString(36).substring(2, 8).toUpperCase();
-            const videoURL = URL.createObjectURL(file);
+        // --- ROUTING / VIEWS ---
+        function showView(view) {
+            ['dashboardView', 'processingView', 'editorView'].forEach(v => document.getElementById(v).classList.add('hidden'));
+            document.getElementById(view + 'View').classList.remove('hidden');
+        }
+
+        // --- DASHBOARD LOGIC ---
+        async function refreshDashboard() {
+            document.getElementById('statProjects').textContent = projects.length;
+            document.getElementById('statClips').textContent = projects.reduce((a, b) => a + (b.clips?.length || 0), 0);
+            
+            if (navigator.storage && navigator.storage.estimate) {
+                const est = await navigator.storage.estimate();
+                document.getElementById('statStorage').textContent = (est.usage / 1024 / 1024).toFixed(1) + " MB";
+            }
+
+            const list = document.getElementById('projectList');
+            list.innerHTML = '';
+            
+            if (projects.length === 0) {
+                list.innerHTML = `<div style="grid-column: span 4; text-align: center; padding: 48px; color: var(--muted); border: 1px dashed var(--border); border-radius: 12px;">No projects yet. Upload a video to begin.</div>`;
+                return;
+            }
+
+            for (const p of projects) {
+                const card = document.createElement('div');
+                card.className = 'project-card';
+                card.onclick = () => openProject(p.id);
+                
+                let thumb = `<svg style="width:40px; color:var(--muted);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>`;
+                if (p.hasVideo) {
+                    const file = await getVideoFromDB(p.id);
+                    if (file) thumb = `<video src="${URL.createObjectURL(file)}#t=1" muted></video>`;
+                }
+
+                card.innerHTML = `
+                    <div class="project-thumb">${thumb}</div>
+                    <div class="project-info">
+                        <h4>${p.name}</h4>
+                        <div class="project-meta">
+                            <span>${p.clips?.length || 0} Clips</span>
+                            <span class="badge ${p.status === 'Processing' ? 'badge-processing' : 'badge-ready'}">${p.status}</span>
+                        </div>
+                        ${p.status === 'Ready' ? `<button class="btn btn-danger" style="margin-top:8px; width:100%;" onclick="event.stopPropagation(); deleteProject('${p.id}')">Delete</button>` : ''}
+                    </div>
+                `;
+                list.appendChild(card);
+            }
+        }
+
+        async function deleteProject(id) {
+            if(!confirm("Delete project and video permanently?")) return;
+            await deleteVideoFromDB(id);
+            projects = projects.filter(p => p.id !== id);
+            localStorage.setItem('cf_projects', JSON.stringify(projects));
+            refreshDashboard();
+        }
+
+        // --- UPLOAD LOGIC ---
+        async function handleUpload(event) {
+            const file = event.target.files[0];
+            if (!file || !file.type.includes('video')) return;
+
+            const projectId = 'CF-' + Date.now().toString(36).toUpperCase();
             
             const newProject = {
                 id: projectId,
-                name: file.name.replace(/\.[^/.]+$/, ""),
-                videoURL: videoURL, // Note: This is a Blob URL, valid only for this session
-                duration: "00:00",
+                name: file.name.replace(/\.[^/.]+$/, "").substring(0, 30),
                 status: "Processing",
-                clips: []
+                clips: [],
+                hasVideo: true
             };
 
+            await saveVideoToDB(projectId, file);
             projects.unshift(newProject);
-            localStorage.setItem('clipForgeProjects', JSON.stringify(projects));
-            renderDashboard();
+            localStorage.setItem('cf_projects', JSON.stringify(projects));
+            
+            refreshDashboard();
             startProcessing(projectId);
         }
 
-        // --- Processing Logic ---
-        function startProcessing(projectId) {
-            document.getElementById('dashboardView').classList.add('hidden');
-            document.getElementById('processingView').classList.remove('hidden');
-            
-            const project = projects.find(p => p.id === projectId);
-            document.getElementById('processingProjectName').textContent = `Analyzing: ${project.name}`;
-
+        // --- PROCESSING LOGIC ---
+        async function startProcessing(projectId) {
+            showView('processing');
+            document.getElementById('procTitle').innerText = "Analyzing Video...";
             const stepsContainer = document.getElementById('pipelineSteps');
             stepsContainer.innerHTML = '';
 
-            let stepIndex = 0;
+            for (let i = 0; i < mockPipeline.length; i++) {
+                const step = mockPipeline[i];
+                const stepEl = document.createElement('div');
+                stepEl.className = 'pipeline-step active';
+                stepEl.innerHTML = `<div class="spinner"></div> <div>${step}...</div>`;
+                stepsContainer.appendChild(stepEl);
 
-            const interval = setInterval(() => {
-                if (stepIndex >= mockPipeline.length) {
-                    clearInterval(interval);
-                    finishProcessing(projectId);
-                    return;
-                }
+                await new Promise(r => setTimeout(r, 800)); // Realistic delay
 
-                const step = mockPipeline[stepIndex];
-                const progress = ((stepIndex + 1) / mockPipeline.length) * 100;
+                stepEl.className = 'pipeline-step done';
+                stepEl.innerHTML = `<svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <div>${step} Complete</div>`;
+            }
 
-                stepsContainer.innerHTML = `
-                    ${stepIndex > 0 ? `<div class="flex items-center gap-3 text-green-400 text-sm"><span>✓</span> ${mockPipeline[stepIndex-1].name}</div>` : ''}
-                    <div class="flex items-center gap-3 text-indigo-400 text-sm font-bold animate-pulse">
-                        <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        ${step.name}... <span class="text-slate-500 font-normal ml-auto">${step.desc}</span>
-                    </div>
-                `;
-
-                document.getElementById('progressBar').style.width = `${progress}%`;
-                document.getElementById('progressText').textContent = `Step ${stepIndex + 1} of ${mockPipeline.length}: ${step.name}`;
-
-                stepIndex++;
-            }, 1200);
-        }
-
-        function finishProcessing(projectId) {
             const project = projects.find(p => p.id === projectId);
             project.status = "Ready";
             project.clips = mockClips;
+            localStorage.setItem('cf_projects', JSON.stringify(projects));
             
-            // Update local storage
-            localStorage.setItem('clipForgeProjects', JSON.stringify(projects));
-            
+            await new Promise(r => setTimeout(r, 500));
             openProject(projectId);
         }
 
-        // --- Editor Logic ---
-        function openProject(projectId) {
+        // --- EDITOR LOGIC ---
+        async function openProject(projectId) {
             currentProject = projects.find(p => p.id === projectId);
             if (!currentProject || currentProject.status !== 'Ready') return;
 
-            document.getElementById('dashboardView').classList.add('hidden');
-            document.getElementById('processingView').classList.add('hidden');
-            document.getElementById('editorView').classList.remove('hidden');
-
-            document.getElementById('videoPlayer').src = currentProject.videoURL;
+            showView('editor');
+            const file = await getVideoFromDB(currentProject.id);
+            if (file) {
+                document.getElementById('videoPlayer').src = URL.createObjectURL(file);
+            }
+            
             renderClips();
         }
 
@@ -365,87 +450,191 @@
             const list = document.getElementById('clipsList');
             list.innerHTML = '';
             currentProject.clips.forEach(clip => {
-                list.innerHTML += `
-                    <div class="bg-slate-950 border border-slate-800 hover:border-indigo-500 rounded-lg p-3 cursor-pointer transition-colors" onclick="selectClip(${clip.id})">
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs font-bold text-indigo-400">#0${clip.id}</span>
-                            <span class="text-xs bg-green-900/50 text-green-400 px-2 py-0.5 rounded-full font-medium">${clip.score}</span>
-                        </div>
-                        <h4 class="text-sm font-semibold truncate">${clip.name}</h4>
-                        <p class="text-xs text-slate-500">${clip.start}s - ${clip.end}s</p>
+                const div = document.createElement('div');
+                div.className = `clip-item ${currentClip?.id === clip.id ? 'active' : ''}`;
+                div.onclick = () => selectClip(clip.id);
+                div.innerHTML = `
+                    <div class="clip-header">
+                        <span class="clip-id">CLIP #0${clip.id}</span>
+                        <span class="clip-score">${clip.score}</span>
                     </div>
+                    <div class="clip-title">${clip.title}</div>
+                    <div class="clip-time">00:${clip.start.toString().padStart(2,'0')} - 00:${clip.end.toString().padStart(2,'0')}</div>
                 `;
+                list.appendChild(div);
             });
-            selectClip(currentProject.clips[0].id);
+            if (!currentClip) selectClip(currentProject.clips[0].id);
         }
 
         function selectClip(clipId) {
             currentClip = currentProject.clips.find(c => c.id === clipId);
-            if (!currentClip) return;
-
-            document.getElementById('scoreVirality').textContent = currentClip.score;
-            document.getElementById('scoreHook').textContent = Math.max(80, currentClip.score - 3);
-            document.getElementById('captionEditor').value = currentClip.caption;
-            updateCaption(currentClip.caption);
-
+            document.getElementById('sVirality').textContent = currentClip.score;
+            document.getElementById('sHook').textContent = Math.max(80, currentClip.score - 3);
+            document.getElementById('captionText').value = currentClip.caption;
+            document.getElementById('captionPreview').innerText = currentClip.caption;
+            
             const video = document.getElementById('videoPlayer');
             video.currentTime = currentClip.start;
+            renderClips();
         }
 
-        function setAspectRatio(ratio, className) {
-            const container = document.getElementById('videoContainer');
-            container.className = `relative bg-black overflow-hidden mx-auto ${className} max-h-[60vh] shadow-2xl flex items-center justify-center`;
-            
-            const buttons = document.querySelectorAll('.flex.gap-2 button');
-            // Reset button styles (simplified)
-            // Add logic here to highlight active button
+        function setRatio(ratio, btn) {
+            document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById('videoContainer').style.aspectRatio = ratio;
         }
 
-        function updateCaption(text) {
-            document.querySelector('#captionOverlay span').textContent = text;
-        }
-
-        function updateHook(text) {
-            // Can integrate hook to caption if needed
-        }
-
-        // --- Export Logic ---
-        function exportMP4(isSingle) {
+        // --- REAL EXPORT LOGIC (MediaRecorder + Canvas) ---
+        async function startExport(isBatch) {
+            if (!currentProject) return;
             const modal = document.getElementById('exportModal');
             const bar = document.getElementById('exportBar');
             const status = document.getElementById('exportStatus');
-            const btn = document.getElementById('exportDownloadBtn');
-            const title = document.getElementById('exportTitle');
-
-            modal.classList.remove('hidden');
+            const btn = document.getElementById('downloadBtn');
+            
+            modal.classList.add('active');
             btn.classList.add('hidden');
             bar.style.width = '0%';
-            title.textContent = isSingle ? "Exporting MP4..." : "Batch Exporting ZIP...";
-            status.textContent = "Preparing...";
+            document.getElementById('exportTitle').innerText = isBatch ? "Batch Exporting..." : "Exporting Clip...";
+            
+            const clipsToExport = isBatch ? currentProject.clips : [currentClip];
+            const recordedBlobs = [];
 
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-                    status.textContent = "Encoding complete!";
-                    btn.classList.remove('hidden');
-                    btn.innerText = isSingle ? "Download MP4" : "Download ZIP";
-                } else {
-                    status.textContent = progress < 50 ? "Rendering frames..." : "Encoding H.264...";
+            for (let i = 0; i < clipsToExport.length; i++) {
+                const clip = clipsToExport[i];
+                status.innerText = `Rendering Clip ${i+1} of ${clipsToExport.length}...`;
+                
+                const blob = await renderClipToBlob(clip, (p) => {
+                    bar.style.width = `${((i + p) / clipsToExport.length) * 100}%`;
+                });
+                recordedBlobs.push({ name: `clip-forge-${clip.id}.mp4`, blob });
+            }
+
+            status.innerText = "Finalizing...";
+            bar.style.width = "100%";
+
+            if (isBatch) {
+                // Untuk batch, kita unduh satu per satu karena browser tidak bisa membuat ZIP tanpa library tambahan
+                recordedBlobs.forEach(b => {
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(b.blob);
+                    a.download = b.name;
+                    a.click();
+                });
+            } else {
+                const url = URL.createObjectURL(recordedBlobs[0].blob);
+                btn.onclick = () => {
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `clip-forge-${currentClip.id}.mp4`;
+                    a.click();
+                    modal.classList.remove('active');
+                };
+                btn.classList.remove('hidden');
+                btn.innerText = "Download MP4";
+            }
+        }
+
+        function renderClipToBlob(clip, progressCb) {
+            return new Promise(async (resolve) => {
+                const file = await getVideoFromDB(currentProject.id);
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.muted = true; // Mute to allow autoplay without user gesture
+                await new Promise(r => video.onloadedmetadata = r);
+                
+                video.currentTime = clip.start;
+                await new Promise(r => video.onseeked = r);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = 720;
+                canvas.height = 1280; // 9:16
+                const ctx = canvas.getContext('2d');
+                
+                const stream = canvas.captureStream(30);
+                
+                // Setup Audio
+                let audioCtx, dest, source;
+                try {
+                    audioCtx = new AudioContext();
+                    source = audioCtx.createMediaElementSource(video);
+                    dest = audioCtx.createMediaStreamDestination();
+                    source.connect(dest);
+                    // Do not connect to speaker to avoid noise
+                } catch (e) { console.warn("Audio capture failed", e); }
+
+                const mixedStream = new MediaStream([
+                    ...stream.getVideoTracks(),
+                    ...(dest ? dest.stream.getAudioTracks() : [])
+                ]);
+
+                // Try MP4, fallback to WebM
+                let mimeType = 'video/mp4;codecs=h264,aac';
+                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp9,opus';
+                if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
+
+                const recorder = new MediaRecorder(mixedStream, { mimeType });
+                const chunks = [];
+                recorder.ondataavailable = e => chunks.push(e.data);
+                recorder.onstop = () => {
+                    resolve(new Blob(chunks, { type: mimeType }));
+                };
+
+                recorder.start();
+                video.play();
+
+                const duration = clip.end - clip.start;
+                const startTime = Date.now();
+
+                function drawFrame() {
+                    if (video.currentTime >= clip.end || video.ended) {
+                        video.pause();
+                        recorder.stop();
+                        if (audioCtx) audioCtx.close();
+                        return;
+                    }
+
+                    // Calculate 9:16 crop (object-fit: cover logic)
+                    const vw = video.videoWidth, vh = video.videoHeight;
+                    const targetRatio = 9 / 16, videoRatio = vw / vh;
+                    let sx, sy, sw, sh;
+
+                    if (videoRatio > targetRatio) {
+                        sh = vh; sw = vh * targetRatio;
+                        sx = (vw - sw) / 2; sy = 0;
+                    } else {
+                        sw = vw; sh = vw / targetRatio;
+                        sx = 0; sy = (vh - sh) / 2;
+                    }
+
+                    ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+
+                    // Draw Caption
+                    const capText = document.getElementById('captionText').value;
+                    ctx.font = 'bold 40px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = 'black';
+                    ctx.strokeStyle = 'white';
+                    ctx.lineWidth = 2;
+                    const x = canvas.width / 2, y = canvas.height - 150;
+                    // Background box
+                    const metrics = ctx.measureText(capText);
+                    ctx.fillRect(x - metrics.width/2 - 10, y - 35, metrics.width + 20, 45);
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(capText, x, y);
+
+                    // Update progress
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    progressCb(elapsed / duration);
+
+                    requestAnimationFrame(drawFrame);
                 }
-                bar.style.width = `${progress}%`;
-            }, 400);
+                drawFrame();
+            });
         }
 
-        function triggerDownload() {
-            // In a real app, this would trigger the Blob download
-            alert("In a production environment, this would download the MP4/ZIP file processed by FFmpeg.");
-            document.getElementById('exportModal').classList.add('hidden');
-        }
-
-        init();
+        // Init
+        showView('dashboard');
     </script>
 </body>
 </html>
