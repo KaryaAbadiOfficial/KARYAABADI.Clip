@@ -107,7 +107,7 @@
       </div>
     </div>
     <div class="hidden md:flex items-center gap-5 text-sm">
-      <span class="text-white/40 mono text-xs">v3.1 · AI-CUT</span>
+      <span class="text-white/40 mono text-xs">v3.2 · AI-CUT</span>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 bg-green-400 rounded-full pulse-glow"></span>
         <span class="text-white/50 text-xs mono">ENGINE READY</span>
@@ -118,18 +118,18 @@
   <section class="relative z-10 px-6 lg:px-12 pt-10 pb-6">
     <div class="max-w-7xl mx-auto">
       <div class="flex items-center gap-3 mb-4 flex-wrap">
-        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs mono text-white/70">YouTube → Short Clip</span>
+        <span class="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs mono text-white/70">Direct Link / YouTube</span>
         <span class="px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-xs mono text-amber-300 flex items-center gap-1.5">
           <i data-lucide="sparkles" class="w-3 h-3"></i> Smart Auto-Cut
         </span>
         <span class="text-xs mono text-white/40">10s · 15s · 20s · 30s</span>
       </div>
       <h1 class="text-5xl md:text-7xl font-bold tracking-tight leading-[0.95] mb-4">
-        <span class="text-white">Potong YouTube</span><br>
+        <span class="text-white">Potong Video</span><br>
         <span class="gradient-text">di momen paling viral.</span>
       </h1>
       <p class="text-lg text-white/50 max-w-2xl">
-        Engine cerdas menganalisis motion, scene change &amp; brightness untuk menemukan momen paling menarik secara otomatis. Pilih durasi, sisanya kami yang potong.
+        Engine cerdas menganalisis motion, scene change & brightness. Tempel link video (mp4/webm/youtube), sisanya kami yang potong.
       </p>
     </div>
   </section>
@@ -143,7 +143,7 @@
           <div class="flex gap-2">
             <div class="flex-1 relative">
               <i data-lucide="link-2" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30"></i>
-              <input id="ytUrl" type="text" placeholder="https://youtube.com/watch?v=..."
+              <input id="ytUrl" type="text" placeholder="Tempel link .mp4 atau YouTube..."
                      class="w-full bg-black/30 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-orange-500/50 transition placeholder:text-white/20" />
             </div>
             <button id="loadBtn" class="px-5 py-3 bg-gradient-to-br from-orange-500 to-pink-600 rounded-xl text-sm font-semibold hover:opacity-90 transition flex items-center gap-2 shadow-lg shadow-orange-500/20">
@@ -154,8 +154,13 @@
           <div class="flex items-center gap-3 mt-3 flex-wrap">
             <button id="useSampleBtn" class="text-xs text-white/50 hover:text-orange-400 flex items-center gap-1.5 transition">
               <i data-lucide="sparkles" class="w-3 h-3"></i>
-              atau gunakan video sampel (full analyze + download)
+              gunakan video sampel
             </button>
+            <span class="text-white/20">·</span>
+            <span class="text-xs text-white/30 flex items-center gap-1">
+              <i data-lucide="info" class="w-3 h-3"></i>
+              YouTube hanya preview. Untuk download gunakan link .mp4
+            </span>
           </div>
         </div>
 
@@ -174,7 +179,7 @@
                 <i data-lucide="film" class="w-14 h-14"></i>
                 <div class="absolute -inset-2 bg-orange-500/20 blur-xl rounded-full"></div>
               </div>
-              <p class="text-sm">Tempel URL YouTube atau pakai sampel</p>
+              <p class="text-sm">Tempel URL video untuk mulai</p>
             </div>
             <div id="ytPlayer" class="absolute inset-0 hidden"></div>
             <video id="sampleVideo" class="absolute inset-0 w-full h-full hidden object-contain" muted loop playsinline crossorigin="anonymous"></video>
@@ -279,8 +284,8 @@
               <i data-lucide="file-video" class="w-3.5 h-3.5 text-pink-400"></i>
               <span class="text-[10px] mono text-white/40 tracking-widest">FORMAT</span>
             </div>
-            <div class="text-sm font-semibold">WebM · 720p</div>
-            <div class="text-xs text-white/40 mt-0.5">30fps · VP9</div>
+            <div class="text-sm font-semibold">WebM/MP4 · 720p</div>
+            <div class="text-xs text-white/40 mt-0.5">30fps · VP9/H264</div>
           </div>
         </div>
       </div>
@@ -434,7 +439,7 @@
           <div class="w-px h-4 bg-white/10 hidden md:block"></div>
           <div class="hidden md:flex items-center gap-2">
             <span class="text-[10px] mono text-white/40 tracking-widest">FORMAT</span>
-            <span class="text-sm font-bold text-white/70 mono">WebM</span>
+            <span id="exportFormat" class="text-sm font-bold text-white/70 mono">WebM</span>
           </div>
         </div>
         <div class="flex items-center gap-3">
@@ -460,8 +465,7 @@
     lucide.createIcons();
 
     const state = {
-      source: null,
-      youtubeId: null,
+      source: null, // 'youtube', 'mp4', 'sample'
       duration: 10,
       ratio: { w: 16, h: 9, label: '16:9' },
       caption: '',
@@ -488,7 +492,7 @@
       el.innerHTML = `<i data-lucide="${icons[type]}" class="w-4 h-4 flex-shrink-0"></i><span>${msg}</span>`;
       container.appendChild(el);
       lucide.createIcons();
-      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(120%)'; setTimeout(() => el.remove(), 300); }, 4000);
+      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(120%)'; setTimeout(() => el.remove(), 300); }, 4500);
     }
 
     function formatTime(s) {
@@ -503,35 +507,66 @@
       return null;
     }
 
-    // ===== Load YouTube =====
+    // ===== Load Button Logic (YouTube / MP4) =====
     document.getElementById('loadBtn').addEventListener('click', () => {
       const url = document.getElementById('ytUrl').value.trim();
-      if (!url) { toast('Tempel URL YouTube dulu', 'warn'); return; }
-      const id = parseYouTube(url);
-      if (!id) { toast('URL YouTube tidak valid', 'error'); return; }
+      if (!url) { toast('Tempel URL dulu', 'warn'); return; }
 
-      state.source = 'youtube';
-      state.youtubeId = id;
-      state.analysisData = null;
+      const ytId = parseYouTube(url);
+      if (ytId) {
+        // YOUTUBE FLOW
+        state.source = 'youtube';
+        state.analysisData = null;
 
-      const player = document.getElementById('ytPlayer');
-      document.getElementById('previewPlaceholder').classList.add('hidden');
-      const sampleVideo = document.getElementById('sampleVideo');
-      sampleVideo.classList.add('hidden');
-      sampleVideo.pause();
-      player.classList.remove('hidden');
-      player.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${id}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        const player = document.getElementById('ytPlayer');
+        document.getElementById('previewPlaceholder').classList.add('hidden');
+        const sampleVideo = document.getElementById('sampleVideo');
+        sampleVideo.classList.add('hidden');
+        sampleVideo.removeAttribute('src');
+        sampleVideo.load();
+        player.classList.remove('hidden');
+        player.innerHTML = `<iframe class="w-full h-full" src="https://www.youtube.com/embed/${ytId}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 
-      document.getElementById('previewMeta').textContent = `YouTube · ID: ${id}`;
-      document.getElementById('liveBadge').classList.remove('hidden');
-      document.getElementById('strategyCard').classList.remove('hidden');
-      document.getElementById('analyzeBtn').classList.add('hidden');
+        document.getElementById('previewMeta').textContent = `YouTube · Preview Only`;
+        document.getElementById('liveBadge').classList.remove('hidden');
+        document.getElementById('strategyCard').classList.remove('hidden');
+        document.getElementById('analyzeBtn').classList.add('hidden');
 
-      state.sourceDuration = 180;
-      applyStrategy();
-      renderHeatmap();
-      updateTimeline();
-      toast('Video YouTube dimuat. Pilih strategi pemotongan.', 'success');
+        state.sourceDuration = 180;
+        applyStrategy();
+        renderHeatmap();
+        updateTimeline();
+        toast('YouTube dimuat. Hanya bisa preview (kebijakan CORS). Untuk download gunakan link .mp4', 'warn');
+      } else if (url.match(/\.(mp4|webm|ogg)$/i) || url.startsWith('http')) {
+        // DIRECT VIDEO FLOW
+        state.source = 'mp4';
+        state.analysisData = null;
+
+        const video = document.getElementById('sampleVideo');
+        video.src = url;
+        video.classList.remove('hidden');
+        document.getElementById('ytPlayer').classList.add('hidden');
+        document.getElementById('ytPlayer').innerHTML = '';
+        document.getElementById('previewPlaceholder').classList.add('hidden');
+        document.getElementById('liveBadge').classList.remove('hidden');
+        document.getElementById('strategyCard').classList.add('hidden');
+
+        video.play().catch(() => {});
+
+        video.onloadedmetadata = async () => {
+          state.sourceDuration = video.duration;
+          document.getElementById('previewMeta').textContent = `MP4/WebM · ${Math.round(video.duration)}s · ${video.videoWidth}×${video.videoHeight}`;
+          updateTimeline();
+          toast('Video siap. Menjalankan smart analysis...', 'info');
+          await analyzeVideo();
+        };
+
+        video.onerror = () => {
+          toast('Gagal load video. Pastikan link benar dan mengizinkan CORS', 'error');
+        };
+      } else {
+        toast('URL tidak valid', 'error');
+      }
     });
 
     // ===== Sample Video =====
@@ -549,7 +584,6 @@
       sampleIdx++;
 
       const video = document.getElementById('sampleVideo');
-      // PENTING: crossOrigin sudah diset di HTML, set src langsung
       video.src = url;
       video.classList.remove('hidden');
       document.getElementById('ytPlayer').classList.add('hidden');
@@ -564,7 +598,7 @@
         state.sourceDuration = video.duration;
         document.getElementById('previewMeta').textContent = `Sampel · ${Math.round(video.duration)}s · ${video.videoWidth}×${video.videoHeight}`;
         updateTimeline();
-        toast('Video dimuat. Menjalankan smart analysis...', 'info');
+        toast('Video sampel dimuat. Menjalankan smart analysis...', 'info');
         await analyzeVideo();
       };
     });
@@ -646,10 +680,7 @@
           edgeStrength = edges / ((w-2) * (h-2) * 2);
 
           const score = Math.min(100,
-            motion * 2.5 +
-            colorVariance * 0.4 +
-            edgeStrength * 1.2 +
-            (brightness > 60 && brightness < 200 ? 10 : 0)
+            motion * 2.5 + colorVariance * 0.4 + edgeStrength * 1.2 + (brightness > 60 && brightness < 200 ? 10 : 0)
           );
 
           frames.push({ time: t, motion, brightness, colorVariance, edgeStrength, score });
@@ -685,7 +716,6 @@
     function renderHeatmap() {
       const container = document.getElementById('heatmapContainer');
       container.innerHTML = '';
-
       const total = state.sourceDuration || 30;
       const barCount = Math.min(60, Math.floor(total));
 
@@ -709,7 +739,6 @@
         const bar = document.createElement('div');
         bar.className = 'heatmap-bar flex-1';
         bar.style.cssText = `height: ${Math.max(8, score)}%; background: ${scoreColor(score)}; opacity: ${0.5 + score / 200};`;
-        bar.title = `${t.toFixed(1)}s · score ${score}`;
         container.appendChild(bar);
       }
     }
@@ -735,7 +764,7 @@
     function findBestCut(duration) {
       const total = state.sourceDuration || 30;
 
-      if (state.source === 'sample' && state.analysisData) {
+      if (state.source !== 'youtube' && state.analysisData) {
         let bestStart = 0, bestScore = 0, bestReason = '';
         const frames = state.analysisData;
 
@@ -800,9 +829,8 @@
       const startPct = (state.cutStart / total) * 100;
       const widthPct = (state.duration / total) * 100;
 
-      const marker = document.getElementById('durationMarker');
-      marker.style.left = startPct + '%';
-      marker.style.width = widthPct + '%';
+      document.getElementById('durationMarker').style.left = startPct + '%';
+      document.getElementById('durationMarker').style.width = widthPct + '%';
 
       document.getElementById('smartCutInfo').classList.remove('hidden');
       document.getElementById('cutTimeBadge').textContent = `${formatTime(state.cutStart)} → ${formatTime(state.cutEnd)}`;
@@ -832,7 +860,7 @@
         state.duration = parseInt(btn.dataset.duration);
         document.getElementById('exportDur').textContent = state.duration + 's';
 
-        if (state.source === 'sample' && state.analysisData) {
+        if (state.source !== 'youtube' && state.analysisData) {
           findBestCut(state.duration);
         } else if (state.source === 'youtube') {
           applyStrategy();
@@ -864,9 +892,7 @@
     const captionTemplates = [
       ["Wait for it...", "This is INSANE!", "Mind = blown", "Drop a follow"],
       ["POV: you found gold", "No way this is real", "Literally crying", "Share this now"],
-      ["This changed everything", "I can't believe it", "Save this for later", "Comment below"],
-      ["The moment when...", "Pure magic right here", "Take notes people", "You're welcome"],
-      ["Nobody expects this", "Watch till the end", "Absolutely unreal", "Follow for more"]
+      ["This changed everything", "I can't believe it", "Save this for later", "Comment below"]
     ];
 
     document.getElementById('autoCaptionBtn').addEventListener('click', () => {
@@ -1032,7 +1058,7 @@
 
     document.getElementById('playBtn').addEventListener('click', () => {
       const video = document.getElementById('sampleVideo');
-      if (state.source === 'sample' && video.src) {
+      if ((state.source === 'sample' || state.source === 'mp4') && video.src) {
         if (video.paused) {
           video.currentTime = state.cutStart;
           video.play();
@@ -1053,7 +1079,7 @@
 
     setInterval(() => {
       const video = document.getElementById('sampleVideo');
-      if (state.source === 'sample' && !video.paused && video.duration) {
+      if ((state.source === 'sample' || state.source === 'mp4') && !video.paused && video.duration) {
         const total = video.duration;
         const pct = (video.currentTime / total) * 100;
         document.getElementById('playhead').style.left = pct + '%';
@@ -1074,9 +1100,8 @@
       }
     }, 100);
 
-    // ===== EXPORT & DOWNLOAD (FIXED) =====
+    // ===== EXPORT & DOWNLOAD =====
     
-    // Cari mimeType yang didukung browser
     function getSupportedMimeType() {
       const types = [
         'video/webm;codecs=vp9,opus',
@@ -1095,25 +1120,9 @@
     document.getElementById('exportBtn').addEventListener('click', async () => {
       if (state.isExporting) return;
       
-      if (!state.source) {
-        toast('Klik "video sampel" dulu untuk download nyata', 'warn');
+      if (!state.source || state.source === 'youtube') {
+        toast('Untuk download: tempel link .mp4 atau gunakan sampel', 'warn');
         return;
-      }
-      
-      if (state.source === 'youtube') {
-        toast('YouTube tidak bisa didownload langsung browser. Auto-load video sampel...', 'warn');
-        document.getElementById('useSampleBtn').click();
-        // Tunggu sampai video siap (metadata + analyze)
-        const video = document.getElementById('sampleVideo');
-        await new Promise((resolve) => {
-          const check = setInterval(() => {
-            if (state.analysisData && video.readyState >= 2) {
-              clearInterval(check);
-              resolve();
-            }
-          }, 200);
-        });
-        toast('Video sampel siap. Mulai export...', 'info');
       }
       
       await exportClip();
@@ -1126,17 +1135,24 @@
       const progressText = document.getElementById('progressText');
       const video = document.getElementById('sampleVideo');
 
-      // Validasi video siap
       if (!video.src) {
-        toast('Video belum siap. Tunggu sampai analysis selesai.', 'error');
+        toast('Video belum siap', 'error');
         return;
       }
       
-      if (video.readyState < 2) {
-        toast('Video masih loading. Tunggu sebentar...', 'warn');
+      // Pastikan video benar-benar siap untuk dirender
+      if (video.readyState < 4) {
+        toast('Menunggu video siap...', 'info');
         await new Promise(resolve => {
-          const onReady = () => { video.removeEventListener('loadeddata', onReady); resolve(); };
-          video.addEventListener('loadeddata', onReady);
+          const onReady = () => { 
+            if (video.readyState >= 4) {
+              video.removeEventListener('canplaythrough', onReady);
+              resolve();
+            }
+          };
+          video.addEventListener('canplaythrough', onReady);
+          // Fallback if already ready
+          if (video.readyState >= 4) resolve();
         });
       }
 
@@ -1156,15 +1172,13 @@
         canvas.width = cw; canvas.height = ch;
         const ctx = canvas.getContext('2d');
 
-        // Setup AudioContext (harus setelah user gesture - klik)
+        // Setup AudioContext
         const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
         const audioCtx = new AudioCtxClass();
-        if (audioCtx.state === 'suspended') {
-          await audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') await audioCtx.resume();
         const destination = audioCtx.createMediaStreamDestination();
 
-        // Render backsound
+        // Render backsound ke audio destination
         if (state.backsound && state.backsound !== 't5') {
           const track = tracks.find(t => t.id === state.backsound);
           const bpm = track.bpm;
@@ -1212,7 +1226,7 @@
           }
         }
 
-        // Setup canvas stream + merge audio
+        // Combine canvas video + audio destination streams
         const videoStream = canvas.captureStream(30);
         const audioTracks = destination.stream.getAudioTracks();
         const combinedStream = new MediaStream([
@@ -1220,11 +1234,8 @@
           ...audioTracks
         ]);
 
-        // Pilih mimeType yang didukung
         const mimeType = getSupportedMimeType();
-        if (!mimeType) {
-          throw new Error('Browser tidak mendukung MediaRecorder video');
-        }
+        if (!mimeType) throw new Error('Browser tidak mendukung MediaRecorder');
 
         const recorder = new MediaRecorder(combinedStream, {
           mimeType: mimeType,
@@ -1256,10 +1267,11 @@
           progressText.textContent = '0%';
           state.isExporting = false;
           audioCtx.close().catch(() => {});
+          document.getElementById('exportFormat').textContent = mimeType.includes('mp4') ? 'MP4' : 'WebM';
           toast(`Clip ${state.duration}s berhasil di-download! (${(blob.size / 1024 / 1024).toFixed(1)} MB)`, 'success');
         };
 
-        // Seek ke cutStart dan tunggu
+        // Seek ke posisi awal cut
         await new Promise(resolve => {
           const onSeeked = () => { video.removeEventListener('seeked', onSeeked); resolve(); };
           video.addEventListener('seeked', onSeeked);
@@ -1269,6 +1281,7 @@
         video.muted = true;
         await video.play();
 
+        // Mulai recording dan gambar frame
         recorder.start();
         const startTime = performance.now();
         const durationMs = state.duration * 1000;
@@ -1282,7 +1295,6 @@
           ctx.fillStyle = '#000';
           ctx.fillRect(0, 0, cw, ch);
 
-          // Draw video frame
           if (video.videoWidth && video.videoHeight && video.readyState >= 2) {
             const vRatio = video.videoWidth / video.videoHeight;
             const cRatio = cw / ch;
@@ -1297,11 +1309,10 @@
             try {
               ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
             } catch (e) {
-              console.warn('drawImage error:', e);
+              console.warn('Draw error:', e);
             }
           }
 
-          // Caption
           const captions = state.caption.split('\n').filter(c => c.trim());
           if (captions.length > 0) {
             const sceneIdx = Math.min(Math.floor(progress * captions.length), captions.length - 1);
@@ -1344,7 +1355,6 @@
             }
           }
 
-          // Watermark
           const wmSize = Math.round(cw * 0.022);
           ctx.font = `600 ${wmSize}px JetBrains Mono, monospace`;
           ctx.textAlign = 'right';
@@ -1375,7 +1385,7 @@
     renderTracks();
     updateCaption();
     updateTimeline();
-    setTimeout(() => toast('Selamat datang di ClipForge · Klik "video sampel" untuk coba download', 'info'), 600);
+    setTimeout(() => toast('Selamat datang! Klik "gunakan video sampel" untuk tes download', 'info'), 600);
   </script>
 </body>
 </html>
