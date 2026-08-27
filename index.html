@@ -107,7 +107,7 @@
       </div>
     </div>
     <div class="hidden md:flex items-center gap-5 text-sm">
-      <span class="text-white/40 mono text-xs">v3.0 · AI-CUT</span>
+      <span class="text-white/40 mono text-xs">v3.1 · AI-CUT</span>
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 bg-green-400 rounded-full pulse-glow"></span>
         <span class="text-white/50 text-xs mono">ENGINE READY</span>
@@ -138,7 +138,6 @@
     <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-6">
 
       <div class="lg:col-span-3 space-y-6">
-        <!-- URL Input -->
         <div class="card p-5">
           <label class="text-[11px] mono text-white/40 mb-2 block tracking-widest">SUMBER VIDEO</label>
           <div class="flex gap-2">
@@ -155,12 +154,11 @@
           <div class="flex items-center gap-3 mt-3 flex-wrap">
             <button id="useSampleBtn" class="text-xs text-white/50 hover:text-orange-400 flex items-center gap-1.5 transition">
               <i data-lucide="sparkles" class="w-3 h-3"></i>
-              atau gunakan video sampel (full analyze)
+              atau gunakan video sampel (full analyze + download)
             </button>
           </div>
         </div>
 
-        <!-- Preview -->
         <div class="card p-5">
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
@@ -179,7 +177,7 @@
               <p class="text-sm">Tempel URL YouTube atau pakai sampel</p>
             </div>
             <div id="ytPlayer" class="absolute inset-0 hidden"></div>
-            <video id="sampleVideo" class="absolute inset-0 w-full h-full hidden object-contain" muted loop playsinline></video>
+            <video id="sampleVideo" class="absolute inset-0 w-full h-full hidden object-contain" muted loop playsinline crossorigin="anonymous"></video>
 
             <div class="absolute bottom-0 left-0 right-0 p-4 text-center pointer-events-none">
               <span id="captionText" class="inline-block px-4 py-2 rounded-lg text-white font-bold text-sm sm:text-base" style="display:none;"></span>
@@ -190,7 +188,6 @@
             <div class="absolute top-3 right-3 pointer-events-none">
               <span id="ratioBadge" class="px-2 py-1 bg-black/60 backdrop-blur rounded text-[10px] mono font-bold tracking-wider">16:9</span>
             </div>
-            <!-- Scanning overlay -->
             <div id="scanOverlay" class="absolute inset-0 hidden pointer-events-none z-20">
               <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
               <div class="scan-line"></div>
@@ -202,7 +199,6 @@
             </div>
           </div>
 
-          <!-- Smart Cut Info -->
           <div id="smartCutInfo" class="hidden mt-4 p-3 rounded-xl bg-gradient-to-r from-amber-500/10 to-orange-500/10 border border-amber-500/30">
             <div class="flex items-start gap-3">
               <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center flex-shrink-0">
@@ -222,7 +218,6 @@
             </div>
           </div>
 
-          <!-- Smart Timeline with Heatmap -->
           <div class="mt-5">
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-2">
@@ -232,18 +227,14 @@
               <span id="timelineTime" class="text-xs mono text-white/40">00:00 / 00:10</span>
             </div>
             <div class="relative h-20 bg-black/40 rounded-lg overflow-hidden border border-white/5">
-              <!-- Heatmap bars -->
               <div id="heatmapContainer" class="absolute inset-0 flex items-end gap-px px-px pb-0"></div>
-              <!-- Selected window -->
               <div id="durationMarker" class="absolute top-0 bottom-0 bg-gradient-to-r from-orange-500/30 to-pink-500/30 border-2 border-orange-400 z-10" style="left: 0%; width: 33%;">
                 <div class="absolute -top-1 left-0 right-0 flex justify-between">
                   <span class="w-2 h-2 bg-orange-400 rounded-full -translate-y-1"></span>
                   <span class="w-2 h-2 bg-orange-400 rounded-full -translate-y-1"></span>
                 </div>
               </div>
-              <!-- Playhead -->
               <div id="playhead" class="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_white] z-20" style="left: 0%;"></div>
-              <!-- Ticks -->
               <div class="absolute inset-x-0 bottom-0 h-4 flex pointer-events-none bg-gradient-to-t from-black/60 to-transparent">
                 <div class="flex-1 border-r border-white/10 flex items-end justify-center pb-0.5"><span class="text-[9px] mono text-white/40">0s</span></div>
                 <div class="flex-1 border-r border-white/10 flex items-end justify-center pb-0.5"><span class="text-[9px] mono text-white/40" id="tick1">10s</span></div>
@@ -266,7 +257,6 @@
           </div>
         </div>
 
-        <!-- Info Row -->
         <div class="grid grid-cols-3 gap-3">
           <div class="card p-4">
             <div class="flex items-center gap-2 mb-1">
@@ -296,7 +286,6 @@
       </div>
 
       <div class="lg:col-span-2 space-y-6">
-        <!-- Duration -->
         <div class="card p-5">
           <div class="flex items-center gap-2 mb-4">
             <i data-lucide="timer" class="w-4 h-4 text-orange-400"></i>
@@ -317,7 +306,6 @@
           </div>
         </div>
 
-        <!-- Smart Strategy (untuk YouTube) -->
         <div id="strategyCard" class="card p-5 hidden">
           <div class="flex items-center gap-2 mb-4">
             <i data-lucide="crosshair" class="w-4 h-4 text-amber-400"></i>
@@ -363,7 +351,6 @@
           </div>
         </div>
 
-        <!-- Aspect Ratio -->
         <div class="card p-5">
           <div class="flex items-center gap-2 mb-4">
             <i data-lucide="ratio" class="w-4 h-4 text-cyan-400"></i>
@@ -389,7 +376,6 @@
           </div>
         </div>
 
-        <!-- Caption -->
         <div class="card p-5">
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
@@ -411,7 +397,6 @@
           </div>
         </div>
 
-        <!-- Backsound -->
         <div class="card p-5">
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
@@ -429,7 +414,6 @@
       </div>
     </div>
 
-    <!-- Export Bar -->
     <div class="fixed bottom-0 left-0 right-0 z-30 bg-black/75 backdrop-blur-xl border-t border-white/10 px-6 lg:px-12 py-4">
       <div class="max-w-7xl mx-auto flex items-center justify-between gap-4 flex-wrap">
         <div class="flex items-center gap-5 flex-wrap">
@@ -486,15 +470,15 @@
       backsoundVolume: 0.8,
       isPlaying: false,
       sourceDuration: 30,
-      analysisData: null, // array of {time, motion, brightness, score}
+      analysisData: null,
       cutStart: 0,
       cutEnd: 10,
       cutScore: 0,
       cutReason: '',
       strategy: 'highlight',
+      isExporting: false,
     };
 
-    // ===== Toast =====
     function toast(msg, type = 'info') {
       const container = document.getElementById('toastContainer');
       const colors = { info: 'border-cyan-400/40 bg-cyan-400/10 text-cyan-100', success: 'border-green-400/40 bg-green-400/10 text-green-100', error: 'border-red-400/40 bg-red-400/10 text-red-100', warn: 'border-orange-400/40 bg-orange-400/10 text-orange-100' };
@@ -504,7 +488,7 @@
       el.innerHTML = `<i data-lucide="${icons[type]}" class="w-4 h-4 flex-shrink-0"></i><span>${msg}</span>`;
       container.appendChild(el);
       lucide.createIcons();
-      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(120%)'; setTimeout(() => el.remove(), 300); }, 3500);
+      setTimeout(() => { el.style.opacity = '0'; el.style.transform = 'translateX(120%)'; setTimeout(() => el.remove(), 300); }, 4000);
     }
 
     function formatTime(s) {
@@ -543,7 +527,6 @@
       document.getElementById('strategyCard').classList.remove('hidden');
       document.getElementById('analyzeBtn').classList.add('hidden');
 
-      // Estimasi durasi untuk YouTube (asumsi 3 menit default)
       state.sourceDuration = 180;
       applyStrategy();
       renderHeatmap();
@@ -560,12 +543,13 @@
     ];
     let sampleIdx = 0;
 
-    document.getElementById('useSampleBtn').addEventListener('click', async () => {
+    document.getElementById('useSampleBtn').addEventListener('click', () => {
       state.source = 'sample';
       const url = sampleVideos[sampleIdx % sampleVideos.length];
       sampleIdx++;
 
       const video = document.getElementById('sampleVideo');
+      // PENTING: crossOrigin sudah diset di HTML, set src langsung
       video.src = url;
       video.classList.remove('hidden');
       document.getElementById('ytPlayer').classList.add('hidden');
@@ -585,7 +569,7 @@
       };
     });
 
-    // ===== Smart Video Analysis (REAL frame-by-frame) =====
+    // ===== Smart Video Analysis =====
     async function analyzeVideo() {
       const video = document.getElementById('sampleVideo');
       if (!video || !video.videoWidth) return;
@@ -601,11 +585,10 @@
       offscreen.width = w; offscreen.height = h;
       const octx = offscreen.getContext('2d', { willReadFrequently: true });
 
-      const duration = Math.min(video.duration, 60); // max 60s analyze
-      const step = 0.5; // every 0.5s
+      const duration = Math.min(video.duration, 60);
+      const step = 0.5;
       const frames = [];
 
-      // Snapshot current state
       const wasPaused = video.paused;
       const wasMuted = video.muted;
       video.muted = true;
@@ -636,12 +619,9 @@
 
           const pixels = data.length / 4;
           brightness /= pixels;
-
-          // Color variance
           const rAvg = rSum / pixels, gAvg = gSum / pixels, bAvg = bSum / pixels;
           const colorVariance = (Math.abs(rAvg - gAvg) + Math.abs(gAvg - bAvg) + Math.abs(rAvg - bAvg)) / 3;
 
-          // Motion (diff with prev frame, sampled)
           if (prevData) {
             let diff = 0, samples = 0;
             for (let i = 0; i < data.length; i += 16) {
@@ -651,7 +631,6 @@
             motion = diff / (samples * 3);
           }
 
-          // Edge detection (simple gradient)
           let edges = 0;
           for (let y = 1; y < h - 1; y++) {
             for (let x = 1; x < w - 1; x++) {
@@ -666,12 +645,11 @@
           }
           edgeStrength = edges / ((w-2) * (h-2) * 2);
 
-          // Composite score (weighted)
           const score = Math.min(100,
             motion * 2.5 +
             colorVariance * 0.4 +
             edgeStrength * 1.2 +
-            (brightness > 60 && brightness < 200 ? 10 : 0) // prefer well-lit
+            (brightness > 60 && brightness < 200 ? 10 : 0)
           );
 
           frames.push({ time: t, motion, brightness, colorVariance, edgeStrength, score });
@@ -684,13 +662,11 @@
         scanProgress.textContent = pct + '%';
       }
 
-      // Normalize scores to 0-100
       const maxScore = Math.max(...frames.map(f => f.score), 1);
       frames.forEach(f => f.normalized = Math.round((f.score / maxScore) * 100));
 
       state.analysisData = frames;
 
-      // Restore
       video.currentTime = 0;
       if (wasPaused) video.pause();
       video.muted = wasMuted;
@@ -706,17 +682,14 @@
       toast(`Analysis selesai · ${frames.length} frames ter-scan`, 'success');
     }
 
-    // ===== Render Heatmap =====
     function renderHeatmap() {
       const container = document.getElementById('heatmapContainer');
       container.innerHTML = '';
 
       const total = state.sourceDuration || 30;
       const barCount = Math.min(60, Math.floor(total));
-      const barWidth = 100 / barCount;
 
       if (!state.analysisData || state.source === 'youtube') {
-        // YouTube: show strategy-based gradient
         for (let i = 0; i < barCount; i++) {
           const t = (i / barCount) * total;
           const score = getStrategyScore(t, total);
@@ -728,7 +701,6 @@
         return;
       }
 
-      // Sample video: use real analysis
       for (let i = 0; i < barCount; i++) {
         const t = (i / barCount) * total;
         const frame = state.analysisData.find(f => Math.abs(f.time - t) < 0.5) || 
@@ -760,12 +732,10 @@
       }
     }
 
-    // ===== Find Best Cut =====
     function findBestCut(duration) {
       const total = state.sourceDuration || 30;
 
       if (state.source === 'sample' && state.analysisData) {
-        // Real analysis: find best window
         let bestStart = 0, bestScore = 0, bestReason = '';
         const frames = state.analysisData;
 
@@ -774,12 +744,9 @@
           const endT = startT + duration;
           if (endT > total) break;
 
-          // Window score = average of frames in window
           const windowFrames = frames.filter(f => f.time >= startT && f.time < endT);
           if (windowFrames.length === 0) continue;
           const avgScore = windowFrames.reduce((s, f) => s + f.normalized, 0) / windowFrames.length;
-
-          // Bonus: window with highest peak motion
           const peakMotion = Math.max(...windowFrames.map(f => f.motion));
           const finalScore = avgScore + Math.min(20, peakMotion * 0.3);
 
@@ -798,7 +765,6 @@
         state.cutScore = Math.round(Math.min(100, bestScore));
         state.cutReason = bestReason;
       } else {
-        // YouTube: use strategy
         applyStrategy();
       }
 
@@ -846,7 +812,6 @@
       document.getElementById('timelineTime').textContent = `${formatTime(state.cutStart)} / ${formatTime(state.cutEnd)}`;
     }
 
-    // ===== Strategy buttons =====
     document.querySelectorAll('.preset-card').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.preset-card').forEach(b => b.classList.remove('active'));
@@ -860,14 +825,12 @@
       });
     });
 
-    // ===== Duration =====
     document.querySelectorAll('.duration-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.duration-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         state.duration = parseInt(btn.dataset.duration);
         document.getElementById('exportDur').textContent = state.duration + 's';
-        document.getElementById('exportSize').textContent = `~${(state.duration * 0.24).toFixed(1)} MB`;
 
         if (state.source === 'sample' && state.analysisData) {
           findBestCut(state.duration);
@@ -883,12 +846,10 @@
       });
     });
 
-    // ===== Re-analyze =====
     document.getElementById('analyzeBtn').addEventListener('click', () => {
       analyzeVideo();
     });
 
-    // ===== Ratio =====
     document.querySelectorAll('.ratio-card').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('.ratio-card').forEach(b => b.classList.remove('active'));
@@ -900,7 +861,6 @@
       });
     });
 
-    // ===== Caption =====
     const captionTemplates = [
       ["Wait for it...", "This is INSANE!", "Mind = blown", "Drop a follow"],
       ["POV: you found gold", "No way this is real", "Literally crying", "Share this now"],
@@ -952,7 +912,6 @@
       }
     }
 
-    // ===== Backsound =====
     const tracks = [
       { id: 't1', name: 'Lofi Chill', bpm: 75, color: '#ff5e1a', type: 'sine', desc: 'Santai & atmospheric' },
       { id: 't2', name: 'Energetic Beat', bpm: 120, color: '#00e5ff', type: 'square', desc: 'Upbeat & punchy' },
@@ -1002,6 +961,7 @@
     function playBeatPreview(track) {
       try {
         const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (ctx.state === 'suspended') ctx.resume();
         currentAudioCtx = ctx;
         const bpm = track.bpm;
         const beatDuration = 60 / bpm;
@@ -1063,7 +1023,6 @@
       document.getElementById('volLabel').textContent = e.target.value + '%';
     });
 
-    // ===== Timeline =====
     function updateTimeline() {
       const total = state.sourceDuration || 30;
       document.getElementById('tick1').textContent = Math.round(total * 0.25) + 's';
@@ -1071,7 +1030,6 @@
       document.getElementById('tick3').textContent = Math.round(total * 0.75) + 's';
     }
 
-    // ===== Play button =====
     document.getElementById('playBtn').addEventListener('click', () => {
       const video = document.getElementById('sampleVideo');
       if (state.source === 'sample' && video.src) {
@@ -1093,7 +1051,6 @@
       }
     });
 
-    // Playhead update
     setInterval(() => {
       const video = document.getElementById('sampleVideo');
       if (state.source === 'sample' && !video.paused && video.duration) {
@@ -1101,12 +1058,10 @@
         const pct = (video.currentTime / total) * 100;
         document.getElementById('playhead').style.left = pct + '%';
 
-        // Stop at cut end
         if (video.currentTime >= state.cutEnd) {
           video.currentTime = state.cutStart;
         }
 
-        // Update caption
         const captions = state.caption.split('\n').filter(c => c.trim());
         if (captions.length > 0) {
           const relTime = video.currentTime - state.cutStart;
@@ -1119,14 +1074,48 @@
       }
     }, 100);
 
-    // ===== Export =====
-    document.getElementById('exportBtn').addEventListener('click', async () => {
-      if (!state.source) { toast('Load video source dulu', 'warn'); return; }
-      if (state.source === 'youtube') {
-        toast('Untuk demo: gunakan video sampel untuk export nyata. YouTube tidak bisa didownload langsung di browser.', 'warn');
-        document.getElementById('useSampleBtn').click();
-        await new Promise(r => setTimeout(r, 2000));
+    // ===== EXPORT & DOWNLOAD (FIXED) =====
+    
+    // Cari mimeType yang didukung browser
+    function getSupportedMimeType() {
+      const types = [
+        'video/webm;codecs=vp9,opus',
+        'video/webm;codecs=vp8,opus',
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm',
+        'video/mp4'
+      ];
+      for (const type of types) {
+        if (MediaRecorder.isTypeSupported(type)) return type;
       }
+      return '';
+    }
+
+    document.getElementById('exportBtn').addEventListener('click', async () => {
+      if (state.isExporting) return;
+      
+      if (!state.source) {
+        toast('Klik "video sampel" dulu untuk download nyata', 'warn');
+        return;
+      }
+      
+      if (state.source === 'youtube') {
+        toast('YouTube tidak bisa didownload langsung browser. Auto-load video sampel...', 'warn');
+        document.getElementById('useSampleBtn').click();
+        // Tunggu sampai video siap (metadata + analyze)
+        const video = document.getElementById('sampleVideo');
+        await new Promise((resolve) => {
+          const check = setInterval(() => {
+            if (state.analysisData && video.readyState >= 2) {
+              clearInterval(check);
+              resolve();
+            }
+          }, 200);
+        });
+        toast('Video sampel siap. Mulai export...', 'info');
+      }
+      
       await exportClip();
     });
 
@@ -1135,16 +1124,30 @@
       const progressWrap = document.getElementById('progressWrap');
       const progressBar = document.getElementById('progressBar');
       const progressText = document.getElementById('progressText');
+      const video = document.getElementById('sampleVideo');
 
+      // Validasi video siap
+      if (!video.src) {
+        toast('Video belum siap. Tunggu sampai analysis selesai.', 'error');
+        return;
+      }
+      
+      if (video.readyState < 2) {
+        toast('Video masih loading. Tunggu sebentar...', 'warn');
+        await new Promise(resolve => {
+          const onReady = () => { video.removeEventListener('loadeddata', onReady); resolve(); };
+          video.addEventListener('loadeddata', onReady);
+        });
+      }
+
+      state.isExporting = true;
       btn.disabled = true;
       btn.innerHTML = '<div class="spinner w-4 h-4"></div> Processing...';
       progressWrap.classList.remove('hidden');
       progressWrap.classList.add('flex');
 
       try {
-        const video = document.getElementById('sampleVideo');
         const canvas = document.getElementById('exportCanvas');
-
         const baseSize = 720;
         const ratio = state.ratio.w / state.ratio.h;
         let cw, ch;
@@ -1153,9 +1156,15 @@
         canvas.width = cw; canvas.height = ch;
         const ctx = canvas.getContext('2d');
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // Setup AudioContext (harus setelah user gesture - klik)
+        const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioCtxClass();
+        if (audioCtx.state === 'suspended') {
+          await audioCtx.resume();
+        }
         const destination = audioCtx.createMediaStreamDestination();
 
+        // Render backsound
         if (state.backsound && state.backsound !== 't5') {
           const track = tracks.find(t => t.id === state.backsound);
           const bpm = track.bpm;
@@ -1203,36 +1212,64 @@
           }
         }
 
+        // Setup canvas stream + merge audio
         const videoStream = canvas.captureStream(30);
         const audioTracks = destination.stream.getAudioTracks();
-        const combinedStream = new MediaStream([...videoStream.getVideoTracks(), ...audioTracks]);
-        const recorder = new MediaRecorder(combinedStream, { mimeType: 'video/webm;codecs=vp9,opus', videoBitsPerSecond: 2500000 });
+        const combinedStream = new MediaStream([
+          ...videoStream.getVideoTracks(),
+          ...audioTracks
+        ]);
+
+        // Pilih mimeType yang didukung
+        const mimeType = getSupportedMimeType();
+        if (!mimeType) {
+          throw new Error('Browser tidak mendukung MediaRecorder video');
+        }
+
+        const recorder = new MediaRecorder(combinedStream, {
+          mimeType: mimeType,
+          videoBitsPerSecond: 2500000
+        });
+
         const chunks = [];
-        recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+        recorder.ondataavailable = e => {
+          if (e.data && e.data.size > 0) chunks.push(e.data);
+        };
 
         recorder.onstop = () => {
-          const blob = new Blob(chunks, { type: 'video/webm' });
+          const blob = new Blob(chunks, { type: mimeType.split(';')[0] });
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = `clipforge-${state.duration}s-${state.ratio.label.replace(':','x')}-${Date.now()}.webm`;
-          document.body.appendChild(a); a.click(); document.body.removeChild(a);
-          URL.revokeObjectURL(url);
+          const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+          a.download = `clipforge-${state.duration}s-${state.ratio.label.replace(':','x')}-${Date.now()}.${ext}`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+
           btn.disabled = false;
-          btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i> Generate & Download';
+          btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i> Generate &amp; Download';
           progressWrap.classList.add('hidden');
           progressWrap.classList.remove('flex');
           progressBar.style.width = '0%';
           progressText.textContent = '0%';
-          toast('Clip berhasil di-download! 🎉', 'success');
-          audioCtx.close();
+          state.isExporting = false;
+          audioCtx.close().catch(() => {});
+          toast(`Clip ${state.duration}s berhasil di-download! (${(blob.size / 1024 / 1024).toFixed(1)} MB)`, 'success');
         };
 
-        recorder.start();
-        video.currentTime = state.cutStart;
+        // Seek ke cutStart dan tunggu
+        await new Promise(resolve => {
+          const onSeeked = () => { video.removeEventListener('seeked', onSeeked); resolve(); };
+          video.addEventListener('seeked', onSeeked);
+          video.currentTime = state.cutStart;
+        });
+
         video.muted = true;
         await video.play();
 
+        recorder.start();
         const startTime = performance.now();
         const durationMs = state.duration * 1000;
 
@@ -1245,7 +1282,8 @@
           ctx.fillStyle = '#000';
           ctx.fillRect(0, 0, cw, ch);
 
-          if (video.videoWidth && video.videoHeight) {
+          // Draw video frame
+          if (video.videoWidth && video.videoHeight && video.readyState >= 2) {
             const vRatio = video.videoWidth / video.videoHeight;
             const cRatio = cw / ch;
             let sx, sy, sw, sh;
@@ -1256,9 +1294,14 @@
               sw = video.videoWidth; sh = sw / cRatio;
               sx = 0; sy = (video.videoHeight - sh) / 2;
             }
-            try { ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch); } catch (e) {}
+            try {
+              ctx.drawImage(video, sx, sy, sw, sh, 0, 0, cw, ch);
+            } catch (e) {
+              console.warn('drawImage error:', e);
+            }
           }
 
+          // Caption
           const captions = state.caption.split('\n').filter(c => c.trim());
           if (captions.length > 0) {
             const sceneIdx = Math.min(Math.floor(progress * captions.length), captions.length - 1);
@@ -1317,20 +1360,22 @@
           }
         }
         requestAnimationFrame(drawFrame);
+
       } catch (err) {
-        console.error(err);
+        console.error('Export error:', err);
         toast('Gagal export: ' + err.message, 'error');
         btn.disabled = false;
-        btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i> Generate & Download';
+        btn.innerHTML = '<i data-lucide="download" class="w-4 h-4"></i> Generate &amp; Download';
         progressWrap.classList.add('hidden');
+        progressWrap.classList.remove('flex');
+        state.isExporting = false;
       }
     }
 
-    // Init
     renderTracks();
     updateCaption();
     updateTimeline();
-    setTimeout(() => toast('Selamat datang di ClipForge · Smart Auto-Cut aktif', 'info'), 600);
+    setTimeout(() => toast('Selamat datang di ClipForge · Klik "video sampel" untuk coba download', 'info'), 600);
   </script>
 </body>
 </html>
