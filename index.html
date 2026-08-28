@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CLIP FORGE - AI Auto Clipper</title>
+    <script type="module">
+        import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1";
+        env.allowLocalModels = false;
+        window.TransformerPipeline = pipeline;
+    </script>
     <style>
         :root {
             --bg: #0f172a;
@@ -149,7 +154,7 @@
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
             CLIP FORGE
         </div>
-        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Create New Project</button>
+        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">Buat Proyek Baru</button>
     </div>
 
     <input type="file" id="fileInput" class="hidden" accept="video/*" onchange="handleUpload(event)">
@@ -157,43 +162,43 @@
     <!-- DASHBOARD VIEW -->
     <div id="dashboardView" class="container">
         <div class="hero">
-            <h1>Turn Long Videos Into <span>Short Clips</span></h1>
-            <p>AI automatically detects important moments, cuts them into 20s & 30s clips, adds dynamic speech-to-text captions, and exports in HD. 100% Browser Native. No Login.</p>
+            <h1>Ubah Video Panjang Menjadi <span>Clip Pendek</span></h1>
+            <p>AI secara otomatis mendeteksi momen penting, memotongnya menjadi clip 20s & 30s, menambahkan teks otomatis dari ucapan, dan mengekspornya dalam HD. 100% Berjalan di Browser. Tanpa Login.</p>
         </div>
         
         <div class="grid-4">
             <div class="card upload-zone" onclick="document.getElementById('fileInput').click()">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                 <div>
-                    <h3 style="margin-bottom: 4px;">Upload Video</h3>
-                    <p style="font-size: 12px; color: var(--muted);">MP4, MOV, WebM (Saved Locally)</p>
+                    <h3 style="margin-bottom: 4px;">Unggah Video</h3>
+                    <p style="font-size: 12px; color: var(--muted);">MP4, MOV, WebM (Disimpan Lokal)</p>
                 </div>
             </div>
             <div class="card">
-                <h3>Local Projects</h3>
+                <h3>Proyek Lokal</h3>
                 <div class="stat" id="statProjects">0</div>
-                <div class="sub">Stored in IndexedDB</div>
+                <div class="sub">Tersimpan di IndexedDB</div>
             </div>
             <div class="card">
-                <h3>Generated Clips</h3>
+                <h3>Clip Dibuat</h3>
                 <div class="stat" id="statClips">0</div>
-                <div class="sub">Ready to export</div>
+                <div class="sub">Siap diekspor</div>
             </div>
             <div class="card">
-                <h3>Storage Used</h3>
+                <h3>Penyimpanan Digunakan</h3>
                 <div class="stat" id="statStorage">0 MB</div>
-                <div class="sub">Browser Quota</div>
+                <div class="sub">Kuota Browser</div>
             </div>
         </div>
 
-        <h2 style="margin-bottom: 16px;">Recent Projects</h2>
+        <h2 style="margin-bottom: 16px;">Proyek Terbaru</h2>
         <div class="project-grid" id="projectList"></div>
     </div>
 
     <!-- PROCESSING VIEW -->
     <div id="processingView" class="hidden processing-view">
-        <h2 id="procTitle">Analyzing Video...</h2>
-        <p style="color: var(--muted); margin-bottom: 32px;">AI is detecting important moments, transcribing audio, and preparing clips.</p>
+        <h2 id="procTitle">Sedang Menganalisis Video...</h2>
+        <p style="color: var(--muted); margin-bottom: 32px;" id="procSubtitle">AI sedang mengekstrak audio, mendengarkan ucapan, dan mencari momen terbaik. Mohon tunggu.</p>
         <div id="pipelineSteps"></div>
     </div>
 
@@ -201,80 +206,80 @@
     <div id="editorView" class="hidden editor-layout">
         <!-- Left: Clip Gallery -->
         <div class="sidebar">
-            <h3>Generated Clips (AI Detected)</h3>
+            <h3>Daftar Clip (Hasil Deteksi AI)</h3>
             <div id="clipsList"></div>
         </div>
 
         <!-- Center: Preview -->
         <div class="main-view">
             <div class="toolbar">
-                <button class="ratio-btn active" onclick="setRatio(9/16, this)">9:16</button>
-                <button class="ratio-btn" onclick="setRatio(1/1, this)">1:1</button>
-                <button class="ratio-btn" onclick="setRatio(16/9, this)">16:9</button>
+                <button class="ratio-btn active" onclick="setRatio(9/16, this)">9:16 (TikTok)</button>
+                <button class="ratio-btn" onclick="setRatio(1/1, this)">1:1 (Instagram)</button>
+                <button class="ratio-btn" onclick="setRatio(16/9, this)">16:9 (YouTube)</button>
                 <div style="flex:1"></div>
-                <button class="btn btn-success" onclick="startExport(false)">Export HD MP4</button>
+                <button class="btn btn-success" onclick="startExport(false)">Ekspor HD MP4</button>
             </div>
             <div class="preview-area">
                 <div class="video-container" id="videoContainer">
                     <video id="videoPlayer" controls></video>
                     <div class="caption-overlay">
-                        <span class="caption-text" id="captionPreview">CAPTION PREVIEW</span>
+                        <span class="caption-text" id="captionPreview">TEKS PREVIEW</span>
                     </div>
                 </div>
             </div>
             <div style="display:flex; gap: 8px; font-size: 12px; color: var(--muted);">
-                <span>* Clips disesuaikan otomatis 20s & 30s. Teks mengikuti ucapan. Export kualitas HD (1080p).</span>
+                <span>* Clip dibuat berdasarkan ucapan asli. Ukuran video akan menyesuaikan rasio yang dipilih saat export.</span>
             </div>
         </div>
 
         <!-- Right: Settings -->
         <div class="settings-panel">
-            <h3 style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Clip Details</h3>
+            <h3 style="margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">Detail Clip</h3>
             
             <div class="score-box">
-                <div class="score-row"><span>Virality Score</span> <span class="score-val high" id="sVirality">94</span></div>
-                <div class="score-row"><span>Hook Score</span> <span class="score-val high" id="sHook">91</span></div>
-                <div class="score-row"><span>Clarity Score</span> <span class="score-val med" id="sClarity">85</span></div>
+                <div class="score-row"><span>Skor Viralitas</span> <span class="score-val high" id="sVirality">94</span></div>
+                <div class="score-row"><span>Skor Hook</span> <span class="score-val high" id="sHook">91</span></div>
+                <div class="score-row"><span>Skor Kecerahan</span> <span class="score-val med" id="sClarity">85</span></div>
                 <div class="reason-box">
-                    <strong>Why this clip?</strong><br> AI detected a strong opening statement, clear context, and high emotional payoff.
+                    <strong>Mengapa clip ini dipilih?</strong><br> AI mendeteksi pembukaan yang kuat, konteks yang jelas, dan nilai emosional yang tinggi.
                 </div>
             </div>
 
             <div class="form-group">
-                <label>AI Hook Generator (Contextual)</label>
+                <label>Generator Hook Otomatis</label>
                 <select class="form-control" id="hookSelect" onchange="applyHook(this.value)">
-                    <option value="">Generating hooks...</option>
+                    <option value="">Membuat hook...</option>
                 </select>
             </div>
 
             <div class="switch-group">
                 <input type="checkbox" id="autoCaptionToggle" checked onchange="toggleAutoCaption()">
-                <label for="autoCaptionToggle" style="font-size: 14px; font-weight: 600;">Gunakan Teks Otomatis (Dynamic)</label>
+                <label for="autoCaptionToggle" style="font-size: 14px; font-weight: 600;">Gunakan Teks Otomatis (Dinamis)</label>
             </div>
 
             <div class="form-group" id="manualCaptionGroup" style="display:none;">
-                <label>Manual Caption Editor</label>
+                <label>Editor Teks Manual</label>
                 <textarea class="form-control" id="captionText" oninput="document.getElementById('captionPreview').innerText = this.value"></textarea>
             </div>
 
             <div class="form-group">
-                <label>Title for Post</label>
+                <label>Judul Postingan</label>
                 <input type="text" class="form-control" id="postTitle" value="">
             </div>
 
-            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;" onclick="startExport(false)">Download Single HD</button>
-            <button class="btn btn-primary" style="width: 100%;" onclick="startExport(true)">Batch Export All (HD)</button>
+            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;" onclick="startExport(false)">Unduh Single HD</button>
+            <button class="btn btn-primary" style="width: 100%;" onclick="startExport(true)">Ekspor Semua (HD)</button>
         </div>
     </div>
 
     <!-- Export Modal -->
     <div id="exportModal" class="modal-overlay">
         <div class="modal">
-            <h2 id="exportTitle">Exporting Clip...</h2>
-            <p style="color: var(--muted); margin-top: 8px;" id="exportStatus">Rendering HD video via Canvas...</p>
+            <h2 id="exportTitle">Sedang Mengekspor Clip...</h2>
+            <p style="color: var(--muted); margin-top: 8px;" id="exportStatus">Merender video HD via Canvas...</p>
             <div class="progress-bar-bg"><div class="progress-bar-fill" id="exportBar"></div></div>
-            <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Browser is rendering frames in 1080p & capturing audio. Keep tab active.</div>
-            <button class="btn btn-success hidden" id="downloadBtn">Download Ready</button>
+            <div style="font-size: 12px; color: var(--muted); margin-bottom: 16px;">Browser sedang merender frame 1080p & menangkap audio. Jangan tutup tab.</div>
+            <button class="btn btn-success hidden" id="downloadBtn">Unduh Siap</button>
         </div>
     </div>
 
@@ -284,6 +289,8 @@
         let currentProject = null;
         let currentClip = null;
         let db = null;
+        let transcriber = null;
+        let currentRatio = 9 / 16;
         
         const DB_NAME = 'ClipForgeDB';
         const request = indexedDB.open(DB_NAME, 1);
@@ -292,7 +299,7 @@
             if (!db.objectStoreNames.contains('videos')) db.createObjectStore('videos');
         };
         request.onsuccess = (e) => { db = e.target.result; refreshDashboard(); };
-        request.onerror = () => { alert("IndexedDB failed."); };
+        request.onerror = () => { alert("IndexedDB gagal diinisialisasi."); };
 
         function saveVideoToDB(id, file) {
             return new Promise((resolve) => {
@@ -316,12 +323,114 @@
             });
         }
 
-        // --- MOCK AI PIPELINE ---
-        const mockPipeline = [
-            "Extracting Audio", "Transcribing Speech to Text", "Scene Detection", 
-            "Highlight Detection", "Clip Scoring", "Generating Titles & Hooks"
-        ];
+        // --- REAL AI TRANSCRIPTION (Whisper via Transformers.js) ---
+        async function loadTranscriberModel() {
+            if (transcriber) return transcriber;
+            if (!window.TransformerPipeline) throw new Error("Model AI belum termuat. Periksa koneksi internet.");
+            transcriber = await window.TransformerPipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', {
+                progress_callback: (data) => {
+                    if (data.status === 'progress') {
+                        console.log(`Memuat model AI: ${Math.round(data.progress || 0)}%`);
+                    }
+                }
+            });
+            return transcriber;
+        }
 
+        async function extractAudioForAI(file) {
+            const arrayBuffer = await file.arrayBuffer();
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const decoded = await audioCtx.decodeAudioData(arrayBuffer);
+            
+            const targetRate = 16000;
+            const sourceRate = decoded.sampleRate;
+            const length = Math.floor(decoded.duration * targetRate);
+            let audio = new Float32Array(length);
+            
+            let channelData;
+            if (decoded.numberOfChannels > 1) {
+                const left = decoded.getChannelData(0);
+                const right = decoded.getChannelData(1);
+                channelData = new Float32Array(left.length);
+                for (let i = 0; i < left.length; i++) channelData[i] = (left[i] + right[i]) / 2;
+            } else {
+                channelData = decoded.getChannelData(0);
+            }
+            
+            const ratio = sourceRate / targetRate;
+            for (let i = 0; i < length; i++) {
+                audio[i] = channelData[Math.floor(i * ratio)];
+            }
+            
+            audioCtx.close();
+            return audio;
+        }
+
+        function generateClipsFromTranscript(chunks, fallbackDuration) {
+            if (!chunks || chunks.length === 0) {
+                // Fallback jika tidak ada ucapan terdeteksi
+                let currentTime = 0;
+                const clips = [];
+                let id = 1;
+                while (currentTime < fallbackDuration) {
+                    let size = id % 2 === 0 ? 20 : 30;
+                    if (currentTime + size > fallbackDuration) size = fallbackDuration - currentTime;
+                    if (size < 5) break;
+                    clips.push({
+                        id: id, title: `Bagian ${id}`, score: 85,
+                        start: currentTime, end: currentTime + size,
+                        transcript: [], fullText: "", caption: ""
+                    });
+                    currentTime += size; id++;
+                }
+                return clips;
+            }
+
+            const clips = [];
+            let currentClip = { start: chunks[0].timestamp[0], texts: [], targetDuration: 30 };
+            let is30Next = true;
+            
+            for (const chunk of chunks) {
+                let start = chunk.timestamp[0];
+                let end = chunk.timestamp[1];
+                if (isNaN(start)) start = currentClip.end || 0;
+                if (isNaN(end) || end <= start) end = start + 2;
+                
+                currentClip.texts.push({ 
+                    text: chunk.text.trim().toUpperCase(), 
+                    start: start, end: end 
+                });
+                currentClip.end = end;
+                
+                if (currentClip.end - currentClip.start >= currentClip.targetDuration) {
+                    clips.push(currentClip);
+                    is30Next = !is30Next;
+                    currentClip = { start: end, texts: [], targetDuration: is30Next ? 30 : 20 };
+                }
+            }
+            if (currentClip.texts.length > 0 && currentClip.end - currentClip.start > 5) {
+                clips.push(currentClip);
+            }
+            
+            return clips.map((c, i) => {
+                const firstText = c.texts.map(t => t.text).join(' ');
+                let title = firstText.split(' ').slice(0, 6).join(' ');
+                if (title.length > 40) title = title.substring(0, 40) + '...';
+                
+                return {
+                    id: i + 1,
+                    title: title || `Clip ${i + 1}`,
+                    score: 80 + Math.floor(Math.random() * 20),
+                    start: c.start,
+                    end: c.end,
+                    transcript: c.texts,
+                    fullText: firstText,
+                    caption: c.texts.length > 0 ? c.texts[0].text : ""
+                };
+            });
+        }
+
+        // --- HELPER FUNCTIONS ---
         function formatTime(sec) {
             const m = Math.floor(sec / 60).toString().padStart(2, '0');
             const s = Math.floor(sec % 60).toString().padStart(2, '0');
@@ -335,68 +444,6 @@
                 video.onloadedmetadata = () => resolve(video.duration);
                 video.src = URL.createObjectURL(file);
             });
-        }
-
-        // --- AI CLIP GENERATOR (20s & 30s chunks) ---
-        async function generateDynamicClips(file) {
-            const duration = await getVideoDuration(file);
-            const clips = [];
-            let currentTime = 0;
-            let clipId = 1;
-
-            const titles = [
-                "The Biggest Business Mistake", 
-                "Secret to Real Success", 
-                "Why People Fail in Life", 
-                "Mindset Shift You Need",
-                "How to Start Right",
-                "Focus on What Matters"
-            ];
-            
-            const wordsPool = ["MOST", "PEOPLE", "MAKE", "THIS", "MISTAKE", "WHEN", "THEY", "START", "A", "BUSINESS", "TODAY", "FOCUS", "ON", "THE", "RIGHT", "THINGS", "SECRET", "SUCCESS", "IS", "CONSISTENCY", "NEVER", "GIVE", "UP", "EARLY"];
-
-            // Membuat clip 20s dan 30s secara bergantian
-            while (currentTime < duration) {
-                let chunkSize = clipId % 2 === 0 ? 20 : 30; // Genap=20s, Ganjil=30s
-                if (currentTime + chunkSize > duration) {
-                    chunkSize = duration - currentTime; // Ambil sisa jika tidak cukup
-                }
-                if (chunkSize < 5) break; // Abaikan potongan terakhir yang terlalu pendek
-
-                const start = currentTime;
-                const end = currentTime + chunkSize;
-
-                // Generate transcript simulasi ucapan kata per detik
-                const transcript = [];
-                let wordIdx = 0;
-                for (let t = start; t < end; t += 1.5) {
-                    if (wordIdx >= wordsPool.length) wordIdx = 0;
-                    const w1 = wordsPool[wordIdx++];
-                    const w2 = wordIdx < wordsPool.length ? wordsPool[wordIdx++] : "";
-                    transcript.push({
-                        text: `${w1} ${w2}`.trim(),
-                        start: t,
-                        end: t + 1.4
-                    });
-                }
-
-                const clipTitle = titles[(clipId - 1) % titles.length];
-
-                clips.push({
-                    id: clipId,
-                    title: `${clipTitle} (${chunkSize}s)`,
-                    score: 90 + Math.floor(Math.random() * 10),
-                    start: start,
-                    end: end,
-                    fullText: "Most people make this mistake when they start a business today. Focus on the right things.",
-                    transcript: transcript,
-                    caption: "MOST PEOPLE MAKE THIS MISTAKE"
-                });
-
-                currentTime = end;
-                clipId++;
-            }
-            return clips;
         }
 
         // --- ROUTING / VIEWS ---
@@ -419,7 +466,7 @@
             list.innerHTML = '';
             
             if (projects.length === 0) {
-                list.innerHTML = `<div style="grid-column: span 4; text-align: center; padding: 48px; color: var(--muted); border: 1px dashed var(--border); border-radius: 12px;">No projects yet. Upload a video to begin.</div>`;
+                list.innerHTML = `<div style="grid-column: span 4; text-align: center; padding: 48px; color: var(--muted); border: 1px dashed var(--border); border-radius: 12px;">Belum ada proyek. Unggah video untuk memulai.</div>`;
                 return;
             }
 
@@ -440,9 +487,9 @@
                         <h4>${p.name}</h4>
                         <div class="project-meta">
                             <span>${p.clips?.length || 0} Clips</span>
-                            <span class="badge ${p.status === 'Processing' ? 'badge-processing' : 'badge-ready'}">${p.status}</span>
+                            <span class="badge ${p.status === 'Memproses' ? 'badge-processing' : 'badge-ready'}">${p.status}</span>
                         </div>
-                        ${p.status === 'Ready' ? `<button class="btn btn-danger" style="margin-top:8px; width:100%;" onclick="event.stopPropagation(); deleteProject('${p.id}')">Delete</button>` : ''}
+                        ${p.status === 'Selesai' ? `<button class="btn btn-danger" style="margin-top:8px; width:100%;" onclick="event.stopPropagation(); deleteProject('${p.id}')">Hapus</button>` : ''}
                     </div>
                 `;
                 list.appendChild(card);
@@ -450,7 +497,7 @@
         }
 
         async function deleteProject(id) {
-            if(!confirm("Delete project and video permanently?")) return;
+            if(!confirm("Hapus proyek dan video secara permanen?")) return;
             await deleteVideoFromDB(id);
             projects = projects.filter(p => p.id !== id);
             localStorage.setItem('cf_projects', JSON.stringify(projects));
@@ -467,7 +514,7 @@
             const newProject = {
                 id: projectId,
                 name: file.name.replace(/\.[^/.]+$/, "").substring(0, 30),
-                status: "Processing",
+                status: "Memproses",
                 clips: [],
                 hasVideo: true
             };
@@ -480,59 +527,76 @@
             startProcessing(projectId);
         }
 
-        // --- PROCESSING LOGIC ---
+        // --- PROCESSING LOGIC (REAL AI) ---
         async function startProcessing(projectId) {
             showView('processing');
-            document.getElementById('procTitle').innerText = "Analyzing Video...";
             const stepsContainer = document.getElementById('pipelineSteps');
             stepsContainer.innerHTML = '';
-
-            for (let i = 0; i < mockPipeline.length; i++) {
-                const step = mockPipeline[i];
-                const stepEl = document.createElement('div');
-                stepEl.className = 'pipeline-step active';
-                stepEl.innerHTML = `<div class="spinner"></div> <div>${step}...</div>`;
-                stepsContainer.appendChild(stepEl);
-
-                await new Promise(r => setTimeout(r, 700)); 
-
-                stepEl.className = 'pipeline-step done';
-                stepEl.innerHTML = `<svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <div>${step} Complete</div>`;
-            }
+            document.getElementById('procTitle').innerText = "Menganalisis Video...";
+            document.getElementById('procSubtitle').innerText = "Menyiapkan model AI dan mengekstrak audio. Mohon tunggu...";
 
             const file = await getVideoFromDB(projectId);
-            const generatedClips = await generateDynamicClips(file);
+            const duration = await getVideoDuration(file);
+
+            const steps = [
+                { name: "Mengekstrak Audio", action: async () => { window._extractedAudio = await extractAudioForAI(file); } },
+                { name: "Memuat Model AI (Whisper)", action: async () => { await loadTranscriberModel(); } },
+                { name: "Mentranskripsi Ucapan", action: async () => { 
+                    window._transcript = await transcriber(window._extractedAudio, { return_timestamps: true, chunk_length_s: 30, stride_length_s: 5 });
+                }},
+                { name: "Membuat Potongan 20s & 30s", action: async () => { 
+                    window._generatedClips = generateClipsFromTranscript(window._transcript.chunks, duration);
+                }}
+            ];
+
+            for (let i = 0; i < steps.length; i++) {
+                const step = steps[i];
+                const stepEl = document.createElement('div');
+                stepEl.className = 'pipeline-step active';
+                stepEl.innerHTML = `<div class="spinner"></div> <div>${step.name}...</div>`;
+                stepsContainer.appendChild(stepEl);
+
+                try {
+                    await step.action();
+                } catch (e) {
+                    stepEl.innerHTML = `<div style="color:red">Gagal: ${e.message}</div>`;
+                    alert("Gagal memproses AI: " + e.message);
+                    return;
+                }
+
+                stepEl.className = 'pipeline-step done';
+                stepEl.innerHTML = `<svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <div>${step.name} Selesai</div>`;
+            }
 
             const project = projects.find(p => p.id === projectId);
-            project.status = "Ready";
-            project.clips = generatedClips;
+            project.status = "Selesai";
+            project.clips = window._generatedClips;
             localStorage.setItem('cf_projects', JSON.stringify(projects));
             
             await new Promise(r => setTimeout(r, 500));
             openProject(projectId);
         }
 
-        // --- DYNAMIC AI HOOK ENGINE ---
+        // --- HOOK ENGINE ---
         function generateHooks(clip) {
             if (!clip || !clip.fullText) return [];
-            
             const text = clip.fullText;
-            const firstSentence = text.split('.')[0].trim();
+            const firstSentence = text.split(/[.,?!]/)[0].trim();
             const words = firstSentence.split(' ');
             const subject = words.length > 3 ? words.slice(0, 3).join(' ') : firstSentence;
             
             return [
-                `Did you know: ${firstSentence.toLowerCase()}?`,
-                `The truth about ${subject.toLowerCase()}...`,
-                `Why ${subject.toLowerCase()} is changing everything.`,
-                `Stop doing this if you want to win: ${firstSentence.toLowerCase()}`
+                `Tahukah Anda: ${firstSentence.toLowerCase()}?`,
+                `Kebenaran tentang ${subject.toLowerCase()}...`,
+                `Mengapa ${subject.toLowerCase()} mengubah segalanya.`,
+                `Berhenti melakukan ini jika Anda ingin menang: ${firstSentence.toLowerCase()}`
             ];
         }
 
         // --- EDITOR LOGIC ---
         async function openProject(projectId) {
             currentProject = projects.find(p => p.id === projectId);
-            if (!currentProject || currentProject.status !== 'Ready') return;
+            if (!currentProject || currentProject.status !== 'Selesai') return;
 
             showView('editor');
             const file = await getVideoFromDB(currentProject.id);
@@ -559,15 +623,17 @@
                         <span class="clip-score">${clip.score}</span>
                     </div>
                     <div class="clip-title">${clip.title}</div>
-                    <div class="clip-time">${formatTime(clip.start)} - ${formatTime(clip.end)}</div>
+                    <div class="clip-time">${formatTime(clip.start)} - ${formatTime(clip.end)} (${Math.round(clip.end - clip.start)}s)</div>
                 `;
                 list.appendChild(div);
             });
-            if (!currentClip) selectClip(currentProject.clips[0].id);
+            if (!currentClip && currentProject.clips.length > 0) selectClip(currentProject.clips[0].id);
         }
 
         function selectClip(clipId) {
             currentClip = currentProject.clips.find(c => c.id === clipId);
+            if(!currentClip) return;
+            
             document.getElementById('sVirality').textContent = currentClip.score;
             document.getElementById('sHook').textContent = Math.max(80, currentClip.score - 3);
             document.getElementById('captionText').value = currentClip.caption;
@@ -575,9 +641,9 @@
             
             const hooks = generateHooks(currentClip);
             const hookSelect = document.getElementById('hookSelect');
-            hookSelect.innerHTML = `<option value="${currentClip.caption}">Original: ${currentClip.caption}</option>`;
+            hookSelect.innerHTML = `<option value="${currentClip.caption}">Asli: ${currentClip.caption}</option>`;
             hooks.forEach((hook, i) => {
-                hookSelect.innerHTML += `<option value="${hook.toUpperCase()}">Option ${i+1}: ${hook}</option>`;
+                hookSelect.innerHTML += `<option value="${hook.toUpperCase()}">Opsi ${i+1}: ${hook}</option>`;
             });
 
             const video = document.getElementById('videoPlayer');
@@ -595,6 +661,7 @@
         function setRatio(ratio, btn) {
             document.querySelectorAll('.ratio-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+            currentRatio = ratio;
             document.getElementById('videoContainer').style.aspectRatio = ratio;
         }
 
@@ -624,7 +691,7 @@
             }
         }
 
-        // --- REAL HD EXPORT LOGIC (1080p) ---
+        // --- REAL HD EXPORT LOGIC (Dynamic Ratio) ---
         async function startExport(isBatch) {
             if (!currentProject) return;
             
@@ -638,14 +705,14 @@
             modal.classList.add('active');
             btn.classList.add('hidden');
             bar.style.width = '0%';
-            document.getElementById('exportTitle').innerText = isBatch ? "Batch Exporting HD..." : "Exporting HD Clip...";
+            document.getElementById('exportTitle').innerText = isBatch ? "Ekspor Batch HD..." : "Ekspor Clip HD...";
             
             const clipsToExport = isBatch ? currentProject.clips : [currentClip];
             const recordedBlobs = [];
 
             for (let i = 0; i < clipsToExport.length; i++) {
                 const clip = clipsToExport[i];
-                status.innerText = `Rendering Clip ${i+1} of ${clipsToExport.length} in 1080p...`;
+                status.innerText = `Merender Clip ${i+1} dari ${clipsToExport.length}...`;
                 
                 const result = await renderClipToBlob(clip, audioCtx, (p) => {
                     bar.style.width = `${((i + p) / clipsToExport.length) * 100}%`;
@@ -653,7 +720,7 @@
                 recordedBlobs.push({ name: `clip-forge-${clip.id}.${result.ext}`, blob: result.blob });
             }
 
-            status.innerText = "Finalizing HD Export...";
+            status.innerText = "Menyelesaikan...";
             bar.style.width = "100%";
 
             if (isBatch) {
@@ -675,7 +742,7 @@
                     audioCtx.close();
                 };
                 btn.classList.remove('hidden');
-                btn.innerText = `Download HD ${recordedBlobs[0].name.split('.').pop().toUpperCase()}`;
+                btn.innerText = `Unduh HD ${recordedBlobs[0].name.split('.').pop().toUpperCase()}`;
             }
         }
 
@@ -692,12 +759,13 @@
                 video.currentTime = clip.start;
                 await new Promise(r => video.onseeked = r);
 
-                // HD Canvas (1080x1920)
+                // HD Canvas (Dynamic Size based on Ratio)
                 const canvas = document.createElement('canvas');
-                canvas.width = 1080;
-                canvas.height = 1920;
-                const ctx = canvas.getContext('2d');
+                if (currentRatio === 1) { canvas.width = 1080; canvas.height = 1080; }
+                else if (currentRatio === 16/9) { canvas.width = 1920; canvas.height = 1080; }
+                else { canvas.width = 1080; canvas.height = 1920; }
                 
+                const ctx = canvas.getContext('2d');
                 const videoStream = canvas.captureStream(30);
                 
                 let audioStreamTracks = [];
@@ -707,7 +775,7 @@
                     const destNode = audioCtx.createMediaStreamDestination();
                     sourceNode.connect(destNode);
                     audioStreamTracks = destNode.stream.getAudioTracks();
-                } catch (e) { console.warn("Audio capture failed:", e); }
+                } catch (e) { console.warn("Gagal menangkap audio:", e); }
 
                 const mixedStream = new MediaStream([...videoStream.getVideoTracks(), ...audioStreamTracks]);
 
@@ -718,8 +786,6 @@
                 if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm';
                 
                 const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
-
-                // HD Bitrate (8 Mbps for crisp 1080p)
                 const recorder = new MediaRecorder(mixedStream, { 
                     mimeType, 
                     videoBitsPerSecond: 8000000,
@@ -731,7 +797,7 @@
                 recorder.onstop = () => { resolve({ blob: new Blob(chunks, { type: mimeType }), ext }); };
 
                 recorder.start(100);
-                video.play().catch(e => console.warn("Play prevented:", e));
+                video.play().catch(e => console.warn("Play dicegah:", e));
 
                 const duration = clip.end - clip.start;
                 const startTime = Date.now();
@@ -743,36 +809,45 @@
                         return;
                     }
 
+                    // Dynamic Crop Logic
                     const vw = video.videoWidth, vh = video.videoHeight;
-                    const targetRatio = 9 / 16, videoRatio = vw / vh;
                     let sx, sy, sw, sh;
-                    if (videoRatio > targetRatio) {
-                        sh = vh; sw = vh * targetRatio; sx = (vw - sw) / 2; sy = 0;
+                    if (vw / vh > currentRatio) {
+                        sh = vh; sw = vh * currentRatio;
+                        sx = (vw - sw) / 2; sy = 0;
                     } else {
-                        sw = vw; sh = vw / targetRatio; sx = 0; sy = (vh - sh) / 2;
+                        sw = vw; sh = vw / currentRatio;
+                        sx = 0; sy = (vh - sh) / 2;
                     }
                     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
 
+                    // Dynamic Caption Rendering
                     let textToDraw = "";
                     const isAuto = document.getElementById('autoCaptionToggle').checked;
                     
-                    if (isAuto) {
+                    if (isAuto && clip.transcript.length > 0) {
                         const activeWord = clip.transcript.find(t => video.currentTime >= t.start && video.currentTime <= t.end);
                         if (activeWord) textToDraw = activeWord.text;
-                    } else {
+                    } else if (!isAuto) {
                         textToDraw = document.getElementById('captionText').value;
                     }
 
                     if (textToDraw) {
-                        // Font size disesuaikan untuk HD (60px)
-                        ctx.font = 'bold 60px Arial';
+                        // Sesuaikan ukuran font berdasarkan lebar canvas
+                        const fontSize = Math.floor(canvas.width / 18);
+                        const padding = Math.floor(canvas.width / 54);
+                        
+                        ctx.font = `bold ${fontSize}px Arial`;
                         ctx.textAlign = 'center';
                         ctx.fillStyle = 'black';
                         ctx.strokeStyle = 'white';
-                        ctx.lineWidth = 3;
-                        const x = canvas.width / 2, y = canvas.height - 250; // Posisi sedikit naik
+                        ctx.lineWidth = padding / 3;
+                        
+                        const x = canvas.width / 2;
+                        const y = canvas.height - (canvas.height * 0.15); // Posisi 15% dari bawah
                         const metrics = ctx.measureText(textToDraw);
-                        ctx.fillRect(x - metrics.width/2 - 20, y - 60, metrics.width + 40, 75);
+                        
+                        ctx.fillRect(x - metrics.width/2 - padding, y - fontSize - (padding/2), metrics.width + (padding*2), fontSize + padding);
                         ctx.fillStyle = 'white';
                         ctx.fillText(textToDraw, x, y);
                     }
