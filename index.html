@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CLIPPER AI — Auto Video Cutter & Caption</title>
+<title>CLIPPER AI — Fast Auto Cutter & Cropper</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -101,6 +101,9 @@ html, body {
   font-size: 11px;
   font-weight: 600;
   border: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .main-grid {
@@ -146,7 +149,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  min-height: 300px;
+  min-height: 200px;
   justify-content: center;
 }
 
@@ -189,6 +192,9 @@ html, body {
   border-radius: 12px;
   overflow: hidden;
   aspect-ratio: 16/9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .video-wrapper video {
@@ -213,9 +219,58 @@ html, body {
   gap: 6px;
 }
 
+/* Controls */
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.control-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.aspect-control {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.aspect-btn {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.aspect-btn i { font-size: 16px; }
+
+.aspect-btn:hover {
+  border-color: var(--border-light);
+  color: var(--text);
+}
+
+.aspect-btn.active {
+  background: rgba(0, 229, 255, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* Buttons */
 .btn {
-  padding: 12px 20px;
+  padding: 14px 20px;
   border-radius: 8px;
   font-weight: 600;
   font-size: 14px;
@@ -260,7 +315,7 @@ html, body {
 .steps {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .step {
@@ -314,15 +369,17 @@ html, body {
   overflow: hidden;
   display: flex;
   align-items: flex-end;
+  padding: 2px;
 }
 
 .timeline-bar {
   flex: 1;
   background: var(--bg-4);
-  margin: 1px;
+  margin: 0 1px;
   border-radius: 2px;
   transition: all 0.2s;
   position: relative;
+  min-height: 4px;
 }
 
 .timeline-bar.selected {
@@ -340,7 +397,7 @@ html, body {
 .result-container.active { display: flex; }
 
 .captions-list {
-  max-height: 150px;
+  max-height: 120px;
   overflow-y: auto;
   background: var(--bg-2);
   border-radius: 8px;
@@ -416,23 +473,6 @@ html, body {
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* Progress Bar */
-.progress-container {
-  height: 6px;
-  background: var(--bg-3);
-  border-radius: 3px;
-  overflow: hidden;
-  margin-top: 8px;
-}
-
-.progress-bar {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent), var(--accent-2));
-  width: 0%;
-  transition: width 0.3s;
-  border-radius: 3px;
-}
-
 .hidden { display: none !important; }
 
 .scanning-line {
@@ -471,14 +511,14 @@ html, body {
       <div class="logo-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
       <span class="logo-text">CLIPPER AI</span>
     </div>
-    <div class="badge"><i class="fas fa-bolt"></i> Auto Cut Engine v2.0</div>
+    <div class="badge"><i class="fas fa-bolt"></i> Fast Auto Cut Engine v3.0</div>
   </header>
 
   <div class="main-grid">
     <!-- LEFT: INPUT -->
     <div class="panel">
       <div class="panel-title">
-        <i class="fas fa-upload"></i> Sumber Video
+        <i class="fas fa-upload"></i> Sumber Video & Setting
       </div>
       
       <div id="uploadArea">
@@ -499,6 +539,31 @@ html, body {
         </div>
       </div>
 
+      <div class="control-group">
+        <span class="control-label">Aspect Ratio & Crop</span>
+        <div class="aspect-control">
+          <button class="aspect-btn active" data-ratio="16/9" data-w="1280" data-h="720">
+            <i class="fas fa-rectangle-wide"></i>
+            <span>16:9</span>
+          </button>
+          <button class="aspect-btn" data-ratio="9/16" data-w="720" data-h="1280">
+            <i class="fas fa-mobile-screen"></i>
+            <span>9:16</span>
+          </button>
+          <button class="aspect-btn" data-ratio="1/1" data-w="800" data-h="800">
+            <i class="fas fa-square"></i>
+            <span>1:1</span>
+          </button>
+          <button class="aspect-btn" data-ratio="4/5" data-w="800" data-h="1000">
+            <i class="fas fa-rectangle-portrait"></i>
+            <span>4:5</span>
+          </button>
+        </div>
+        <p style="font-size: 11px; color: var(--text-faint); margin-top: 4px;">
+          * Video akan otomatis di-crop (center) agar pas dengan rasio yang dipilih.
+        </p>
+      </div>
+
       <div class="steps">
         <div class="step" id="step1">
           <div class="step-icon"><i class="fas fa-file-video"></i></div>
@@ -510,14 +575,14 @@ html, body {
         <div class="step" id="step2">
           <div class="step-icon"><i class="fas fa-brain"></i></div>
           <div class="step-info">
-            <div class="step-name">2. Analisis Momen Penting</div>
-            <div class="step-status" id="step2Status">Deteksi visual & audio</div>
+            <div class="step-name">2. Fast Analysis (Visual + Audio)</div>
+            <div class="step-status" id="step2Status">Deteksi momen terbaik</div>
           </div>
         </div>
         <div class="step" id="step3">
           <div class="step-icon"><i class="fas fa-scissors"></i></div>
           <div class="step-info">
-            <div class="step-name">3. Auto Cut (20 Detik)</div>
+            <div class="step-name">3. Auto Cut & Crop (20 Detik)</div>
             <div class="step-status" id="step3Status">Menggabungkan momen terbaik</div>
           </div>
         </div>
@@ -531,7 +596,7 @@ html, body {
       </div>
 
       <button class="btn btn-primary" id="btnProcess" disabled>
-        <i class="fas fa-wand-magic-sparkles"></i> Proses Auto Cut Sekarang
+        <i class="fas fa-bolt"></i> Proses Auto Cut Cepat
       </button>
     </div>
 
@@ -553,7 +618,7 @@ html, body {
       </div>
 
       <div class="result-container" id="resultContainer">
-        <div class="video-wrapper">
+        <div class="video-wrapper" id="resultWrapper" style="aspect-ratio: 16/9;">
           <video id="resultVideo" controls></video>
         </div>
 
@@ -595,7 +660,11 @@ const state = {
   selectedSegments: [],
   captions: [],
   recorder: null,
-  chunks: []
+  chunks: [],
+  aspectRatio: '16/9',
+  canvasWidth: 1280,
+  canvasHeight: 720,
+  currentCaption: ''
 };
 
 // DOM Elements
@@ -609,6 +678,7 @@ const btnProcess = document.getElementById('btnProcess');
 const resultContainer = document.getElementById('resultContainer');
 const emptyState = document.getElementById('emptyState');
 const resultVideo = document.getElementById('resultVideo');
+const resultWrapper = document.getElementById('resultWrapper');
 const timelineViz = document.getElementById('timelineViz');
 const captionsList = document.getElementById('captionsList');
 
@@ -627,6 +697,18 @@ function showToast(msg, type = 'info') {
     setTimeout(() => toast.remove(), 300);
   }, 4000);
 }
+
+// Aspect Ratio Selection
+document.querySelectorAll('.aspect-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.aspect-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.aspectRatio = btn.dataset.ratio;
+    state.canvasWidth = parseInt(btn.dataset.w);
+    state.canvasHeight = parseInt(btn.dataset.h);
+    resultWrapper.style.aspectRatio = state.aspectRatio.replace('/', ' / ');
+  });
+});
 
 // File Upload Handling
 dropzone.addEventListener('click', () => fileInput.click());
@@ -670,7 +752,7 @@ function setStepStatus(stepNum, status, text) {
   if (text) statusEl.textContent = text;
 }
 
-// MAIN PROCESS: Analyze -> Cut -> Caption
+// MAIN PROCESS
 btnProcess.addEventListener('click', startAutoCut);
 
 async function startAutoCut() {
@@ -680,9 +762,9 @@ async function startAutoCut() {
   document.getElementById('scanningLine').classList.remove('hidden');
   
   try {
-    // STEP 2: Analyze Video
-    setStepStatus(2, 'active', 'Menganalisis visual...');
-    await analyzeVideo();
+    // STEP 2: Fast Analyze Video
+    setStepStatus(2, 'active', 'Memulai analisis cepat...');
+    await analyzeVideoFast();
     setStepStatus(2, 'done', `Ditemukan ${state.analysisData.length} potensi momen`);
     
     // STEP 3: Auto Cut Selection
@@ -711,34 +793,47 @@ async function startAutoCut() {
   }
 }
 
-// Analyze Video: Seek frame by frame, calculate visual difference (motion) & audio volume
-async function analyzeVideo() {
+// FAST Analysis: Extract audio volume quickly, sample video frames less frequently
+async function analyzeVideoFast() {
   return new Promise(async (resolve) => {
     const video = videoPlayer;
-    const canvas = document.createElement('canvas');
-    const w = 80, h = 45;
-    canvas.width = w; canvas.height = h;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     
-    // Audio Analysis Setup
-    let audioBuffer = null;
+    // 1. Fast Audio Analysis using decodeAudioData
+    let audioScores = new Array(Math.floor(video.duration / 0.5)).fill(0);
     try {
       const arrayBuffer = await state.file.arrayBuffer();
       const audioCtx = new AudioContext();
-      audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+      const channelData = audioBuffer.getChannelData(0);
+      const sampleRate = audioBuffer.sampleRate;
+      
+      for (let i = 0; i < audioScores.length; i++) {
+        const startSample = Math.floor(i * 0.5 * sampleRate);
+        const endSample = Math.floor((i + 1) * 0.5 * sampleRate);
+        let sum = 0;
+        for (let j = startSample; j < endSample && j < channelData.length; j++) {
+          sum += Math.abs(channelData[j]);
+        }
+        audioScores[i] = (sum / (endSample - startSample)) * 100;
+      }
     } catch (e) {
       console.warn("Audio decode failed, using visual only", e);
     }
 
+    // 2. Fast Visual Analysis using tiny canvas
+    const canvas = document.createElement('canvas');
+    const w = 32, h = 18; // Very small for fast processing
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    
     state.analysisData = [];
-    const step = 0.2; // analyze every 200ms
+    const step = 0.5; // 500ms steps for speed
     let prevFrame = null;
 
     for (let t = 0; t < video.duration; t += step) {
       video.currentTime = t;
       await new Promise(r => video.addEventListener('seeked', r, { once: true }));
 
-      // Visual Diff
       ctx.drawImage(video, 0, 0, w, h);
       const frame = ctx.getImageData(0, 0, w, h).data;
       let diff = 0;
@@ -746,29 +841,19 @@ async function analyzeVideo() {
         for (let i = 0; i < frame.length; i += 4) {
           diff += Math.abs(frame[i] - prevFrame[i]) + Math.abs(frame[i+1] - prevFrame[i+1]) + Math.abs(frame[i+2] - prevFrame[i+2]);
         }
-        diff = diff / (w * h * 3 * 255) * 100; // Normalize to 0-100
+        diff = diff / (w * h * 3 * 255) * 100;
       }
       prevFrame = frame;
 
-      // Audio Volume
-      let volume = 0;
-      if (audioBuffer) {
-        const startSample = Math.floor(t * audioBuffer.sampleRate);
-        const endSample = Math.floor((t + step) * audioBuffer.sampleRate);
-        const channelData = audioBuffer.getChannelData(0);
-        let sum = 0;
-        for (let i = startSample; i < endSample && i < channelData.length; i++) {
-          sum += Math.abs(channelData[i]);
-        }
-        volume = (sum / (endSample - startSample)) * 100;
-      }
-
-      // Combined Score (Motion 60% + Audio 40%)
+      const audioIdx = Math.floor(t / 0.5);
+      const volume = audioScores[audioIdx] || 0;
+      
+      // Combined Score
       const score = (diff * 0.6) + (volume * 0.4);
       state.analysisData.push({ time: t, score, diff, volume });
       
-      // Update UI progress
-      document.getElementById('step2Status').textContent = `Menganalisis... ${(t/video.duration*100).toFixed(0)}%`;
+      // Update UI
+      document.getElementById('step2Status').textContent = `Analisis cepat... ${(t/video.duration*100).toFixed(0)}%`;
     }
     resolve();
   });
@@ -776,23 +861,22 @@ async function analyzeVideo() {
 
 // Select best moments to fill 20 seconds
 function selectBestMoments() {
-  const targetDuration = 20; // seconds
-  const segmentLength = 2; // seconds per segment
+  const targetDuration = 20;
+  const segmentLength = 2; // 2s per segment
   const numSegments = Math.ceil(targetDuration / segmentLength);
   
-  // Create windows (segments)
   const windows = [];
-  for (let i = 0; i < state.analysisData.length; i += 10) { // 10 steps * 0.2s = 2s window
-    const windowSlice = state.analysisData.slice(i, i + 10);
+  for (let i = 0; i < state.analysisData.length; i += 4) { // 4 steps * 0.5s = 2s window
+    const windowSlice = state.analysisData.slice(i, i + 4);
+    if (windowSlice.length === 0) continue;
     const avgScore = windowSlice.reduce((a, b) => a + b.score, 0) / windowSlice.length;
     windows.push({
-      start: i * 0.2,
-      end: (i + 10) * 0.2,
+      start: i * 0.5,
+      end: (i + 4) * 0.5,
       score: avgScore
     });
   }
 
-  // Sort by score, pick top N, then sort back by time
   windows.sort((a, b) => b.score - a.score);
   const selected = windows.slice(0, numSegments).sort((a, b) => a.start - b.start);
   
@@ -812,8 +896,7 @@ function renderTimelineViz() {
     const bar = document.createElement('div');
     bar.className = 'timeline-bar';
     if (selectedTimes.has(i)) bar.classList.add('selected');
-    // Height based on score
-    const data = state.analysisData[i * 2];
+    const data = state.analysisData[i];
     const height = data ? Math.max(5, data.score * 2) : 5;
     bar.style.height = `${height}%`;
     timelineViz.appendChild(bar);
@@ -821,13 +904,35 @@ function renderTimelineViz() {
   document.getElementById('highlighCount').textContent = `${state.selectedSegments.length} momen | 20.0s`;
 }
 
+// Canvas Crop Math (Object-fit: Cover)
+function drawImageCover(ctx, video, x, y, w, h) {
+  const vRatio = video.videoWidth / video.videoHeight;
+  const dRatio = w / h;
+  let sx, sy, sw, sh;
+
+  if (vRatio > dRatio) {
+    // Video is wider than canvas, crop sides
+    sh = video.videoHeight;
+    sw = sh * dRatio;
+    sx = (video.videoWidth - sw) / 2;
+    sy = 0;
+  } else {
+    // Video is taller than canvas, crop top/bottom
+    sw = video.videoWidth;
+    sh = sw / dRatio;
+    sx = 0;
+    sy = (video.videoHeight - sh) / 2;
+  }
+  ctx.drawImage(video, sx, sy, sw, sh, x, y, w, h);
+}
+
 // Render Result with Canvas & Capture Stream
 async function renderResultWithCaptions() {
   return new Promise(async (resolve) => {
     const sourceVideo = videoPlayer;
     const canvas = document.createElement('canvas');
-    canvas.width = sourceVideo.videoWidth || 1280;
-    canvas.height = sourceVideo.videoHeight || 720;
+    canvas.width = state.canvasWidth;
+    canvas.height = state.canvasHeight;
     const ctx = canvas.getContext('2d');
     
     // Setup Audio
@@ -835,7 +940,7 @@ async function renderResultWithCaptions() {
     const source = audioCtx.createMediaElementSource(sourceVideo);
     const dest = audioCtx.createMediaStreamDestination();
     source.connect(dest);
-    source.connect(audioCtx.destination); // Also play through speakers
+    source.connect(audioCtx.destination);
     
     // Setup Canvas Stream
     const stream = canvas.captureStream(30);
@@ -891,7 +996,7 @@ async function renderResultWithCaptions() {
 
     // Start Recorder & Play Segments
     state.recorder.start();
-    sourceVideo.muted = false; // Unmute so mic can hear it
+    sourceVideo.muted = false;
     
     let totalElapsed = 0;
     for (const seg of state.selectedSegments) {
@@ -902,7 +1007,6 @@ async function renderResultWithCaptions() {
       const segDuration = seg.end - seg.start;
       const startTime = performance.now();
       
-      // Draw loop for this segment
       await new Promise(resolveSeg => {
         function drawFrame() {
           const elapsed = (performance.now() - startTime) / 1000;
@@ -911,7 +1015,13 @@ async function renderResultWithCaptions() {
             resolveSeg();
             return;
           }
-          ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+          
+          // Background
+          ctx.fillStyle = '#000';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          
+          // Draw Video with Crop (Cover)
+          drawImageCover(ctx, sourceVideo, 0, 0, canvas.width, canvas.height);
           
           // Draw Caption
           if (state.currentCaption) {
@@ -933,13 +1043,12 @@ async function renderResultWithCaptions() {
 }
 
 function drawCaption(ctx, text, w, h) {
-  const fontSize = Math.floor(h / 15);
+  const fontSize = Math.floor(h / 18);
   ctx.font = `bold ${fontSize}px Plus Jakarta Sans, sans-serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'bottom';
   
-  // Wrap text
-  const maxWidth = w * 0.8;
+  const maxWidth = w * 0.85;
   const words = text.split(' ');
   let lines = [];
   let currentLine = '';
@@ -955,22 +1064,19 @@ function drawCaption(ctx, text, w, h) {
   });
   lines.push(currentLine);
 
-  // Draw bg and text
-  const padding = fontSize * 0.5;
+  const padding = fontSize * 0.4;
   const lineHeight = fontSize * 1.2;
   const totalHeight = lines.length * lineHeight + padding * 2;
-  const yStart = h - totalHeight - (h * 0.1);
+  const yStart = h - totalHeight - (h * 0.08);
   
   lines.forEach((line, i) => {
     const y = yStart + padding + (i * lineHeight);
     
-    // Text Shadow/Outline
-    ctx.strokeStyle = 'rgba(0,0,0,0.8)';
-    ctx.lineWidth = fontSize / 5;
+    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
+    ctx.lineWidth = fontSize / 4;
     ctx.lineJoin = 'round';
     ctx.strokeText(line, w / 2, y);
     
-    // Main Text
     ctx.fillStyle = '#ffffff';
     ctx.fillText(line, w / 2, y);
   });
@@ -995,7 +1101,7 @@ document.getElementById('btnDownload').addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `clipper-ai-highlight-${Date.now()}.webm`;
+  a.download = `clipper-ai-${state.aspectRatio.replace('/','x')}-${Date.now()}.webm`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('Video didownload!', 'success');
