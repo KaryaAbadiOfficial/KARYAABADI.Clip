@@ -7,6 +7,7 @@
     <script type="module">
         import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1";
         env.allowLocalModels = false;
+        env.useBrowserCache = true; // Mempercepat loading di video kedua
         window.TransformerPipeline = pipeline;
     </script>
     <style>
@@ -42,7 +43,7 @@
         .btn-secondary { background: var(--card); color: var(--text); border: 1px solid var(--border); }
         .btn-secondary:hover { background: var(--border); }
         .btn-success { background: var(--success); color: white; }
-        .btn-danger { background: var(--danger); color: white; font-size: 12px; padding: 4px 8px; }
+        .btn-danger { background: var(--danger); color: white; font-size: 12px; padding: 4px 8px; width: 100%; margin-top: 8px; }
         
         .header {
             display: flex; justify-content: space-between; align-items: center;
@@ -130,6 +131,7 @@
         .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .checkmark { width: 20px; height: 20px; color: var(--success); }
+        .progress-subtext { font-size: 12px; color: var(--muted); margin-left: auto; }
         
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(4px); }
         .modal-overlay.active { display: flex; }
@@ -323,14 +325,17 @@
             });
         }
 
-        // --- REAL AI TRANSCRIPTION (Whisper via Transformers.js) ---
-        async function loadTranscriberModel() {
+        // --- REAL AI TRANSCRIPTION (Whisper with Progress) ---
+        async function loadTranscriberModel(updateProgress) {
             if (transcriber) return transcriber;
             if (!window.TransformerPipeline) throw new Error("Model AI belum termuat. Periksa koneksi internet.");
+            
             transcriber = await window.TransformerPipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', {
                 progress_callback: (data) => {
                     if (data.status === 'progress') {
-                        console.log(`Memuat model AI: ${Math.round(data.progress || 0)}%`);
+                        updateProgress(data.progress || 0, data.file || 'model');
+                    } else if (data.status === 'done') {
+                        updateProgress(100, data.file || 'model');
                     }
                 }
             });
@@ -368,7 +373,6 @@
 
         function generateClipsFromTranscript(chunks, fallbackDuration) {
             if (!chunks || chunks.length === 0) {
-                // Fallback jika tidak ada ucapan terdeteksi
                 let currentTime = 0;
                 const clips = [];
                 let id = 1;
@@ -489,7 +493,7 @@
                             <span>${p.clips?.length || 0} Clips</span>
                             <span class="badge ${p.status === 'Memproses' ? 'badge-processing' : 'badge-ready'}">${p.status}</span>
                         </div>
-                        ${p.status === 'Selesai' ? `<button class="btn btn-danger" style="margin-top:8px; width:100%;" onclick="event.stopPropagation(); deleteProject('${p.id}')">Hapus</button>` : ''}
+                        <button class="btn btn-danger" onclick="event.stopPropagation(); deleteProject('${p.id}')">Hapus</button>
                     </div>
                 `;
                 list.appendChild(card);
@@ -539,25 +543,48 @@
             const duration = await getVideoDuration(file);
 
             const steps = [
-                { name: "Mengekstrak Audio", action: async () => { window._extractedAudio = await extractAudioForAI(file); } },
-                { name: "Memuat Model AI (Whisper)", action: async () => { await loadTranscriberModel(); } },
-                { name: "Mentranskripsi Ucapan", action: async () => { 
-                    window._transcript = await transcriber(window._extractedAudio, { return_timestamps: true, chunk_length_s: 30, stride_length_s: 5 });
-                }},
-                { name: "Membuat Potongan 20s & 30s", action: async () => { 
-                    window._generatedClips = generateClipsFromTranscript(window._transcript.chunks, duration);
-                }}
+                { 
+                    name: "Mengekstrak Audio", 
+                    action: async () => { window._extractedAudio = await extractAudioForAI(file); } 
+                },
+                { 
+                    name: "Memuat Model AI (Whisper)", 
+                    action: async (updateProgress) => { 
+                        await loadTranscriberModel(updateProgress); 
+                    } 
+                },
+                { 
+                    name: "Mentranskripsi Ucapan", 
+                    action: async () => { 
+                        window._transcript = await transcriber(window._extractedAudio, { return_timestamps: true, chunk_length_s: 30, stride_length_s: 5 });
+                    } 
+                },
+                { 
+                    name: "Membuat Potongan 20s & 30s", 
+                    action: async () => { 
+                        window._generatedClips = generateClipsFromTranscript(window._transcript.chunks, duration);
+                    } 
+                }
             ];
 
             for (let i = 0; i < steps.length; i++) {
                 const step = steps[i];
                 const stepEl = document.createElement('div');
                 stepEl.className = 'pipeline-step active';
-                stepEl.innerHTML = `<div class="spinner"></div> <div>${step.name}...</div>`;
+                stepEl.innerHTML = `<div class="spinner"></div> <div>${step.name}...</div> <span class="progress-subtext" id="step-subtext-${i}"></span>`;
                 stepsContainer.appendChild(stepEl);
 
                 try {
-                    await step.action();
+                    await step.action((progress, file) => {
+                        const subEl = document.getElementById(`step-subtext-${i}`);
+                        if (subEl) {
+                            if (progress > 0 && progress < 100) {
+                                subEl.innerText = `Mengunduh ${file}: ${Math.round(progress)}%`;
+                            } else if (progress >= 100) {
+                                subEl.innerText = `${file} siap`;
+                            }
+                        }
+                    });
                 } catch (e) {
                     stepEl.innerHTML = `<div style="color:red">Gagal: ${e.message}</div>`;
                     alert("Gagal memproses AI: " + e.message);
@@ -565,6 +592,7 @@
                 }
 
                 stepEl.className = 'pipeline-step done';
+                const subEl = document.getElementById(`step-subtext-${i}`);
                 stepEl.innerHTML = `<svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <div>${step.name} Selesai</div>`;
             }
 
