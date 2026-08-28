@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ANIME CLIPPER AI — Auto Epic Moments</title>
+<title>ANIME CLIPPER AI — Turbo Action Edition</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -150,7 +150,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  min-height: 200px;
+  min-height: 180px;
   justify-content: center;
 }
 
@@ -491,7 +491,7 @@ html, body {
       <div class="logo-icon"><i class="fas fa-bolt"></i></div>
       <span class="logo-text">ANIME CLIPPER AI</span>
     </div>
-    <div class="badge"><i class="fas fa-wand-magic-sparkles"></i> Epic Moments Engine v4.0</div>
+    <div class="badge"><i class="fas fa-rocket"></i> Turbo Action Engine v5.0</div>
   </header>
 
   <div class="main-grid">
@@ -540,7 +540,7 @@ html, body {
           </button>
         </div>
         <p style="font-size: 11px; color: var(--text-faint); margin-top: 4px;">
-          * Target durasi: 30 Detik. Momen epik otomatis mendapat efek Slow Motion.
+          * Target 30 Detik. Langsung ke action. Momen epik otomatis Slow Motion.
         </p>
       </div>
 
@@ -553,23 +553,23 @@ html, body {
           </div>
         </div>
         <div class="step" id="step2">
-          <div class="step-icon"><i class="fas fa-brain"></i></div>
+          <div class="step-icon"><i class="fas fa-forward"></i></div>
           <div class="step-info">
-            <div class="step-name">2. Super Fast Analysis</div>
-            <div class="step-status" id="step2Status">Deteksi visual & audio</div>
+            <div class="step-name">2. Turbo Analysis (8x Speed)</div>
+            <div class="step-status" id="step2Status">Scan visual & audio cepat</div>
           </div>
         </div>
         <div class="step" id="step3">
           <div class="step-icon"><i class="fas fa-gauge-high"></i></div>
           <div class="step-info">
-            <div class="step-name">3. Auto Cut 30s + Slow Motion</div>
-            <div class="step-status" id="step3Status">Menyusun momen terbaik</div>
+            <div class="step-name">3. Action Cut 30s + Slow Mo</div>
+            <div class="step-status" id="step3Status">Menyusun momen aksi terbaik</div>
           </div>
         </div>
       </div>
 
       <button class="btn btn-primary" id="btnProcess" disabled>
-        <i class="fas fa-bolt"></i> Generate Anime Clip (30s)
+        <i class="fas fa-bolt"></i> Generate Turbo Action Clip
       </button>
     </div>
 
@@ -599,8 +599,8 @@ html, body {
           <div class="flex justify-between mb-2">
             <span style="font-size:12px; color:var(--text-dim);">Timeline Momen:</span>
             <div class="legend">
-              <div class="legend-item"><div class="legend-dot normal"></div> Normal</div>
-              <div class="legend-item"><div class="legend-dot slow"></div> Slow-Mo (0.4x)</div>
+              <div class="legend-item"><div class="legend-dot normal"></div> Action</div>
+              <div class="legend-item"><div class="legend-dot slow"></div> Epic Slow-Mo</div>
             </div>
           </div>
           <div class="timeline-viz" id="timelineViz"></div>
@@ -718,13 +718,13 @@ async function startAutoCut() {
   document.getElementById('scanningLine').classList.remove('hidden');
   
   try {
-    setStepStatus(2, 'active', 'Memulai analisis super cepat...');
-    await analyzeVideoSuperFast();
-    setStepStatus(2, 'done', `Ditemukan ${state.analysisData.length} potensi momen`);
+    setStepStatus(2, 'active', 'Memulai turbo analisis...');
+    await analyzeVideoTurbo();
+    setStepStatus(2, 'done', `Selesai dalam hitungan detik!`);
     
-    setStepStatus(3, 'active', 'Memilih 30 detik terbaik...');
-    selectBestMomentsWithSlowMo();
-    setStepStatus(3, 'done', `${state.selectedSegments.length} segmen dipilih`);
+    setStepStatus(3, 'active', 'Memilih aksi terbaik...');
+    selectActionMoments();
+    setStepStatus(3, 'done', `${state.selectedSegments.length} segmen aksi dipilih`);
     
     renderTimelineViz();
     
@@ -745,50 +745,32 @@ async function startAutoCut() {
   }
 }
 
-// SUPER FAST ANALYSIS: Hybrid Audio + Sparse Visual
-async function analyzeVideoSuperFast() {
+// TURBO ANALYZER: Play video at 8x speed and sample frames
+async function analyzeVideoTurbo() {
   return new Promise(async (resolve) => {
     const video = videoPlayer;
+    video.currentTime = 0;
+    video.muted = true;
+    video.playbackRate = 8.0; // Fast forward 8x
     
-    // 1. Instant Audio Analysis
-    let audioScores = new Array(Math.floor(video.duration / 0.2)).fill(0);
-    try {
-      const arrayBuffer = await state.file.arrayBuffer();
-      const audioCtx = new AudioContext();
-      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-      const channelData = audioBuffer.getChannelData(0);
-      const sampleRate = audioBuffer.sampleRate;
-      
-      for (let i = 0; i < audioScores.length; i++) {
-        const startSample = Math.floor(i * 0.2 * sampleRate);
-        const endSample = Math.floor((i + 1) * 0.2 * sampleRate);
-        let sum = 0;
-        for (let j = startSample; j < endSample && j < channelData.length; j++) {
-          sum += Math.abs(channelData[j]);
-        }
-        audioScores[i] = (sum / (endSample - startSample)) * 100;
-      }
-    } catch (e) {
-      console.warn("Audio decode failed, using visual only", e);
-    }
-
-    // 2. Fast Visual Analysis (32x18 canvas, 0.2s step but drawing is instant)
     const canvas = document.createElement('canvas');
     const w = 32, h = 18; 
     canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     
     state.analysisData = [];
-    const step = 0.2; 
     let prevFrame = null;
+    let lastT = 0;
 
-    for (let t = 0; t < video.duration; t += step) {
-      video.currentTime = t;
-      await new Promise(r => video.addEventListener('seeked', r, { once: true }));
-
+    function processFrame() {
+      const currentT = video.currentTime;
+      if (currentT - lastT < 0.1) return; // Sample every ~0.1s
+      
+      lastT = currentT;
       ctx.drawImage(video, 0, 0, w, h);
       const frame = ctx.getImageData(0, 0, w, h).data;
       let diff = 0;
+      
       if (prevFrame) {
         for (let i = 0; i < frame.length; i += 4) {
           diff += Math.abs(frame[i] - prevFrame[i]) + Math.abs(frame[i+1] - prevFrame[i+1]) + Math.abs(frame[i+2] - prevFrame[i+2]);
@@ -797,55 +779,82 @@ async function analyzeVideoSuperFast() {
       }
       prevFrame = frame;
 
-      const audioIdx = Math.floor(t / 0.2);
-      const volume = audioScores[audioIdx] || 0;
+      // Action score: Emphasize large visual differences (fast movement)
+      // Ignore audio here because 8x playback messes up audio pitch.
+      // We rely purely on high visual diff to detect action.
+      const score = Math.pow(diff, 1.5); 
+      state.analysisData.push({ time: currentT, score });
       
-      // Emphasize visual diff for anime (action scenes have huge diffs)
-      const score = (diff * 0.7) + (volume * 0.3);
-      state.analysisData.push({ time: t, score, diff, volume });
-      
-      document.getElementById('step2Status').textContent = `Analisis cepat... ${(t/video.duration*100).toFixed(0)}%`;
+      document.getElementById('step2Status').textContent = `Turbo scan... ${(currentT/video.duration*100).toFixed(0)}%`;
     }
-    resolve();
+
+    // Use requestVideoFrameCallback if available (very efficient)
+    if (video.requestVideoFrameCallback) {
+      const onFrame = (now, metadata) => {
+        processFrame();
+        if (metadata.mediaTime < video.duration - 0.1) {
+          video.requestVideoFrameCallback(onFrame);
+        } else {
+          video.pause();
+          video.playbackRate = 1;
+          resolve();
+        }
+      };
+      video.requestVideoFrameCallback(onFrame);
+      await video.play();
+    } else {
+      // Fallback for browsers without rVFC
+      const interval = setInterval(() => {
+        processFrame();
+        if (video.ended) {
+          clearInterval(interval);
+          video.playbackRate = 1;
+          resolve();
+        }
+      }, 50);
+      await video.play();
+    }
   });
 }
 
-// Select best moments for 30 seconds + Apply Slow Motion to top 3
-function selectBestMomentsWithSlowmo() {
+// ACTION SELECTOR: Directly pick high-motion chunks
+function selectActionMoments() {
   const targetDuration = 30;
-  const segmentLength = 1.5; // 1.5s base segments
+  const segmentLength = 1.5; 
   const numSegments = Math.floor(state.duration / segmentLength);
   
   const windows = [];
   for (let i = 0; i < numSegments; i++) {
     const startT = i * segmentLength;
     const endT = startT + segmentLength;
-    const startIdx = Math.floor(startT / 0.2);
-    const endIdx = Math.floor(endT / 0.2);
-    const windowSlice = state.analysisData.slice(startIdx, endIdx);
+    const windowSlice = state.analysisData.filter(d => d.time >= startT && d.time < endT);
     if (windowSlice.length === 0) continue;
+    
     const avgScore = windowSlice.reduce((a, b) => a + b.score, 0) / windowSlice.length;
-    windows.push({
-      start: startT,
-      end: endT,
-      score: avgScore,
-      speed: 1,
-      outDuration: segmentLength
-    });
+    
+    // Reject low-score (boring) segments completely
+    if (avgScore > 5) { 
+      windows.push({
+        start: startT,
+        end: endT,
+        score: avgScore,
+        speed: 1,
+        outDuration: segmentLength
+      });
+    }
   }
 
-  // Sort by score to find the absolute best moments
+  // Sort by score to find absolute best moments for Slow Mo
   const sortedByScore = [...windows].sort((a, b) => b.score - a.score);
   
-  // Mark top 3 highest scored segments as Slow Motion (0.4x)
-  // This will make 1.5s segment become 3.75s in output
-  const slowMoCount = Math.min(3, sortedByScore.length);
+  // Mark top 2 highest scored segments as Slow Motion (0.4x)
+  const slowMoCount = Math.min(2, sortedByScore.length);
   for (let i = 0; i < slowMoCount; i++) {
     sortedByScore[i].speed = 0.4;
     sortedByScore[i].outDuration = segmentLength / 0.4; // 3.75s
   }
 
-  // Now, select segments until we reach ~30s output duration
+  // Select segments until we reach ~30s output duration
   const selected = [];
   let totalOutDuration = 0;
   
@@ -884,8 +893,8 @@ function renderTimelineViz() {
     if (slowMoTimes.has(i)) bar.classList.add('slowmo');
     else if (selectedTimes.has(i)) bar.classList.add('selected');
     
-    const data = state.analysisData[i];
-    const height = data ? Math.max(5, data.score * 1.5) : 5;
+    const data = state.analysisData.find(d => Math.abs(d.time - (i * 0.2)) < 0.2);
+    const height = data ? Math.max(5, Math.min(100, data.score * 2)) : 5;
     bar.style.height = `${height}%`;
     timelineViz.appendChild(bar);
   }
@@ -977,14 +986,14 @@ async function renderResult() {
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
           // Add cinematic zoom if slow motion
-          const zoomFactor = seg.speed < 1 ? 1.1 : 1.0;
+          const zoomFactor = seg.speed < 1 ? 1.15 : 1.0;
           drawImageCover(ctx, sourceVideo, 0, 0, canvas.width, canvas.height, zoomFactor);
           
-          // Optional: Add slight vignette for epic feel
+          // Add slight vignette for epic feel during slow-mo
           if (seg.speed < 1) {
             const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.height/3, canvas.width/2, canvas.height/2, canvas.height/1.2);
             grad.addColorStop(0, 'rgba(0,0,0,0)');
-            grad.addColorStop(1, 'rgba(0,0,0,0.4)');
+            grad.addColorStop(1, 'rgba(0,0,0,0.5)');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
@@ -1010,7 +1019,7 @@ document.getElementById('btnDownload').addEventListener('click', () => {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `anime-clip-hd-${state.aspectRatio.replace('/','x')}-${Date.now()}.webm`;
+  a.download = `anime-action-hd-${state.aspectRatio.replace('/','x')}-${Date.now()}.webm`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('Video HD didownload!', 'success');
