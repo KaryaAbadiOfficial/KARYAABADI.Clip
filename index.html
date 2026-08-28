@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CLIPPER AI — Fast Auto Cutter & Cropper</title>
+<title>ANIME CLIPPER AI — Auto Epic Moments</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,6 +28,7 @@
   --accent-3: #ff2d75;
   --success: #00d97e;
   --danger: #ff3b5c;
+  --warning: #ffb800;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -75,27 +76,27 @@ html, body {
 .logo-icon {
   width: 40px;
   height: 40px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--accent-3), var(--accent-2));
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   color: white;
-  box-shadow: 0 0 20px var(--accent-glow);
+  box-shadow: 0 0 20px rgba(255, 45, 117, 0.5);
 }
 
 .logo-text {
   font-size: 24px;
   font-weight: 700;
-  background: linear-gradient(135deg, #fff, var(--accent));
+  background: linear-gradient(135deg, #fff, var(--accent-3));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .badge {
   background: var(--bg-3);
-  color: var(--accent);
+  color: var(--accent-3);
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 11px;
@@ -154,13 +155,13 @@ html, body {
 }
 
 .upload-zone:hover {
-  border-color: var(--accent);
-  background: rgba(0, 229, 255, 0.03);
+  border-color: var(--accent-3);
+  background: rgba(255, 45, 117, 0.03);
 }
 
 .upload-zone.dragging {
-  border-color: var(--accent);
-  background: rgba(0, 229, 255, 0.08);
+  border-color: var(--accent-3);
+  background: rgba(255, 45, 117, 0.08);
   transform: scale(1.02);
 }
 
@@ -177,7 +178,7 @@ html, body {
 }
 
 .upload-zone:hover .upload-icon {
-  background: var(--accent);
+  background: var(--accent-3);
   color: white;
 }
 
@@ -263,9 +264,9 @@ html, body {
 }
 
 .aspect-btn.active {
-  background: rgba(0, 229, 255, 0.1);
-  border-color: var(--accent);
-  color: var(--accent);
+  background: rgba(255, 45, 117, 0.1);
+  border-color: var(--accent-3);
+  color: var(--accent-3);
 }
 
 /* Buttons */
@@ -285,14 +286,14 @@ html, body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  background: linear-gradient(135deg, var(--accent-3), var(--accent-2));
   color: white;
-  box-shadow: 0 4px 12px rgba(0, 229, 255, 0.2);
+  box-shadow: 0 4px 12px rgba(255, 45, 117, 0.2);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 229, 255, 0.35);
+  box-shadow: 0 6px 16px rgba(255, 45, 117, 0.35);
 }
 
 .btn-primary:disabled {
@@ -330,8 +331,8 @@ html, body {
 }
 
 .step.active {
-  border-color: var(--accent);
-  background: rgba(0, 229, 255, 0.05);
+  border-color: var(--accent-3);
+  background: rgba(255, 45, 117, 0.05);
 }
 
 .step.done {
@@ -352,7 +353,7 @@ html, body {
   flex-shrink: 0;
 }
 
-.step.active .step-icon { background: var(--accent); color: white; }
+.step.active .step-icon { background: var(--accent-3); color: white; }
 .step.done .step-icon { background: var(--success); color: white; }
 
 .step-info { flex: 1; }
@@ -387,6 +388,11 @@ html, body {
   box-shadow: 0 0 8px var(--accent-glow);
 }
 
+.timeline-bar.slowmo {
+  background: linear-gradient(180deg, var(--warning), var(--accent-3));
+  box-shadow: 0 0 8px rgba(255, 184, 0, 0.5);
+}
+
 /* Result */
 .result-container {
   display: none;
@@ -395,33 +401,6 @@ html, body {
 }
 
 .result-container.active { display: flex; }
-
-.captions-list {
-  max-height: 120px;
-  overflow-y: auto;
-  background: var(--bg-2);
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.caption-item {
-  font-size: 12px;
-  padding: 6px 8px;
-  background: var(--bg-3);
-  border-radius: 4px;
-  border-left: 3px solid var(--accent);
-}
-
-.caption-time {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
-  color: var(--text-faint);
-  margin-right: 8px;
-}
 
 /* Loading Spinner */
 .spinner {
@@ -465,8 +444,8 @@ html, body {
 .toast.success i { color: var(--success); }
 .toast.error { border-color: var(--danger); }
 .toast.error i { color: var(--danger); }
-.toast.info { border-color: var(--accent); }
-.toast.info i { color: var(--accent); }
+.toast.info { border-color: var(--accent-3); }
+.toast.info i { color: var(--accent-3); }
 
 @keyframes slideIn {
   from { opacity: 0; transform: translateX(20px); }
@@ -481,7 +460,7 @@ html, body {
   left: 0;
   width: 100%;
   height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  background: linear-gradient(90deg, transparent, var(--accent-3), transparent);
   animation: scan 2s linear infinite;
   z-index: 10;
 }
@@ -492,15 +471,16 @@ html, body {
   100% { top: 0; }
 }
 
-.mic-pulse {
-  animation: micpulse 1.5s infinite;
+.legend {
+  display: flex;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--text-dim);
 }
-
-@keyframes micpulse {
-  0% { box-shadow: 0 0 0 0 rgba(255, 45, 117, 0.4); }
-  70% { box-shadow: 0 0 0 15px rgba(255, 45, 117, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 45, 117, 0); }
-}
+.legend-item { display: flex; align-items: center; gap: 4px; }
+.legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+.legend-dot.normal { background: var(--accent); }
+.legend-dot.slow { background: var(--warning); }
 </style>
 </head>
 <body>
@@ -508,25 +488,25 @@ html, body {
 <div class="container">
   <header class="header">
     <div class="logo">
-      <div class="logo-icon"><i class="fas fa-wand-magic-sparkles"></i></div>
-      <span class="logo-text">CLIPPER AI</span>
+      <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+      <span class="logo-text">ANIME CLIPPER AI</span>
     </div>
-    <div class="badge"><i class="fas fa-bolt"></i> Fast Auto Cut Engine v3.0</div>
+    <div class="badge"><i class="fas fa-wand-magic-sparkles"></i> Epic Moments Engine v4.0</div>
   </header>
 
   <div class="main-grid">
     <!-- LEFT: INPUT -->
     <div class="panel">
       <div class="panel-title">
-        <i class="fas fa-upload"></i> Sumber Video & Setting
+        <i class="fas fa-upload"></i> Sumber Anime & Setting
       </div>
       
       <div id="uploadArea">
         <div class="upload-zone" id="dropzone">
           <div class="upload-icon"><i class="fas fa-cloud-arrow-up"></i></div>
           <div class="upload-text">
-            <h3>Tarik & Lepas Video</h3>
-            <p>atau klik untuk memilih file (MP4, WebM, MOV)</p>
+            <h3>Tarik & Lepas Video Anime</h3>
+            <p>atau klik untuk memilih file (MP4, MKV, WebM)</p>
           </div>
         </div>
         <input type="file" id="fileInput" accept="video/*" class="hidden">
@@ -540,27 +520,27 @@ html, body {
       </div>
 
       <div class="control-group">
-        <span class="control-label">Aspect Ratio & Crop</span>
+        <span class="control-label">Aspect Ratio & Crop (HD Output)</span>
         <div class="aspect-control">
           <button class="aspect-btn active" data-ratio="16/9" data-w="1280" data-h="720">
             <i class="fas fa-rectangle-wide"></i>
-            <span>16:9</span>
+            <span>16:9 HD</span>
           </button>
           <button class="aspect-btn" data-ratio="9/16" data-w="720" data-h="1280">
             <i class="fas fa-mobile-screen"></i>
-            <span>9:16</span>
+            <span>9:16 HD</span>
           </button>
           <button class="aspect-btn" data-ratio="1/1" data-w="800" data-h="800">
             <i class="fas fa-square"></i>
-            <span>1:1</span>
+            <span>1:1 HD</span>
           </button>
-          <button class="aspect-btn" data-ratio="4/5" data-w="800" data-h="1000">
+          <button class="aspect-btn" data-ratio="4/5" data-w="864" data-h="1080">
             <i class="fas fa-rectangle-portrait"></i>
-            <span>4:5</span>
+            <span>4:5 HD</span>
           </button>
         </div>
         <p style="font-size: 11px; color: var(--text-faint); margin-top: 4px;">
-          * Video akan otomatis di-crop (center) agar pas dengan rasio yang dipilih.
+          * Target durasi: 30 Detik. Momen epik otomatis mendapat efek Slow Motion.
         </p>
       </div>
 
@@ -575,28 +555,21 @@ html, body {
         <div class="step" id="step2">
           <div class="step-icon"><i class="fas fa-brain"></i></div>
           <div class="step-info">
-            <div class="step-name">2. Fast Analysis (Visual + Audio)</div>
-            <div class="step-status" id="step2Status">Deteksi momen terbaik</div>
+            <div class="step-name">2. Super Fast Analysis</div>
+            <div class="step-status" id="step2Status">Deteksi visual & audio</div>
           </div>
         </div>
         <div class="step" id="step3">
-          <div class="step-icon"><i class="fas fa-scissors"></i></div>
+          <div class="step-icon"><i class="fas fa-gauge-high"></i></div>
           <div class="step-info">
-            <div class="step-name">3. Auto Cut & Crop (20 Detik)</div>
-            <div class="step-status" id="step3Status">Menggabungkan momen terbaik</div>
-          </div>
-        </div>
-        <div class="step" id="step4">
-          <div class="step-icon"><i class="fas fa-closed-captioning"></i></div>
-          <div class="step-info">
-            <div class="step-name">4. Teks Audio Otomatis</div>
-            <div class="step-status" id="step4Status">Speech-to-Text (Indonesia)</div>
+            <div class="step-name">3. Auto Cut 30s + Slow Motion</div>
+            <div class="step-status" id="step3Status">Menyusun momen terbaik</div>
           </div>
         </div>
       </div>
 
       <button class="btn btn-primary" id="btnProcess" disabled>
-        <i class="fas fa-bolt"></i> Proses Auto Cut Cepat
+        <i class="fas fa-bolt"></i> Generate Anime Clip (30s)
       </button>
     </div>
 
@@ -604,15 +577,15 @@ html, body {
     <div class="panel">
       <div class="scanning-line hidden" id="scanningLine"></div>
       <div class="panel-title">
-        <i class="fas fa-film"></i> Hasil Highlight (20s)
+        <i class="fas fa-film"></i> Hasil Edit (30 Detik)
       </div>
 
       <div id="emptyState">
         <div class="upload-zone" style="cursor: default;">
           <div class="upload-icon"><i class="fas fa-clock"></i></div>
           <div class="upload-text">
-            <h3>Highlight 20 Detik</h3>
-            <p>Hasil potongan otomatis akan muncul di sini</p>
+            <h3>Clip 30 Detik</h3>
+            <p>Hasil edit anime akan muncul di sini</p>
           </div>
         </div>
       </div>
@@ -624,24 +597,17 @@ html, body {
 
         <div>
           <div class="flex justify-between mb-2">
-            <span style="font-size:12px; color:var(--text-dim);">Timeline Momen Terpilih:</span>
-            <span style="font-size:12px; color:var(--accent);" id="highlighCount"></span>
+            <span style="font-size:12px; color:var(--text-dim);">Timeline Momen:</span>
+            <div class="legend">
+              <div class="legend-item"><div class="legend-dot normal"></div> Normal</div>
+              <div class="legend-item"><div class="legend-dot slow"></div> Slow-Mo (0.4x)</div>
+            </div>
           </div>
           <div class="timeline-viz" id="timelineViz"></div>
         </div>
 
-        <div>
-          <div class="flex justify-between mb-2">
-            <span style="font-size:12px; color:var(--text-dim);">Subtitle Otomatis:</span>
-            <span style="font-size:12px; color:var(--success);" id="captionCount"></span>
-          </div>
-          <div class="captions-list" id="captionsList">
-            <div style="text-align:center; color:var(--text-faint); padding:20px;">Memproses suara...</div>
-          </div>
-        </div>
-
         <button class="btn btn-secondary" id="btnDownload">
-          <i class="fas fa-download"></i> Download Video (WebM)
+          <i class="fas fa-download"></i> Download Video HD (WebM)
         </button>
       </div>
     </div>
@@ -651,23 +617,19 @@ html, body {
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-// State Management
 const state = {
   file: null,
   videoUrl: null,
   duration: 0,
   analysisData: [],
   selectedSegments: [],
-  captions: [],
   recorder: null,
   chunks: [],
   aspectRatio: '16/9',
   canvasWidth: 1280,
-  canvasHeight: 720,
-  currentCaption: ''
+  canvasHeight: 720
 };
 
-// DOM Elements
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
 const videoPlayer = document.getElementById('videoPlayer');
@@ -680,9 +642,7 @@ const emptyState = document.getElementById('emptyState');
 const resultVideo = document.getElementById('resultVideo');
 const resultWrapper = document.getElementById('resultWrapper');
 const timelineViz = document.getElementById('timelineViz');
-const captionsList = document.getElementById('captionsList');
 
-// Toast Notification
 function showToast(msg, type = 'info') {
   const container = document.getElementById('toastContainer');
   const toast = document.createElement('div');
@@ -698,7 +658,6 @@ function showToast(msg, type = 'info') {
   }, 4000);
 }
 
-// Aspect Ratio Selection
 document.querySelectorAll('.aspect-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.aspect-btn').forEach(b => b.classList.remove('active'));
@@ -710,7 +669,6 @@ document.querySelectorAll('.aspect-btn').forEach(btn => {
   });
 });
 
-// File Upload Handling
 dropzone.addEventListener('click', () => fileInput.click());
 dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('dragging'); });
 dropzone.addEventListener('dragleave', () => dropzone.classList.remove('dragging'));
@@ -743,7 +701,6 @@ function handleFile(file) {
   };
 }
 
-// Step UI Updater
 function setStepStatus(stepNum, status, text) {
   const step = document.getElementById(`step${stepNum}`);
   const statusEl = document.getElementById(`step${stepNum}Status`);
@@ -752,7 +709,6 @@ function setStepStatus(stepNum, status, text) {
   if (text) statusEl.textContent = text;
 }
 
-// MAIN PROCESS
 btnProcess.addEventListener('click', startAutoCut);
 
 async function startAutoCut() {
@@ -762,27 +718,23 @@ async function startAutoCut() {
   document.getElementById('scanningLine').classList.remove('hidden');
   
   try {
-    // STEP 2: Fast Analyze Video
-    setStepStatus(2, 'active', 'Memulai analisis cepat...');
-    await analyzeVideoFast();
+    setStepStatus(2, 'active', 'Memulai analisis super cepat...');
+    await analyzeVideoSuperFast();
     setStepStatus(2, 'done', `Ditemukan ${state.analysisData.length} potensi momen`);
     
-    // STEP 3: Auto Cut Selection
-    setStepStatus(3, 'active', 'Memilih 20 detik terbaik...');
-    selectBestMoments();
+    setStepStatus(3, 'active', 'Memilih 30 detik terbaik...');
+    selectBestMomentsWithSlowMo();
     setStepStatus(3, 'done', `${state.selectedSegments.length} segmen dipilih`);
     
-    // Render Viz
     renderTimelineViz();
     
-    // STEP 4: Render & Auto Caption
-    setStepStatus(4, 'active', 'Mendengarkan suara & merender...');
-    await renderResultWithCaptions();
-    setStepStatus(4, 'done', 'Subtitle dibuat');
+    setStepStatus(4, 'active', 'Merender HD & Slow Motion...');
+    await renderResult();
+    setStepStatus(4, 'done', 'Render selesai');
     
     document.getElementById('scanningLine').classList.add('hidden');
     resultContainer.classList.add('active');
-    showToast('Auto cut selesai!', 'success');
+    showToast('Anime Clip berhasil dibuat!', 'success');
     
   } catch (error) {
     console.error(error);
@@ -793,13 +745,13 @@ async function startAutoCut() {
   }
 }
 
-// FAST Analysis: Extract audio volume quickly, sample video frames less frequently
-async function analyzeVideoFast() {
+// SUPER FAST ANALYSIS: Hybrid Audio + Sparse Visual
+async function analyzeVideoSuperFast() {
   return new Promise(async (resolve) => {
     const video = videoPlayer;
     
-    // 1. Fast Audio Analysis using decodeAudioData
-    let audioScores = new Array(Math.floor(video.duration / 0.5)).fill(0);
+    // 1. Instant Audio Analysis
+    let audioScores = new Array(Math.floor(video.duration / 0.2)).fill(0);
     try {
       const arrayBuffer = await state.file.arrayBuffer();
       const audioCtx = new AudioContext();
@@ -808,8 +760,8 @@ async function analyzeVideoFast() {
       const sampleRate = audioBuffer.sampleRate;
       
       for (let i = 0; i < audioScores.length; i++) {
-        const startSample = Math.floor(i * 0.5 * sampleRate);
-        const endSample = Math.floor((i + 1) * 0.5 * sampleRate);
+        const startSample = Math.floor(i * 0.2 * sampleRate);
+        const endSample = Math.floor((i + 1) * 0.2 * sampleRate);
         let sum = 0;
         for (let j = startSample; j < endSample && j < channelData.length; j++) {
           sum += Math.abs(channelData[j]);
@@ -820,14 +772,14 @@ async function analyzeVideoFast() {
       console.warn("Audio decode failed, using visual only", e);
     }
 
-    // 2. Fast Visual Analysis using tiny canvas
+    // 2. Fast Visual Analysis (32x18 canvas, 0.2s step but drawing is instant)
     const canvas = document.createElement('canvas');
-    const w = 32, h = 18; // Very small for fast processing
+    const w = 32, h = 18; 
     canvas.width = w; canvas.height = h;
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
     
     state.analysisData = [];
-    const step = 0.5; // 500ms steps for speed
+    const step = 0.2; 
     let prevFrame = null;
 
     for (let t = 0; t < video.duration; t += step) {
@@ -845,80 +797,113 @@ async function analyzeVideoFast() {
       }
       prevFrame = frame;
 
-      const audioIdx = Math.floor(t / 0.5);
+      const audioIdx = Math.floor(t / 0.2);
       const volume = audioScores[audioIdx] || 0;
       
-      // Combined Score
-      const score = (diff * 0.6) + (volume * 0.4);
+      // Emphasize visual diff for anime (action scenes have huge diffs)
+      const score = (diff * 0.7) + (volume * 0.3);
       state.analysisData.push({ time: t, score, diff, volume });
       
-      // Update UI
       document.getElementById('step2Status').textContent = `Analisis cepat... ${(t/video.duration*100).toFixed(0)}%`;
     }
     resolve();
   });
 }
 
-// Select best moments to fill 20 seconds
-function selectBestMoments() {
-  const targetDuration = 20;
-  const segmentLength = 2; // 2s per segment
-  const numSegments = Math.ceil(targetDuration / segmentLength);
+// Select best moments for 30 seconds + Apply Slow Motion to top 3
+function selectBestMomentsWithSlowmo() {
+  const targetDuration = 30;
+  const segmentLength = 1.5; // 1.5s base segments
+  const numSegments = Math.floor(state.duration / segmentLength);
   
   const windows = [];
-  for (let i = 0; i < state.analysisData.length; i += 4) { // 4 steps * 0.5s = 2s window
-    const windowSlice = state.analysisData.slice(i, i + 4);
+  for (let i = 0; i < numSegments; i++) {
+    const startT = i * segmentLength;
+    const endT = startT + segmentLength;
+    const startIdx = Math.floor(startT / 0.2);
+    const endIdx = Math.floor(endT / 0.2);
+    const windowSlice = state.analysisData.slice(startIdx, endIdx);
     if (windowSlice.length === 0) continue;
     const avgScore = windowSlice.reduce((a, b) => a + b.score, 0) / windowSlice.length;
     windows.push({
-      start: i * 0.5,
-      end: (i + 4) * 0.5,
-      score: avgScore
+      start: startT,
+      end: endT,
+      score: avgScore,
+      speed: 1,
+      outDuration: segmentLength
     });
   }
 
-  windows.sort((a, b) => b.score - a.score);
-  const selected = windows.slice(0, numSegments).sort((a, b) => a.start - b.start);
+  // Sort by score to find the absolute best moments
+  const sortedByScore = [...windows].sort((a, b) => b.score - a.score);
+  
+  // Mark top 3 highest scored segments as Slow Motion (0.4x)
+  // This will make 1.5s segment become 3.75s in output
+  const slowMoCount = Math.min(3, sortedByScore.length);
+  for (let i = 0; i < slowMoCount; i++) {
+    sortedByScore[i].speed = 0.4;
+    sortedByScore[i].outDuration = segmentLength / 0.4; // 3.75s
+  }
+
+  // Now, select segments until we reach ~30s output duration
+  const selected = [];
+  let totalOutDuration = 0;
+  
+  // Re-sort by time to pick chronologically, but we need to pick the best ones.
+  // Better approach: Sort by score, take top N until 30s is reached, then sort by time.
+  sortedByScore.forEach(win => {
+    if (totalOutDuration < targetDuration) {
+      selected.push(win);
+      totalOutDuration += win.outDuration;
+    }
+  });
+
+  // Sort the final selection back by time
+  selected.sort((a, b) => a.start - b.start);
   
   state.selectedSegments = selected;
 }
 
-// Render Timeline Visualization
 function renderTimelineViz() {
   timelineViz.innerHTML = '';
-  const totalChunks = Math.floor(state.duration / 0.5);
+  const totalChunks = Math.floor(state.duration / 0.2);
   const selectedTimes = new Set();
+  const slowMoTimes = new Set();
+  
   state.selectedSegments.forEach(seg => {
-    for (let t = seg.start; t < seg.end; t += 0.5) selectedTimes.add(Math.floor(t * 2));
+    for (let t = seg.start; t < seg.end; t += 0.2) {
+      const idx = Math.floor(t * 5);
+      selectedTimes.add(idx);
+      if (seg.speed < 1) slowMoTimes.add(idx);
+    }
   });
 
   for (let i = 0; i < totalChunks; i++) {
     const bar = document.createElement('div');
     bar.className = 'timeline-bar';
-    if (selectedTimes.has(i)) bar.classList.add('selected');
+    if (slowMoTimes.has(i)) bar.classList.add('slowmo');
+    else if (selectedTimes.has(i)) bar.classList.add('selected');
+    
     const data = state.analysisData[i];
-    const height = data ? Math.max(5, data.score * 2) : 5;
+    const height = data ? Math.max(5, data.score * 1.5) : 5;
     bar.style.height = `${height}%`;
     timelineViz.appendChild(bar);
   }
-  document.getElementById('highlighCount').textContent = `${state.selectedSegments.length} momen | 20.0s`;
 }
 
 // Canvas Crop Math (Object-fit: Cover)
-function drawImageCover(ctx, video, x, y, w, h) {
+function drawImageCover(ctx, video, x, y, w, h, zoom = 1) {
   const vRatio = video.videoWidth / video.videoHeight;
   const dRatio = w / h;
   let sx, sy, sw, sh;
 
   if (vRatio > dRatio) {
-    // Video is wider than canvas, crop sides
-    sh = video.videoHeight;
+    sh = video.videoHeight / zoom;
     sw = sh * dRatio;
     sx = (video.videoWidth - sw) / 2;
     sy = 0;
   } else {
-    // Video is taller than canvas, crop top/bottom
-    sw = video.videoWidth;
+    sw = video.videoWidth / zoom;
     sh = sw / dRatio;
     sx = 0;
     sy = (video.videoHeight - sh) / 2;
@@ -926,8 +911,7 @@ function drawImageCover(ctx, video, x, y, w, h) {
   ctx.drawImage(video, sx, sy, sw, sh, x, y, w, h);
 }
 
-// Render Result with Canvas & Capture Stream
-async function renderResultWithCaptions() {
+async function renderResult() {
   return new Promise(async (resolve) => {
     const sourceVideo = videoPlayer;
     const canvas = document.createElement('canvas');
@@ -942,13 +926,21 @@ async function renderResultWithCaptions() {
     source.connect(dest);
     source.connect(audioCtx.destination);
     
-    // Setup Canvas Stream
+    // Setup Canvas Stream (30 FPS)
     const stream = canvas.captureStream(30);
     stream.addTrack(dest.stream.getAudioTracks()[0]);
     
-    // Setup Recorder
+    // Setup HD Recorder (8 Mbps for high quality)
     state.chunks = [];
-    state.recorder = new MediaRecorder(stream, { mimeType: 'video/webm' });
+    let recorderOptions = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 };
+    if (!MediaRecorder.isTypeSupported(recorderOptions.mimeType)) {
+      recorderOptions = { mimeType: 'video/webm;codecs=vp8', videoBitsPerSecond: 8000000 };
+    }
+    if (!MediaRecorder.isTypeSupported(recorderOptions.mimeType)) {
+      recorderOptions = { mimeType: 'video/webm', videoBitsPerSecond: 8000000 };
+    }
+    
+    state.recorder = new MediaRecorder(stream, recorderOptions);
     state.recorder.ondataavailable = e => { if (e.data.size > 0) state.chunks.push(e.data); };
     state.recorder.onstop = () => {
       const blob = new Blob(state.chunks, { type: 'video/webm' });
@@ -956,157 +948,73 @@ async function renderResultWithCaptions() {
       resolve();
     };
     
-    // Setup Speech Recognition
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
-    state.captions = [];
-    
-    if (SpeechRecognition) {
-      recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'id-ID';
-      
-      recognition.onresult = (event) => {
-        let interim = '';
-        let final = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            final += event.results[i][0].transcript;
-          } else {
-            interim += event.results[i][0].transcript;
-          }
-        }
-        
-        const currentTime = sourceVideo.currentTime;
-        if (final) {
-          state.captions.push({ time: currentTime, text: final.trim() });
-          updateCaptionsList();
-        }
-        state.currentCaption = interim || final;
-      };
-      
-      recognition.onerror = (e) => console.warn("Speech error:", e.error);
-      recognition.onend = () => { if (sourceVideo.paused === false) recognition.start(); };
-      
-      try { await recognition.start(); } catch(e) {}
-    } else {
-      captionsList.innerHTML = '<div style="text-align:center; color:var(--danger); padding:20px;">Browser tidak mendukung Speech API. Gunakan Chrome/Edge.</div>';
-    }
-
-    // Start Recorder & Play Segments
     state.recorder.start();
     sourceVideo.muted = false;
     
     let totalElapsed = 0;
+    const totalTargetDuration = state.selectedSegments.reduce((acc, seg) => acc + seg.outDuration, 0);
+    
     for (const seg of state.selectedSegments) {
       sourceVideo.currentTime = seg.start;
       await new Promise(r => sourceVideo.addEventListener('seeked', r, { once: true }));
+      
+      // Set playback speed (Slow motion or normal)
+      sourceVideo.playbackRate = seg.speed;
       await sourceVideo.play();
       
-      const segDuration = seg.end - seg.start;
       const startTime = performance.now();
       
       await new Promise(resolveSeg => {
         function drawFrame() {
           const elapsed = (performance.now() - startTime) / 1000;
-          if (elapsed >= segDuration || sourceVideo.currentTime >= seg.end) {
+          if (elapsed >= seg.outDuration) {
             sourceVideo.pause();
             resolveSeg();
             return;
           }
           
-          // Background
           ctx.fillStyle = '#000';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Draw Video with Crop (Cover)
-          drawImageCover(ctx, sourceVideo, 0, 0, canvas.width, canvas.height);
+          // Add cinematic zoom if slow motion
+          const zoomFactor = seg.speed < 1 ? 1.1 : 1.0;
+          drawImageCover(ctx, sourceVideo, 0, 0, canvas.width, canvas.height, zoomFactor);
           
-          // Draw Caption
-          if (state.currentCaption) {
-            drawCaption(ctx, state.currentCaption, canvas.width, canvas.height);
+          // Optional: Add slight vignette for epic feel
+          if (seg.speed < 1) {
+            const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.height/3, canvas.width/2, canvas.height/2, canvas.height/1.2);
+            grad.addColorStop(0, 'rgba(0,0,0,0)');
+            grad.addColorStop(1, 'rgba(0,0,0,0.4)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
           
           requestAnimationFrame(drawFrame);
         }
         drawFrame();
       });
-      totalElapsed += segDuration;
-      document.getElementById('step4Status').textContent = `Merender... ${(totalElapsed/20*100).toFixed(0)}%`;
+      
+      totalElapsed += seg.outDuration;
+      document.getElementById('step4Status').textContent = `Render HD... ${(totalElapsed/totalTargetDuration*100).toFixed(0)}%`;
     }
 
     sourceVideo.muted = true;
-    if (recognition) recognition.stop();
+    sourceVideo.playbackRate = 1;
     state.recorder.stop();
   });
 }
 
-function drawCaption(ctx, text, w, h) {
-  const fontSize = Math.floor(h / 18);
-  ctx.font = `bold ${fontSize}px Plus Jakarta Sans, sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'bottom';
-  
-  const maxWidth = w * 0.85;
-  const words = text.split(' ');
-  let lines = [];
-  let currentLine = '';
-  
-  words.forEach(word => {
-    const testLine = currentLine + word + ' ';
-    if (ctx.measureText(testLine).width > maxWidth && currentLine) {
-      lines.push(currentLine);
-      currentLine = word + ' ';
-    } else {
-      currentLine = testLine;
-    }
-  });
-  lines.push(currentLine);
-
-  const padding = fontSize * 0.4;
-  const lineHeight = fontSize * 1.2;
-  const totalHeight = lines.length * lineHeight + padding * 2;
-  const yStart = h - totalHeight - (h * 0.08);
-  
-  lines.forEach((line, i) => {
-    const y = yStart + padding + (i * lineHeight);
-    
-    ctx.strokeStyle = 'rgba(0,0,0,0.9)';
-    ctx.lineWidth = fontSize / 4;
-    ctx.lineJoin = 'round';
-    ctx.strokeText(line, w / 2, y);
-    
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(line, w / 2, y);
-  });
-}
-
-function updateCaptionsList() {
-  captionsList.innerHTML = '';
-  state.captions.forEach(cap => {
-    const item = document.createElement('div');
-    item.className = 'caption-item';
-    item.innerHTML = `<span class="caption-time">[${cap.time.toFixed(1)}s]</span> ${cap.text}`;
-    captionsList.appendChild(item);
-  });
-  document.getElementById('captionCount').textContent = `${state.captions.length} subtitle dibuat`;
-  captionsList.scrollTop = captionsList.scrollHeight;
-}
-
-// Download Button
 document.getElementById('btnDownload').addEventListener('click', () => {
   if (state.chunks.length === 0) return;
   const blob = new Blob(state.chunks, { type: 'video/webm' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `clipper-ai-${state.aspectRatio.replace('/','x')}-${Date.now()}.webm`;
+  a.download = `anime-clip-hd-${state.aspectRatio.replace('/','x')}-${Date.now()}.webm`;
   a.click();
   URL.revokeObjectURL(url);
-  showToast('Video didownload!', 'success');
+  showToast('Video HD didownload!', 'success');
 });
-
 </script>
 </body>
 </html>
