@@ -66,142 +66,65 @@ html, body {
   border-bottom: 1px solid var(--border);
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-family: 'Space Grotesk', sans-serif;
-}
-
+.logo { display: flex; align-items: center; gap: 12px; font-family: 'Space Grotesk', sans-serif; }
 .logo-icon {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, var(--accent-3), var(--accent-2));
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: white;
-  box-shadow: 0 0 20px rgba(255, 45, 117, 0.5);
+  width: 40px; height: 40px; background: linear-gradient(135deg, var(--accent-3), var(--accent-2));
+  border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: white; box-shadow: 0 0 20px rgba(255, 45, 117, 0.5);
 }
-
 .logo-text {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 24px; font-weight: 700;
   background: linear-gradient(135deg, #fff, var(--accent-3));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
 }
-
 .badge {
-  background: var(--bg-3);
-  color: var(--accent-3);
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 600;
-  border: 1px solid var(--border-light);
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  background: var(--bg-3); color: var(--accent-3); padding: 4px 10px;
+  border-radius: 20px; font-size: 11px; font-weight: 600; border: 1px solid var(--border-light);
+  display: flex; align-items: center; gap: 6px;
 }
 
-.main-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  flex: 1;
-}
-
+.main-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; flex: 1; }
 .panel {
-  background: var(--bg-1);
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  position: relative;
-  overflow: hidden;
+  background: var(--bg-1); border: 1px solid var(--border); border-radius: 16px; padding: 24px;
+  display: flex; flex-direction: column; gap: 16px; position: relative; overflow: hidden;
 }
-
 .panel-title {
-  font-size: 14px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-dim);
-  display: flex;
-  align-items: center;
-  gap: 8px;
+  font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--text-dim); display: flex; align-items: center; gap: 8px;
 }
 
 .upload-zone {
-  border: 2px dashed var(--border-light);
-  border-radius: 12px;
-  padding: 40px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  background: var(--bg-2);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  min-height: 180px;
-  justify-content: center;
+  border: 2px dashed var(--border-light); border-radius: 12px; padding: 40px; text-align: center;
+  cursor: pointer; transition: all 0.3s; background: var(--bg-2);
+  display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 180px; justify-content: center;
 }
-
 .upload-zone:hover { border-color: var(--accent-3); background: rgba(255, 45, 117, 0.03); }
 .upload-zone.dragging { border-color: var(--accent-3); background: rgba(255, 45, 117, 0.08); transform: scale(1.02); }
-
 .upload-icon {
-  width: 60px;
-  height: 60px;
-  background: var(--bg-3);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: var(--text-dim);
+  width: 60px; height: 60px; background: var(--bg-3); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--text-dim);
 }
-
 .upload-zone:hover .upload-icon { background: var(--accent-3); color: white; }
 .upload-text h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
 .upload-text p { font-size: 13px; color: var(--text-faint); }
 
 .video-wrapper {
-  position: relative;
-  width: 100%;
-  background: #000;
-  border-radius: 12px;
-  overflow: hidden;
-  aspect-ratio: 16/9;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position: relative; width: 100%; background: #000; border-radius: 12px; overflow: hidden;
+  aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center;
 }
-
 .video-wrapper video { width: 100%; height: 100%; object-fit: contain; }
-
 .video-overlay {
-  position: absolute; top: 12px; left: 12px;
-  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
-  padding: 6px 12px; border-radius: 6px;
-  font-size: 11px; font-weight: 600; color: white;
+  position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  padding: 6px 12px; border-radius: 6px; font-size: 11px; font-weight: 600; color: white;
   display: flex; align-items: center; gap: 6px;
 }
 
 .control-group { display: flex; flex-direction: column; gap: 8px; }
 .control-label { font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; }
-
 .aspect-control { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .aspect-btn {
   background: var(--bg-3); border: 1px solid var(--border); color: var(--text-dim);
-  padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s;
+  padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
 .aspect-btn i { font-size: 16px; }
@@ -209,11 +132,9 @@ html, body {
 .aspect-btn.active { background: rgba(255, 45, 117, 0.1); border-color: var(--accent-3); color: var(--accent-3); }
 
 .btn {
-  padding: 14px 20px; border-radius: 8px; font-weight: 600; font-size: 14px;
-  cursor: pointer; border: none; display: flex; align-items: center; justify-content: center;
-  gap: 8px; transition: all 0.2s; width: 100%;
+  padding: 14px 20px; border-radius: 8px; font-weight: 600; font-size: 14px; cursor: pointer; border: none;
+  display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; width: 100%;
 }
-
 .btn-primary { background: linear-gradient(135deg, var(--accent-3), var(--accent-2)); color: white; box-shadow: 0 4px 12px rgba(255, 45, 117, 0.2); }
 .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255, 45, 117, 0.35); }
 .btn-primary:disabled { background: var(--bg-4); color: var(--text-faint); cursor: not-allowed; transform: none; box-shadow: none; }
@@ -221,32 +142,18 @@ html, body {
 .btn-secondary:hover { background: var(--bg-4); }
 
 .steps { display: flex; flex-direction: column; gap: 10px; }
-.step {
-  display: flex; align-items: center; gap: 12px; padding: 12px;
-  background: var(--bg-2); border-radius: 8px; border: 1px solid var(--border);
-  transition: all 0.3s;
-}
+.step { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--bg-2); border-radius: 8px; border: 1px solid var(--border); transition: all 0.3s; }
 .step.active { border-color: var(--accent-3); background: rgba(255, 45, 117, 0.05); }
 .step.done { border-color: var(--success); background: rgba(0, 217, 126, 0.05); }
-.step-icon {
-  width: 32px; height: 32px; border-radius: 50%; background: var(--bg-4);
-  display: flex; align-items: center; justify-content: center; font-size: 14px;
-  color: var(--text-dim); flex-shrink: 0;
-}
+.step-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--bg-4); display: flex; align-items: center; justify-content: center; font-size: 14px; color: var(--text-dim); flex-shrink: 0; }
 .step.active .step-icon { background: var(--accent-3); color: white; }
 .step.done .step-icon { background: var(--success); color: white; }
 .step-info { flex: 1; }
 .step-name { font-size: 13px; font-weight: 600; }
 .step-status { font-size: 11px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
 
-.timeline-viz {
-  height: 60px; background: var(--bg-2); border-radius: 8px; border: 1px solid var(--border);
-  position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 2px;
-}
-.timeline-bar {
-  flex: 1; background: var(--bg-4); margin: 0 1px; border-radius: 2px;
-  transition: all 0.2s; position: relative; min-height: 4px;
-}
+.timeline-viz { height: 60px; background: var(--bg-2); border-radius: 8px; border: 1px solid var(--border); position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 2px; }
+.timeline-bar { flex: 1; background: var(--bg-4); margin: 0 1px; border-radius: 2px; transition: all 0.2s; position: relative; min-height: 4px; }
 .timeline-bar.selected { background: linear-gradient(180deg, var(--accent), var(--accent-2)); box-shadow: 0 0 8px var(--accent-glow); }
 .timeline-bar.slowmo { background: linear-gradient(180deg, var(--warning), var(--accent-3)); box-shadow: 0 0 8px rgba(255, 184, 0, 0.5); }
 
@@ -257,23 +164,14 @@ html, body {
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
-.toast {
-  background: var(--bg-3); border: 1px solid var(--border); padding: 12px 16px;
-  border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); min-width: 250px;
-}
+.toast { background: var(--bg-3); border: 1px solid var(--border); padding: 12px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); min-width: 250px; }
 .toast.success { border-color: var(--success); } .toast.success i { color: var(--success); }
 .toast.error { border-color: var(--danger); } .toast.error i { color: var(--danger); }
 .toast.info { border-color: var(--accent-3); } .toast.info i { color: var(--accent-3); }
 @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
 .hidden { display: none !important; }
-
-.scanning-line {
-  position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--accent-3), transparent);
-  animation: scan 2s linear infinite; z-index: 10;
-}
+.scanning-line { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, var(--accent-3), transparent); animation: scan 2s linear infinite; z-index: 10; }
 @keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
 
 .legend { display: flex; gap: 12px; font-size: 10px; color: var(--text-dim); }
@@ -291,7 +189,7 @@ html, body {
       <div class="logo-icon"><i class="fas fa-bolt"></i></div>
       <span class="logo-text">ANIME CLIPPER AI</span>
     </div>
-    <div class="badge"><i class="fas fa-rocket"></i> Turbo Action Engine v5.1</div>
+    <div class="badge"><i class="fas fa-rocket"></i> Turbo Action Engine v7.0</div>
   </header>
 
   <div class="main-grid">
@@ -312,7 +210,7 @@ html, body {
 
       <div id="videoPreviewWrapper" class="hidden">
         <div class="video-wrapper">
-          <video id="videoPlayer" controls muted></video>
+          <video id="videoPlayer" controls></video>
           <div class="video-overlay" id="videoInfo"></div>
         </div>
       </div>
@@ -325,7 +223,7 @@ html, body {
           <button class="aspect-btn" data-ratio="1/1" data-w="800" data-h="800"><i class="fas fa-square"></i><span>1:1 HD</span></button>
           <button class="aspect-btn" data-ratio="4/5" data-w="864" data-h="1080"><i class="fas fa-rectangle-portrait"></i><span>4:5 HD</span></button>
         </div>
-        <p style="font-size: 11px; color: var(--text-faint); margin-top: 4px;">* Target 30 Detik. Langsung ke action. Momen epik otomatis Slow Motion.</p>
+        <p style="font-size: 11px; color: var(--text-faint); margin-top: 4px;">* Target 30 Detik. Lewati Opening. Action pas tidak terpotong. Subtitle terpotong akan ditutupi.</p>
       </div>
 
       <div class="steps">
@@ -339,8 +237,8 @@ html, body {
         <div class="step" id="step2">
           <div class="step-icon"><i class="fas fa-forward"></i></div>
           <div class="step-info">
-            <div class="step-name">2. Turbo Analysis</div>
-            <div class="step-status" id="step2Status">Scan visual & audio cepat</div>
+            <div class="step-name">2. Skip Opening & Smart Scan</div>
+            <div class="step-status" id="step2Status">Lewati intro, cari action</div>
           </div>
         </div>
         <div class="step" id="step3">
@@ -353,7 +251,7 @@ html, body {
         <div class="step" id="step4">
           <div class="step-icon"><i class="fas fa-film"></i></div>
           <div class="step-info">
-            <div class="step-name">4. Render HD</div>
+            <div class="step-name">4. Render HD & Mask Subtitle</div>
             <div class="step-status" id="step4Status">Render & Encoding</div>
           </div>
         </div>
@@ -418,7 +316,9 @@ const state = {
   canvasWidth: 1280,
   canvasHeight: 720,
   audioCtx: null,
-  mediaElementSource: null
+  mediaElementSource: null,
+  speakerGain: null,
+  mediaDest: null
 };
 
 const dropzone = document.getElementById('dropzone');
@@ -501,6 +401,18 @@ function setStepStatus(stepNum, status, text) {
   if (text) statusEl.textContent = text;
 }
 
+function setupAudioGraph() {
+  if (state.audioCtx) return;
+  state.audioCtx = new AudioContext();
+  state.mediaElementSource = state.audioCtx.createMediaElementSource(videoPlayer);
+  state.speakerGain = state.audioCtx.createGain();
+  state.speakerGain.gain.value = 0; 
+  state.mediaDest = state.audioCtx.createMediaStreamDestination();
+  state.mediaElementSource.connect(state.speakerGain);
+  state.speakerGain.connect(state.audioCtx.destination);
+  state.mediaElementSource.connect(state.mediaDest);
+}
+
 btnProcess.addEventListener('click', startAutoCut);
 
 async function startAutoCut() {
@@ -509,12 +421,14 @@ async function startAutoCut() {
   resultContainer.classList.remove('active');
   document.getElementById('scanningLine').classList.remove('hidden');
   
-  // Reset steps
   for(let i=2; i<=4; i++) setStepStatus(i, null, '');
   
   try {
-    setStepStatus(2, 'active', 'Memulai turbo analisis...');
-    await analyzeVideoTurbo();
+    setupAudioGraph();
+    if (state.audioCtx.state === 'suspended') await state.audioCtx.resume();
+    
+    setStepStatus(2, 'active', 'Melewati opening & scan action...');
+    await analyzeVideoSmart();
     setStepStatus(2, 'done', `Selesai!`);
     
     setStepStatus(3, 'active', 'Memilih aksi terbaik...');
@@ -523,11 +437,11 @@ async function startAutoCut() {
     
     renderTimelineViz();
     
-    setStepStatus(4, 'active', 'Merender HD & Slow Motion...');
+    setStepStatus(4, 'active', 'Merender HD & Mask Subtitle...');
     await renderResult();
     setStepStatus(4, 'done', 'Render selesai');
     
-    document.getElementById('scanningLine').classList.add('hidden');
+    document.getElementById('scanningLine').classList.remove('hidden');
     resultContainer.classList.add('active');
     showToast('Anime Clip berhasil dibuat!', 'success');
     
@@ -540,13 +454,11 @@ async function startAutoCut() {
   }
 }
 
-// TURBO ANALYZER FIXED: Using requestAnimationFrame + Anti-Stall
-async function analyzeVideoTurbo() {
+// SMART ACTION SCAN v2: Skip Opening (15%) & Outro (5%)
+async function analyzeVideoSmart() {
   return new Promise(async (resolve) => {
     const video = videoPlayer;
-    video.currentTime = 0;
-    video.muted = true;
-    video.playbackRate = 8.0; // Fast forward 8x
+    video.pause();
     
     const canvas = document.createElement('canvas');
     const w = 32, h = 18; 
@@ -555,23 +467,23 @@ async function analyzeVideoTurbo() {
     
     state.analysisData = [];
     let prevFrame = null;
-    let lastT = -1;
-    let stallCounter = 0;
-    let lastCurrentTime = 0;
-
-    try {
-      await video.play();
-    } catch(e) {
-      console.error("Play error", e);
-      resolve();
-      return;
-    }
-
-    function processFrame() {
-      const currentT = video.currentTime;
-      if (currentT - lastT < 0.1) return; // Sample every ~0.1s
+    
+    // Skip Opening (15% or max 30s) and Outro (5% or max 15s)
+    const startSkip = Math.min(30, state.duration * 0.15);
+    const endSkip = state.duration - Math.min(15, state.duration * 0.05);
+    const step = 2.5; // Larger segment for complete action moves
+    
+    for (let t = startSkip; t < endSkip - step; t += step) {
+      video.currentTime = t;
       
-      lastT = currentT;
+      await new Promise(r => {
+        const onSeeked = () => {
+          video.removeEventListener('seeked', onSeeked);
+          r();
+        };
+        video.addEventListener('seeked', onSeeked);
+      });
+      
       if (video.readyState >= 2) {
         ctx.drawImage(video, 0, 0, w, h);
         const frame = ctx.getImageData(0, 0, w, h).data;
@@ -584,76 +496,36 @@ async function analyzeVideoTurbo() {
           diff = diff / (w * h * 3 * 255) * 100;
         }
         prevFrame = frame;
-
-        const score = Math.pow(diff, 1.5); 
-        state.analysisData.push({ time: currentT, score });
         
-        document.getElementById('step2Status').textContent = `Turbo scan... ${Math.min(100, (currentT/video.duration*100)).toFixed(0)}%`;
+        const score = Math.pow(diff, 1.2); 
+        state.analysisData.push({ time: t, score, start: t, end: t + step });
+        document.getElementById('step2Status').textContent = `Scan action (Intro dilewati)... ${Math.min(100, (t/endSkip*100)).toFixed(0)}%`;
       }
     }
-
-    function checkFrame() {
-      if (video.ended || video.currentTime >= video.duration - 0.1) {
-        video.pause();
-        video.playbackRate = 1;
-        resolve();
-        return;
-      }
-
-      // Anti-Stall Protection
-      if (video.currentTime === lastCurrentTime) {
-        stallCounter++;
-        if (stallCounter > 150) { // ~2.5 seconds of no progress
-          console.warn("Video stalled during analysis, forcing completion...");
-          video.pause();
-          video.playbackRate = 1;
-          resolve();
-          return;
-        }
-      } else {
-        stallCounter = 0;
-        lastCurrentTime = video.currentTime;
-      }
-
-      processFrame();
-      requestAnimationFrame(checkFrame);
-    }
-
-    requestAnimationFrame(checkFrame);
+    resolve();
   });
 }
 
 function selectActionMoments() {
   const targetDuration = 30;
-  const segmentLength = 1.5; 
-  const numSegments = Math.floor(state.duration / segmentLength);
+  const segmentLength = 2.5; 
   
-  const windows = [];
-  for (let i = 0; i < numSegments; i++) {
-    const startT = i * segmentLength;
-    const endT = startT + segmentLength;
-    const windowSlice = state.analysisData.filter(d => d.time >= startT && d.time < endT);
-    if (windowSlice.length === 0) continue;
-    
-    const avgScore = windowSlice.reduce((a, b) => a + b.score, 0) / windowSlice.length;
-    
-    if (avgScore > 5) { 
-      windows.push({
-        start: startT,
-        end: endT,
-        score: avgScore,
-        speed: 1,
-        outDuration: segmentLength
-      });
-    }
-  }
-
+  const windows = state.analysisData.map(d => ({
+    start: d.start,
+    end: d.end,
+    score: d.score,
+    speed: 1,
+    outDuration: segmentLength
+  })).filter(w => w.score > 2); 
+  
   const sortedByScore = [...windows].sort((a, b) => b.score - a.score);
   
+  // Top 2 epic moments become slow motion (1.5s source -> 3.75s output)
   const slowMoCount = Math.min(2, sortedByScore.length);
   for (let i = 0; i < slowMoCount; i++) {
     sortedByScore[i].speed = 0.4;
-    sortedByScore[i].outDuration = segmentLength / 0.4;
+    sortedByScore[i].outDuration = (1.5 / 0.4); // 3.75s output
+    sortedByScore[i].end = sortedByScore[i].start + 1.5; // Source only needs 1.5s
   }
 
   const selected = [];
@@ -672,13 +544,13 @@ function selectActionMoments() {
 
 function renderTimelineViz() {
   timelineViz.innerHTML = '';
-  const totalChunks = Math.floor(state.duration / 0.2);
+  const totalChunks = Math.floor(state.duration / 0.5);
   const selectedTimes = new Set();
   const slowMoTimes = new Set();
   
   state.selectedSegments.forEach(seg => {
-    for (let t = seg.start; t < seg.end; t += 0.2) {
-      const idx = Math.floor(t * 5);
+    for (let t = seg.start; t < seg.end; t += 0.5) {
+      const idx = Math.floor(t * 2);
       selectedTimes.add(idx);
       if (seg.speed < 1) slowMoTimes.add(idx);
     }
@@ -690,28 +562,31 @@ function renderTimelineViz() {
     if (slowMoTimes.has(i)) bar.classList.add('slowmo');
     else if (selectedTimes.has(i)) bar.classList.add('selected');
     
-    const data = state.analysisData.find(d => Math.abs(d.time - (i * 0.2)) < 0.2);
-    const height = data ? Math.max(5, Math.min(100, data.score * 2)) : 5;
+    const height = 5;
     bar.style.height = `${height}%`;
     timelineViz.appendChild(bar);
   }
 }
 
-function drawImageCover(ctx, video, x, y, w, h, zoom = 1) {
+// SMART CROP: Shift up if cropping top/bottom to protect subtitles
+function drawImageCoverSmart(ctx, video, x, y, w, h, zoom = 1) {
   const vRatio = video.videoWidth / video.videoHeight;
   const dRatio = w / h;
   let sx, sy, sw, sh;
 
   if (vRatio > dRatio) {
+    // Video is wider than canvas (crop sides) - Subtitles at bottom are SAFE
     sh = video.videoHeight / zoom;
     sw = sh * dRatio;
     sx = (video.videoWidth - sw) / 2;
     sy = 0;
   } else {
+    // Video is taller than canvas (crop top/bottom) - Subtitles at bottom are AT RISK
+    // Shift crop UP by 15% to protect the bottom area
     sw = video.videoWidth / zoom;
     sh = sw / dRatio;
     sx = 0;
-    sy = (video.videoHeight - sh) / 2;
+    sy = (video.videoHeight - sh) * 0.15; // Shift up
   }
   ctx.drawImage(video, sx, sy, sw, sh, x, y, w, h);
 }
@@ -724,17 +599,10 @@ async function renderResult() {
     canvas.height = state.canvasHeight;
     const ctx = canvas.getContext('2d');
     
-    // Setup Audio (Safe initialization to prevent crash on multiple runs)
-    if (!state.audioCtx) {
-      state.audioCtx = new AudioContext();
-      state.mediaElementSource = state.audioCtx.createMediaElementSource(sourceVideo);
-    }
-    const dest = state.audioCtx.createMediaStreamDestination();
-    state.mediaElementSource.connect(dest);
-    state.mediaElementSource.connect(state.audioCtx.destination);
+    state.speakerGain.gain.value = 0; 
     
     const stream = canvas.captureStream(30);
-    stream.addTrack(dest.stream.getAudioTracks()[0]);
+    stream.addTrack(state.mediaDest.stream.getAudioTracks()[0]);
     
     state.chunks = [];
     let recorderOptions = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 };
@@ -754,7 +622,6 @@ async function renderResult() {
     };
     
     state.recorder.start();
-    sourceVideo.muted = false;
     
     let totalElapsed = 0;
     const totalTargetDuration = state.selectedSegments.reduce((acc, seg) => acc + seg.outDuration, 0);
@@ -781,14 +648,25 @@ async function renderResult() {
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
           const zoomFactor = seg.speed < 1 ? 1.15 : 1.0;
-          drawImageCover(ctx, sourceVideo, 0, 0, canvas.width, canvas.height, zoomFactor);
+          drawImageCoverSmart(ctx, sourceVideo, 0, 0, canvas.width, canvas.height, zoomFactor);
           
+          // Epic Vignette for slow-mo
           if (seg.speed < 1) {
             const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.height/3, canvas.width/2, canvas.height/2, canvas.height/1.2);
             grad.addColorStop(0, 'rgba(0,0,0,0)');
             grad.addColorStop(1, 'rgba(0,0,0,0.5)');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+          }
+          
+          // Smart Subtitle Masking: If aspect ratio is not 16:9, cover the bottom 12% to hide cut subtitles
+          if (state.aspectRatio !== '16/9') {
+            const maskHeight = canvas.height * 0.12;
+            const gradMask = ctx.createLinearGradient(0, canvas.height - maskHeight - 20, 0, canvas.height);
+            gradMask.addColorStop(0, 'rgba(0,0,0,0)');
+            gradMask.addColorStop(1, 'rgba(0,0,0,0.95)');
+            ctx.fillStyle = gradMask;
+            ctx.fillRect(0, canvas.height - maskHeight - 20, canvas.width, maskHeight + 20);
           }
           
           requestAnimationFrame(drawFrame);
@@ -800,8 +678,6 @@ async function renderResult() {
       document.getElementById('step4Status').textContent = `Render HD... ${Math.min(100, (totalElapsed/totalTargetDuration*100)).toFixed(0)}%`;
     }
 
-    sourceVideo.muted = true;
-    sourceVideo.playbackRate = 1;
     state.recorder.stop();
   });
 }
