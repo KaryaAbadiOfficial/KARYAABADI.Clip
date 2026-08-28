@@ -15,6 +15,7 @@
             --primary-hover: #4f46e5;
             --success: #10b981;
             --danger: #ef4444;
+            --warning: #f59e0b;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -79,7 +80,7 @@
         .project-info h4 { font-size: 14px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .project-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
         .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
-        .badge-processing { background: #f59e0b; color: black; }
+        .badge-processing { background: var(--warning); color: black; }
         .badge-ready { background: var(--success); color: white; }
         
         .editor-layout { display: flex; gap: 16px; height: calc(100vh - 65px); padding: 16px; }
@@ -115,13 +116,14 @@
         .score-row { display: flex; justify-content: space-between; margin-bottom: 4px; font-size: 13px; }
         .score-val { font-weight: 700; }
         .score-val.high { color: var(--success); }
-        .score-val.med { color: #f59e0b; }
+        .score-val.med { color: var(--warning); }
         .reason-box { background: rgba(99, 102, 241, 0.1); border: 1px solid var(--primary); border-radius: 6px; padding: 8px; margin-top: 8px; font-size: 12px; color: #a5b4fc; }
         
         .processing-view { max-width: 600px; margin: 0 auto; padding: 48px 24px; text-align: center; }
         .pipeline-step { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 8px; text-align: left; }
         .pipeline-step.done { opacity: 0.5; }
         .pipeline-step.active { border-color: var(--primary); box-shadow: 0 0 10px rgba(99, 102, 241, 0.2); }
+        .pipeline-step.error { border-color: var(--danger); }
         .spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .checkmark { width: 20px; height: 20px; color: var(--success); }
@@ -159,7 +161,7 @@
     <div id="dashboardView" class="container">
         <div class="hero">
             <h1>Ubah Video Panjang Menjadi <span>Clip Pendek</span></h1>
-            <p>AI mendengarkan suara, membuat teks otomatis per kata, dan memotong video per 20 detik. Berjalan di Background (Tanpa Stuck). 100% Browser.</p>
+            <p>AI membuat teks otomatis per kata dari ucapan, dan memotong video per 20 detik. Berjalan di Background. 100% Browser. Tanpa Login.</p>
         </div>
         
         <div class="grid-4">
@@ -194,7 +196,7 @@
     <!-- PROCESSING VIEW -->
     <div id="processingView" class="hidden processing-view">
         <h2 id="procTitle">Sedang Menganalisis Video...</h2>
-        <p style="color: var(--muted); margin-bottom: 32px;" id="procSubtitle">AI sedang mendengarkan suara di background. Anda bisa tetap menggulir halaman. Proses ini membutuhkan download model AI (sekali) dan memakan waktu sesuai durasi video.</p>
+        <p style="color: var(--muted); margin-bottom: 32px;" id="procSubtitle">AI sedang mendengarkan suara di background. Proses ini membutuhkan download model AI (sekali) dan memakan waktu sesuai durasi video.</p>
         <div id="pipelineSteps"></div>
     </div>
 
@@ -244,7 +246,7 @@
             <div class="form-group">
                 <label>Generator Hook Otomatis</label>
                 <select class="form-control" id="hookSelect" onchange="applyHook(this.value)">
-                    <option value="">Membuat hook...</option>
+                    <option value="">Pilih Hook...</option>
                 </select>
             </div>
 
@@ -318,7 +320,7 @@
             });
         }
 
-        // --- WEB WORKER FOR REAL AI WHISPER (Anti Stuck) ---
+        // --- ROBUST WEB WORKER FOR WHISPER AI (Anti-Stuck) ---
         const workerCode = `
             import { pipeline, env } from "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.1";
             env.allowLocalModels = false;
@@ -327,41 +329,84 @@
             let transcriber = null;
             self.onmessage = async (e) => {
                 if (!transcriber) {
-                    self.postMessage({ status: 'loading_model' });
-                    transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', {
-                        progress_callback: (data) => {
-                            if (data.status === 'progress') {
-                                self.postMessage({ status: 'model_progress', progress: data.progress });
+                    self.postMessage({ status: 'model_loading' });
+                    try {
+                        transcriber = await pipeline('automatic-speech-recognition', 'Xenova/whisper-tiny', {
+                            progress_callback: (data) => {
+                                if (data.status === 'progress') {
+                                    self.postMessage({ status: 'model_progress', progress: data.progress });
+                                }
                             }
-                        }
-                    });
+                        });
+                    } catch (err) {
+                        self.postMessage({ status: 'error', message: 'Gagal memuat model AI: ' + err.message });
+                        return;
+                    }
                 }
+                
                 self.postMessage({ status: 'transcribing' });
-                const output = await transcriber(e.data.audio, {
-                    return_timestamps: true,
-                    chunk_length_s: 20,
-                    stride_length_s: 2
-                });
-                self.postMessage({ status: 'done', chunks: output.chunks });
+                const heartbeat = setInterval(() => self.postMessage({ status: 'heartbeat' }), 2000);
+                
+                try {
+                    const output = await transcriber(e.data.audio, {
+                        return_timestamps: true,
+                        chunk_length_s: 20,
+                        stride_length_s: 2
+                    });
+                    clearInterval(heartbeat);
+                    self.postMessage({ status: 'done', chunks: output.chunks });
+                } catch (err) {
+                    clearInterval(heartbeat);
+                    self.postMessage({ status: 'error', message: 'Gagal transkripsi: ' + err.message });
+                }
             };
         `;
         const workerBlob = new Blob([workerCode], { type: 'application/javascript' });
         const workerUrl = URL.createObjectURL(workerBlob);
-        let aiWorker = new Worker(workerUrl);
+        // PERBAIKAN UTAMA: Worker harus diinisialisasi sebagai Module agar import berfungsi
+        let aiWorker = new Worker(workerUrl, { type: "module" });
+
+        let workerTimeout = null;
+        let lastHeartbeat = 0;
 
         aiWorker.onmessage = function(e) {
             const data = e.data;
             const subEl = document.getElementById('step-subtext-1');
-            if (data.status === 'loading_model') {
-                if(subEl) subEl.innerText = "Mengunduh model AI (sekali saja)...";
+            
+            if (data.status === 'model_loading') {
+                if(subEl) subEl.innerText = "Mengunduh model AI (40MB)...";
             } else if (data.status === 'model_progress') {
                 if(subEl) subEl.innerText = `Mengunduh: ${Math.round(data.progress)}%`;
             } else if (data.status === 'transcribing') {
-                if(subEl) subEl.innerText = "Sedang mendengarkan ucapan...";
+                if(subEl) subEl.innerText = "Mendengarkan ucapan...";
+                lastHeartbeat = Date.now();
+                // Failsafe: Jika tidak ada aktivitas > 60 detik, jalankan fallback
+                if (workerTimeout) clearTimeout(workerTimeout);
+                workerTimeout = setTimeout(() => {
+                    if (Date.now() - lastHeartbeat > 50000) {
+                        console.warn("Worker hang detected. Switching to Fallback.");
+                        aiWorker.terminate();
+                        fallbackToAudioMode();
+                    }
+                }, 60000);
+            } else if (data.status === 'heartbeat') {
+                lastHeartbeat = Date.now();
+                const elapsed = Math.floor((Date.now() - window._transcribeStart) / 1000);
+                if(subEl) subEl.innerText = `Mendengarkan... (${elapsed}s berlalu)`;
             } else if (data.status === 'done') {
+                if (workerTimeout) clearTimeout(workerTimeout);
                 if(subEl) subEl.innerText = "Selesai";
                 finishProcessing(data.chunks);
+            } else if (data.status === 'error') {
+                if (workerTimeout) clearTimeout(workerTimeout);
+                console.error("Worker Error:", data.message);
+                fallbackToAudioMode();
             }
+        };
+
+        aiWorker.onerror = function(e) {
+            console.error("Worker Init Error:", e.message);
+            fallbackToAudioMode();
         };
 
         // --- AUDIO EXTRACTION ---
@@ -392,6 +437,46 @@
             
             audioCtx.close();
             return audio;
+        }
+
+        // --- FALLBACK MODE (Jika AI gagal/beban berat) ---
+        async function fallbackToAudioMode() {
+            alert("Browser Anda terlalu berat untuk model AI. Sistem beralih ke mode Audio Cepat. Teks tidak per kata, namun video akan tetap dipotong 20 detik.");
+            try {
+                const file = await getVideoFromDB(currentProcessingProjectId);
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const decoded = await audioCtx.decodeAudioData(await file.arrayBuffer());
+                audioCtx.close();
+                
+                const data = decoded.getChannelData(0);
+                const block = Math.floor(decoded.sampleRate * 0.1);
+                const energy = [];
+                for (let i = 0; i < data.length; i += block) {
+                    let sum = 0;
+                    for (let j = 0; j < block; j++) { if (i + j < data.length) sum += Math.abs(data[i + j] || 0); }
+                    energy.push(sum / block);
+                }
+                const maxE = Math.max(...energy) || 1;
+                const normE = energy.map(e => e / maxE);
+                
+                const clips = [];
+                let currentTime = 0, id = 1;
+                while (currentTime < decoded.duration) {
+                    let size = 20;
+                    if (currentTime + size > decoded.duration) size = decoded.duration - currentTime;
+                    if (size < 5) break;
+                    clips.push({
+                        id: id, title: `Clip ${id} (20s)`, score: 85,
+                        start: currentTime, end: currentTime + size,
+                        transcript: [], fullText: "", caption: "MOMEN PENTING"
+                    });
+                    currentTime += size; id++;
+                }
+                finishProcessing(null, clips);
+            } catch (e) {
+                alert("Gagal total memproses audio.");
+                showView('dashboard');
+            }
         }
 
         // --- GENERATE CLIPS PER 20 DETIK ---
@@ -576,7 +661,7 @@
             const stepsContainer = document.getElementById('pipelineSteps');
             stepsContainer.innerHTML = '';
             document.getElementById('procTitle').innerText = "Menganalisis Video...";
-            document.getElementById('procSubtitle').innerText = "AI sedang mendengarkan suara di background. Anda bisa tetap menggulir halaman. Proses ini membutuhkan download model AI (sekali) dan memakan waktu sesuai durasi video.";
+            document.getElementById('procSubtitle').innerText = "AI sedang mendengarkan suara di background. Proses ini membutuhkan download model AI (sekali) dan memakan waktu sesuai durasi video.";
 
             const steps = [
                 { name: "Mengekstrak Audio", id: 0 },
@@ -600,21 +685,23 @@
                 stepsContainer.children[0].innerHTML = `<svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <div>Mengekstrak Audio Selesai</div>`;
 
                 window._videoDuration = await getVideoDuration(file);
+                window._transcribeStart = Date.now();
                 
                 // Kirim audio ke Worker (Background Process)
                 aiWorker.postMessage({ audio: window._extractedAudio });
             } catch (e) {
-                alert("Gagal memproses: " + e.message);
+                alert("Gagal memproses audio: " + e.message);
+                showView('dashboard');
             }
         }
 
-        async function finishProcessing(chunks) {
+        async function finishProcessing(chunks, fallbackClips = null) {
             const stepsContainer = document.getElementById('pipelineSteps');
             stepsContainer.children[1].className = 'pipeline-step done';
             stepsContainer.children[1].innerHTML = `<svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <div>Transkripsi Selesai</div>`;
             
             stepsContainer.children[2].className = 'pipeline-step active';
-            const generatedClips = generateClipsFromTranscript(chunks, window._videoDuration);
+            const generatedClips = fallbackClips ? fallbackClips : generateClipsFromTranscript(chunks, window._videoDuration);
             
             await new Promise(r => setTimeout(r, 300));
             
