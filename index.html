@@ -189,7 +189,7 @@ html, body {
       <div class="logo-icon"><i class="fas fa-bolt"></i></div>
       <span class="logo-text">ANIME CLIPPER AI</span>
     </div>
-    <div class="badge"><i class="fas fa-rocket"></i> Turbo Action Engine v7.0</div>
+    <div class="badge"><i class="fas fa-rocket"></i> Turbo Action Engine v8.0</div>
   </header>
 
   <div class="main-grid">
@@ -223,7 +223,7 @@ html, body {
           <button class="aspect-btn" data-ratio="1/1" data-w="800" data-h="800"><i class="fas fa-square"></i><span>1:1 HD</span></button>
           <button class="aspect-btn" data-ratio="4/5" data-w="864" data-h="1080"><i class="fas fa-rectangle-portrait"></i><span>4:5 HD</span></button>
         </div>
-        <p style="font-size: 11px; color: var(--text-faint); margin-top: 4px;">* Target 30 Detik. Lewati Opening. Action pas tidak terpotong. Subtitle terpotong akan ditutupi.</p>
+        <p style="font-size: 11px; color: var(--text-faint); margin-top: 4px;">* Target 30 Detik. Action pas tepat di tengah. Subtitle bawaan tertutup.</p>
       </div>
 
       <div class="steps">
@@ -237,15 +237,15 @@ html, body {
         <div class="step" id="step2">
           <div class="step-icon"><i class="fas fa-forward"></i></div>
           <div class="step-info">
-            <div class="step-name">2. Skip Opening & Smart Scan</div>
-            <div class="step-status" id="step2Status">Lewati intro, cari action</div>
+            <div class="step-name">2. Skip Opening & Peak Scan</div>
+            <div class="step-status" id="step2Status">Cari puncak gerakan tercepat</div>
           </div>
         </div>
         <div class="step" id="step3">
           <div class="step-icon"><i class="fas fa-gauge-high"></i></div>
           <div class="step-info">
             <div class="step-name">3. Action Cut 30s + Slow Mo</div>
-            <div class="step-status" id="step3Status">Menyusun momen aksi terbaik</div>
+            <div class="step-status" id="step3Status">Susun momen terbaik</div>
           </div>
         </div>
         <div class="step" id="step4">
@@ -318,7 +318,9 @@ const state = {
   audioCtx: null,
   mediaElementSource: null,
   speakerGain: null,
-  mediaDest: null
+  mediaDest: null,
+  startSkip: 0,
+  endSkip: 0
 };
 
 const dropzone = document.getElementById('dropzone');
@@ -427,13 +429,13 @@ async function startAutoCut() {
     setupAudioGraph();
     if (state.audioCtx.state === 'suspended') await state.audioCtx.resume();
     
-    setStepStatus(2, 'active', 'Melewati opening & scan action...');
+    setStepStatus(2, 'active', 'Melewati opening & cari puncak action...');
     await analyzeVideoSmart();
-    setStepStatus(2, 'done', `Selesai!`);
+    setStepStatus(2, 'done', `Ditemukan ${state.analysisData.length} potensi action`);
     
-    setStepStatus(3, 'active', 'Memilih aksi terbaik...');
+    setStepStatus(3, 'active', 'Memilih action terbaik...');
     selectActionMoments();
-    setStepStatus(3, 'done', `${state.selectedSegments.length} segmen aksi dipilih`);
+    setStepStatus(3, 'done', `${state.selectedSegments.length} segmen disusun`);
     
     renderTimelineViz();
     
@@ -441,7 +443,7 @@ async function startAutoCut() {
     await renderResult();
     setStepStatus(4, 'done', 'Render selesai');
     
-    document.getElementById('scanningLine').classList.remove('hidden');
+    document.getElementById('scanningLine').classList.add('hidden');
     resultContainer.classList.add('active');
     showToast('Anime Clip berhasil dibuat!', 'success');
     
@@ -454,7 +456,7 @@ async function startAutoCut() {
   }
 }
 
-// SMART ACTION SCAN v2: Skip Opening (15%) & Outro (5%)
+// SMART PEAK SCAN: Scan every 0.5s to find the exact frame of action
 async function analyzeVideoSmart() {
   return new Promise(async (resolve) => {
     const video = videoPlayer;
@@ -468,12 +470,11 @@ async function analyzeVideoSmart() {
     state.analysisData = [];
     let prevFrame = null;
     
-    // Skip Opening (15% or max 30s) and Outro (5% or max 15s)
-    const startSkip = Math.min(30, state.duration * 0.15);
-    const endSkip = state.duration - Math.min(15, state.duration * 0.05);
-    const step = 2.5; // Larger segment for complete action moves
+    state.startSkip = Math.min(30, state.duration * 0.15);
+    state.endSkip = state.duration - Math.min(15, state.duration * 0.05);
+    const step = 0.5; // Fine scanning every 0.5s
     
-    for (let t = startSkip; t < endSkip - step; t += step) {
+    for (let t = state.startSkip; t < state.endSkip - step; t += step) {
       video.currentTime = t;
       
       await new Promise(r => {
@@ -498,46 +499,70 @@ async function analyzeVideoSmart() {
         prevFrame = frame;
         
         const score = Math.pow(diff, 1.2); 
-        state.analysisData.push({ time: t, score, start: t, end: t + step });
-        document.getElementById('step2Status').textContent = `Scan action (Intro dilewati)... ${Math.min(100, (t/endSkip*100)).toFixed(0)}%`;
+        state.analysisData.push({ time: t, score });
+        document.getElementById('step2Status').textContent = `Cari action (Intro dilewati)... ${Math.min(100, (t/state.endSkip*100)).toFixed(0)}%`;
       }
     }
     resolve();
   });
 }
 
+// ACTION SELECTOR: Center segments exactly around the peak
 function selectActionMoments() {
   const targetDuration = 30;
-  const segmentLength = 2.5; 
   
-  const windows = state.analysisData.map(d => ({
-    start: d.start,
-    end: d.end,
-    score: d.score,
-    speed: 1,
-    outDuration: segmentLength
-  })).filter(w => w.score > 2); 
+  // Sort by score to find absolute best peaks
+  const sortedPeaks = [...state.analysisData].sort((a, b) => b.score - a.score);
   
-  const sortedByScore = [...windows].sort((a, b) => b.score - a.score);
-  
-  // Top 2 epic moments become slow motion (1.5s source -> 3.75s output)
-  const slowMoCount = Math.min(2, sortedByScore.length);
-  for (let i = 0; i < slowMoCount; i++) {
-    sortedByScore[i].speed = 0.4;
-    sortedByScore[i].outDuration = (1.5 / 0.4); // 3.75s output
-    sortedByScore[i].end = sortedByScore[i].start + 1.5; // Source only needs 1.5s
-  }
-
   const selected = [];
   let totalOutDuration = 0;
+  const minDistance = 2.0; // Avoid picking peaks that are too close
   
-  sortedByScore.forEach(win => {
-    if (totalOutDuration < targetDuration) {
-      selected.push(win);
-      totalOutDuration += win.outDuration;
+  for (const peak of sortedPeaks) {
+    if (totalOutDuration >= targetDuration) break;
+    if (peak.score < 2) break; // Threshold for "action"
+    
+    // Check distance to already selected segments
+    let tooClose = false;
+    for (const sel of selected) {
+      if (Math.abs(sel.start - peak.time) < minDistance) {
+        tooClose = true;
+        break;
+      }
     }
-  });
+    if (tooClose) continue;
+    
+    // Determine if this should be slow-mo (max 2)
+    let isSlowMo = selected.filter(s => s.speed < 1).length < 2;
+    let speed = isSlowMo ? 0.4 : 1.0;
+    let srcDuration = isSlowMo ? 1.2 : 2.0; // 1.2s for slowmo, 2.0s for normal
+    let outDuration = srcDuration / speed;
+    
+    // Center segment around the peak
+    let start = peak.time - (srcDuration / 2);
+    let end = peak.time + (srcDuration / 2);
+    
+    // Clamp to video bounds
+    if (start < state.startSkip) {
+      start = state.startSkip;
+      end = start + srcDuration;
+    }
+    if (end > state.endSkip) {
+      end = state.endSkip;
+      start = end - srcDuration;
+    }
+    
+    selected.push({
+      start: start,
+      end: end,
+      speed: speed,
+      outDuration: outDuration
+    });
+    
+    totalOutDuration += outDuration;
+  }
 
+  // Sort chronologically
   selected.sort((a, b) => a.start - b.start);
   state.selectedSegments = selected;
 }
@@ -562,8 +587,7 @@ function renderTimelineViz() {
     if (slowMoTimes.has(i)) bar.classList.add('slowmo');
     else if (selectedTimes.has(i)) bar.classList.add('selected');
     
-    const height = 5;
-    bar.style.height = `${height}%`;
+    bar.style.height = `5%`;
     timelineViz.appendChild(bar);
   }
 }
@@ -575,18 +599,17 @@ function drawImageCoverSmart(ctx, video, x, y, w, h, zoom = 1) {
   let sx, sy, sw, sh;
 
   if (vRatio > dRatio) {
-    // Video is wider than canvas (crop sides) - Subtitles at bottom are SAFE
+    // Crop sides - Full height is kept, subtitles are SAFE
     sh = video.videoHeight / zoom;
     sw = sh * dRatio;
     sx = (video.videoWidth - sw) / 2;
     sy = 0;
   } else {
-    // Video is taller than canvas (crop top/bottom) - Subtitles at bottom are AT RISK
-    // Shift crop UP by 15% to protect the bottom area
+    // Crop top/bottom - Shift UP 20% to protect bottom subtitles
     sw = video.videoWidth / zoom;
     sh = sw / dRatio;
     sx = 0;
-    sy = (video.videoHeight - sh) * 0.15; // Shift up
+    sy = (video.videoHeight - sh) * 0.2; // Shifted up
   }
   ctx.drawImage(video, sx, sy, sw, sh, x, y, w, h);
 }
@@ -659,14 +682,20 @@ async function renderResult() {
             ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
           
-          // Smart Subtitle Masking: If aspect ratio is not 16:9, cover the bottom 12% to hide cut subtitles
+          // AGGRESSIVE SUBTITLE MASKING
           if (state.aspectRatio !== '16/9') {
-            const maskHeight = canvas.height * 0.12;
-            const gradMask = ctx.createLinearGradient(0, canvas.height - maskHeight - 20, 0, canvas.height);
+            // Solid Black Bar at the bottom 12%
+            const solidH = canvas.height * 0.12;
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(0, canvas.height - solidH, canvas.width, solidH);
+            
+            // Gradient Blend above the solid bar (15% height)
+            const gradH = canvas.height * 0.15;
+            const gradMask = ctx.createLinearGradient(0, canvas.height - solidH - gradH, 0, canvas.height - solidH);
             gradMask.addColorStop(0, 'rgba(0,0,0,0)');
-            gradMask.addColorStop(1, 'rgba(0,0,0,0.95)');
+            gradMask.addColorStop(1, 'rgba(0,0,0,1)');
             ctx.fillStyle = gradMask;
-            ctx.fillRect(0, canvas.height - maskHeight - 20, canvas.width, maskHeight + 20);
+            ctx.fillRect(0, canvas.height - solidH - gradH, canvas.width, gradH);
           }
           
           requestAnimationFrame(drawFrame);
