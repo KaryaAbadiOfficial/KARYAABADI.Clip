@@ -78,7 +78,7 @@
         .project-info { padding: 12px; }
         .project-info h4 { font-size: 14px; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .project-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
-        .badge { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
+        .badge { padding: 2px; 6px; border-radius: 4px; font-size: 10px; font-weight: 700; }
         .badge-processing { background: #f59e0b; color: black; }
         .badge-ready { background: var(--success); color: white; }
         
@@ -103,7 +103,7 @@
         .video-container { position: relative; background: black; overflow: hidden; max-height: 70vh; transition: aspect-ratio 0.3s; aspect-ratio: 9/16; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .video-container video { width: 100%; height: 100%; object-fit: cover; }
         .caption-overlay { position: absolute; bottom: 10%; left: 0; right: 0; text-align: center; padding: 0 16px; pointer-events: none; }
-        .caption-text { display: inline-block; background: black; color: white; font-weight: 800; font-size: 24px; padding: 4px 8px; text-transform: uppercase; border-radius: 4px; }
+        .caption-text { display: inline-block; background: black; color: white; font-weight: 800; font-size: 24px; padding: 4px 8px; text-transform: uppercase; border-radius: 4px; transition: opacity 0.1s; }
         
         .settings-panel { width: 300px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; overflow-y: auto; flex-shrink: 0; }
         .form-group { margin-bottom: 16px; }
@@ -132,6 +132,10 @@
         .progress-bar-bg { width: 100%; height: 8px; background: var(--bg); border-radius: 4px; margin: 16px 0; overflow: hidden; }
         .progress-bar-fill { height: 100%; background: var(--success); width: 0%; transition: width 0.3s; }
         
+        .switch-group { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+        .switch-group input { width: 20px; height: 20px; cursor: pointer; }
+        .switch-group label { margin-bottom: 0; cursor: pointer; }
+        
         .hidden { display: none !important; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: var(--bg); }
@@ -154,7 +158,7 @@
     <div id="dashboardView" class="container">
         <div class="hero">
             <h1>Turn Long Videos Into <span>Short Clips</span></h1>
-            <p>AI automatically finds the best moments, edits them, adds captions, reframes the video, and exports ready-to-post MP4 clips. 100% Browser Native. No Login.</p>
+            <p>AI automatically finds the best moments, generates dynamic hooks, adds captions, reframes the video, and exports ready-to-post MP4 clips. 100% Browser Native. No Login.</p>
         </div>
         
         <div class="grid-4">
@@ -189,7 +193,7 @@
     <!-- PROCESSING VIEW -->
     <div id="processingView" class="hidden processing-view">
         <h2 id="procTitle">Analyzing Video...</h2>
-        <p style="color: var(--muted); margin-bottom: 32px;">AI is scanning your video to find the best moments.</p>
+        <p style="color: var(--muted); margin-bottom: 32px;">AI is scanning your video to find the best moments, transcribe audio, and generate hooks.</p>
         <div id="pipelineSteps"></div>
     </div>
 
@@ -219,7 +223,7 @@
                 </div>
             </div>
             <div style="display:flex; gap: 8px; font-size: 12px; color: var(--muted);">
-                <span>* Video di-crop otomatis. Audio asli akan ikut terender bersama video.</span>
+                <span>* Teks otomatis (Auto Caption) & Hook Generator menyesuaikan dengan isi video.</span>
             </div>
         </div>
 
@@ -237,22 +241,25 @@
             </div>
 
             <div class="form-group">
-                <label>AI Hook Generator</label>
-                <select class="form-control" id="hookSelect" onchange="updateCaption()">
-                    <option value="MOST PEOPLE MAKE THIS MISTAKE">Option 1: Most people make this mistake</option>
-                    <option value="THE SECRET NOBODY TELLS YOU">Option 2: The secret nobody tells you</option>
-                    <option value="IF I STARTED AGAIN I WOULD DO THIS">Option 3: If I started again...</option>
+                <label>AI Hook Generator (Contextual)</label>
+                <select class="form-control" id="hookSelect" onchange="applyHook(this.value)">
+                    <option value="">Generating hooks...</option>
                 </select>
             </div>
 
-            <div class="form-group">
-                <label>Caption Editor (Burned into Video)</label>
-                <textarea class="form-control" id="captionText" oninput="document.getElementById('captionPreview').innerText = this.value">MOST PEOPLE MAKE THIS MISTAKE</textarea>
+            <div class="switch-group">
+                <input type="checkbox" id="autoCaptionToggle" checked onchange="toggleAutoCaption()">
+                <label for="autoCaptionToggle" style="font-size: 14px; font-weight: 600;">Gunakan Teks Otomatis (Dynamic)</label>
+            </div>
+
+            <div class="form-group" id="manualCaptionGroup" style="display:none;">
+                <label>Manual Caption Editor</label>
+                <textarea class="form-control" id="captionText" oninput="document.getElementById('captionPreview').innerText = this.value"></textarea>
             </div>
 
             <div class="form-group">
                 <label>Title for Post</label>
-                <input type="text" class="form-control" id="postTitle" value="The Biggest Business Mistake">
+                <input type="text" class="form-control" id="postTitle" value="">
             </div>
 
             <button class="btn btn-secondary" style="width: 100%; margin-bottom: 8px;" onclick="startExport(false)">Download Single Clip</button>
@@ -278,7 +285,6 @@
         let currentClip = null;
         let db = null;
         
-        // Initialize IndexedDB for storing actual video files
         const DB_NAME = 'ClipForgeDB';
         const request = indexedDB.open(DB_NAME, 1);
         request.onupgradeneeded = (e) => {
@@ -286,7 +292,7 @@
             if (!db.objectStoreNames.contains('videos')) db.createObjectStore('videos');
         };
         request.onsuccess = (e) => { db = e.target.result; refreshDashboard(); };
-        request.onerror = () => { alert("IndexedDB failed. App cannot store videos."); };
+        request.onerror = () => { alert("IndexedDB failed."); };
 
         function saveVideoToDB(id, file) {
             return new Promise((resolve) => {
@@ -313,12 +319,49 @@
         // --- MOCK AI DATA ---
         const mockPipeline = [
             "Extracting Audio", "Transcribing (Whisper)", "Scene Detection", 
-            "Speaker Detection", "Highlight Detection", "Clip Scoring", "Generating Captions"
+            "Speaker Detection", "Highlight Detection", "Clip Scoring", "Generating Hooks & Captions"
         ];
+        
+        // Clip sekarang memiliki 'fullText' untuk dianalisis oleh Hook Generator
         const mockClips = [
-            { id: 1, title: "Business Mistake", score: 94, start: 5, end: 20, caption: "MOST PEOPLE MAKE THIS MISTAKE" },
-            { id: 2, title: "Secret to Success", score: 89, start: 25, end: 45, caption: "THE SECRET NOBODY TELLS YOU" },
-            { id: 3, title: "Why We Fail", score: 85, start: 50, end: 70, caption: "HERE IS WHY WE ACTUALLY FAIL" }
+            { 
+                id: 1, title: "Business Mistake", score: 94, start: 5, end: 15, 
+                fullText: "Most people make this mistake when starting a new business. They focus on the wrong things.",
+                transcript: [
+                    { text: "MOST PEOPLE", start: 5.0, end: 5.8 },
+                    { text: "MAKE THIS MISTAKE", start: 5.9, end: 6.8 },
+                    { text: "WHEN STARTING", start: 7.5, end: 8.3 },
+                    { text: "A NEW BUSINESS", start: 8.4, end: 9.2 },
+                    { text: "THEY FOCUS", start: 10.0, end: 10.5 },
+                    { text: "ON THE WRONG", start: 10.6, end: 11.2 },
+                    { text: "THINGS", start: 11.3, end: 12.0 }
+                ],
+                caption: "MOST PEOPLE MAKE THIS MISTAKE" 
+            },
+            { 
+                id: 2, title: "Secret to Success", score: 89, start: 25, end: 35, 
+                fullText: "The secret to success is not what you think. It's about consistency and focus.",
+                transcript: [
+                    { text: "THE SECRET TO", start: 25.0, end: 25.5 },
+                    { text: "SUCCESS IS NOT", start: 25.6, end: 26.2 },
+                    { text: "WHAT YOU THINK", start: 26.3, end: 27.0 },
+                    { text: "IT'S ABOUT", start: 28.0, end: 28.5 },
+                    { text: "CONSISTENCY", start: 28.6, end: 29.5 }
+                ],
+                caption: "THE SECRET NOBODY TELLS YOU" 
+            },
+            { 
+                id: 3, title: "Why We Fail", score: 85, start: 50, end: 60, 
+                fullText: "Here is why we actually fail in life. It happens slowly, then suddenly.",
+                transcript: [
+                    { text: "HERE IS WHY", start: 50.0, end: 50.5 },
+                    { text: "WE ACTUALLY FAIL", start: 50.6, end: 51.5 },
+                    { text: "IT HAPPENS", start: 52.5, end: 53.0 },
+                    { text: "SLOWLY", start: 53.1, end: 53.6 },
+                    { text: "THEN SUDDENLY", start: 54.5, end: 55.3 }
+                ],
+                caption: "HERE IS WHY WE ACTUALLY FAIL" 
+            }
         ];
 
         // --- ROUTING / VIEWS ---
@@ -416,7 +459,7 @@
                 stepEl.innerHTML = `<div class="spinner"></div> <div>${step}...</div>`;
                 stepsContainer.appendChild(stepEl);
 
-                await new Promise(r => setTimeout(r, 800)); // Realistic delay
+                await new Promise(r => setTimeout(r, 800)); 
 
                 stepEl.className = 'pipeline-step done';
                 stepEl.innerHTML = `<svg class="checkmark" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg> <div>${step} Complete</div>`;
@@ -431,6 +474,24 @@
             openProject(projectId);
         }
 
+        // --- DYNAMIC AI HOOK ENGINE ---
+        function generateHooks(clip) {
+            if (!clip || !clip.fullText) return [];
+            
+            const text = clip.fullText;
+            const firstSentence = text.split('.')[0].trim();
+            const words = firstSentence.split(' ');
+            const subject = words.length > 3 ? words.slice(0, 3).join(' ') : firstSentence;
+            
+            // Buat 4 variasi hook berdasarkan teks asli video
+            return [
+                `Did you know: ${firstSentence.toLowerCase()}?`,
+                `The truth about ${subject.toLowerCase()}...`,
+                `Why ${subject.toLowerCase()} is changing everything.`,
+                `Stop doing this if you want to win: ${firstSentence.toLowerCase()}`
+            ];
+        }
+
         // --- EDITOR LOGIC ---
         async function openProject(projectId) {
             currentProject = projects.find(p => p.id === projectId);
@@ -441,6 +502,9 @@
             if (file) {
                 document.getElementById('videoPlayer').src = URL.createObjectURL(file);
             }
+            
+            const video = document.getElementById('videoPlayer');
+            video.ontimeupdate = updateAutoCaption;
             
             renderClips();
         }
@@ -470,11 +534,27 @@
             document.getElementById('sVirality').textContent = currentClip.score;
             document.getElementById('sHook').textContent = Math.max(80, currentClip.score - 3);
             document.getElementById('captionText').value = currentClip.caption;
-            document.getElementById('captionPreview').innerText = currentClip.caption;
+            document.getElementById('postTitle').value = currentClip.title;
             
+            // Generate dan isi dropdown Hook berdasarkan teks video
+            const hooks = generateHooks(currentClip);
+            const hookSelect = document.getElementById('hookSelect');
+            hookSelect.innerHTML = `<option value="${currentClip.caption}">Original: ${currentClip.caption}</option>`;
+            hooks.forEach((hook, i) => {
+                hookSelect.innerHTML += `<option value="${hook.toUpperCase()}">Option ${i+1}: ${hook}</option>`;
+            });
+
             const video = document.getElementById('videoPlayer');
             video.currentTime = currentClip.start;
             renderClips();
+        }
+
+        function applyHook(hookText) {
+            // Jika user manual caption aktif, update teksnya
+            document.getElementById('captionText').value = hookText;
+            if (!document.getElementById('autoCaptionToggle').checked) {
+                document.getElementById('captionPreview').innerText = hookText;
+            }
         }
 
         function setRatio(ratio, btn) {
@@ -483,12 +563,36 @@
             document.getElementById('videoContainer').style.aspectRatio = ratio;
         }
 
-        // --- REAL EXPORT LOGIC (AudioContext Fix) ---
+        function toggleAutoCaption() {
+            const isAuto = document.getElementById('autoCaptionToggle').checked;
+            document.getElementById('manualCaptionGroup').style.display = isAuto ? 'none' : 'block';
+            if (!isAuto) {
+                document.getElementById('captionPreview').innerText = document.getElementById('captionText').value;
+            }
+        }
+
+        function updateAutoCaption() {
+            const isAuto = document.getElementById('autoCaptionToggle').checked;
+            if (!isAuto || !currentClip) return;
+            
+            const video = document.getElementById('videoPlayer');
+            const currentTime = video.currentTime;
+            
+            const activeWord = currentClip.transcript.find(t => currentTime >= t.start && currentTime <= t.end);
+            
+            const captionEl = document.getElementById('captionPreview');
+            if (activeWord) {
+                captionEl.innerText = activeWord.text;
+                captionEl.style.opacity = 1;
+            } else {
+                captionEl.style.opacity = 0;
+            }
+        }
+
+        // --- REAL EXPORT LOGIC ---
         async function startExport(isBatch) {
             if (!currentProject) return;
             
-            // 1. Synchronously create AudioContext during user gesture (button click)
-            // This bypasses browser autoplay policy and ensures audio is captured.
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             
             const modal = document.getElementById('exportModal');
@@ -546,7 +650,7 @@
                 const video = document.createElement('video');
                 video.src = URL.createObjectURL(file);
                 video.crossOrigin = "anonymous";
-                video.muted = false; // Must be false for WebAudio to capture
+                video.muted = false; 
                 video.volume = 1.0;
                 
                 await new Promise(r => video.onloadedmetadata = r);
@@ -560,27 +664,17 @@
                 
                 const videoStream = canvas.captureStream(30);
                 
-                // Setup Audio using the PASSED audioCtx (which is already running)
                 let audioStreamTracks = [];
                 try {
-                    if (audioCtx.state === 'suspended') {
-                        await audioCtx.resume();
-                    }
+                    if (audioCtx.state === 'suspended') await audioCtx.resume();
                     const sourceNode = audioCtx.createMediaElementSource(video);
                     const destNode = audioCtx.createMediaStreamDestination();
                     sourceNode.connect(destNode);
-                    // Do NOT connect to audioCtx.destination to keep speakers silent
                     audioStreamTracks = destNode.stream.getAudioTracks();
-                } catch (e) {
-                    console.warn("Audio capture failed, exporting video only:", e);
-                }
+                } catch (e) { console.warn("Audio capture failed:", e); }
 
-                const mixedStream = new MediaStream([
-                    ...videoStream.getVideoTracks(),
-                    ...audioStreamTracks
-                ]);
+                const mixedStream = new MediaStream([...videoStream.getVideoTracks(), ...audioStreamTracks]);
 
-                // Determine best codec and extension to ensure audio plays in video players
                 let mimeType = 'video/mp4;codecs=h264,aac';
                 if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=h264,opus';
                 if (!MediaRecorder.isTypeSupported(mimeType)) mimeType = 'video/webm;codecs=vp9,opus';
@@ -592,9 +686,7 @@
                 const recorder = new MediaRecorder(mixedStream, { mimeType, videoBitsPerSecond: 5000000 });
                 const chunks = [];
                 recorder.ondataavailable = e => chunks.push(e.data);
-                recorder.onstop = () => {
-                    resolve({ blob: new Blob(chunks, { type: mimeType }), ext });
-                };
+                recorder.onstop = () => { resolve({ blob: new Blob(chunks, { type: mimeType }), ext }); };
 
                 recorder.start(100);
                 video.play().catch(e => console.warn("Play prevented:", e));
@@ -612,28 +704,35 @@
                     const vw = video.videoWidth, vh = video.videoHeight;
                     const targetRatio = 9 / 16, videoRatio = vw / vh;
                     let sx, sy, sw, sh;
-
                     if (videoRatio > targetRatio) {
-                        sh = vh; sw = vh * targetRatio;
-                        sx = (vw - sw) / 2; sy = 0;
+                        sh = vh; sw = vh * targetRatio; sx = (vw - sw) / 2; sy = 0;
                     } else {
-                        sw = vw; sh = vw / targetRatio;
-                        sx = 0; sy = (vh - sh) / 2;
+                        sw = vw; sh = vw / targetRatio; sx = 0; sy = (vh - sh) / 2;
                     }
-
                     ctx.drawImage(video, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
 
-                    const capText = document.getElementById('captionText').value;
-                    ctx.font = 'bold 40px Arial';
-                    ctx.textAlign = 'center';
-                    ctx.fillStyle = 'black';
-                    ctx.strokeStyle = 'white';
-                    ctx.lineWidth = 2;
-                    const x = canvas.width / 2, y = canvas.height - 150;
-                    const metrics = ctx.measureText(capText);
-                    ctx.fillRect(x - metrics.width/2 - 10, y - 35, metrics.width + 20, 45);
-                    ctx.fillStyle = 'white';
-                    ctx.fillText(capText, x, y);
+                    let textToDraw = "";
+                    const isAuto = document.getElementById('autoCaptionToggle').checked;
+                    
+                    if (isAuto) {
+                        const activeWord = clip.transcript.find(t => video.currentTime >= t.start && video.currentTime <= t.end);
+                        if (activeWord) textToDraw = activeWord.text;
+                    } else {
+                        textToDraw = document.getElementById('captionText').value;
+                    }
+
+                    if (textToDraw) {
+                        ctx.font = 'bold 40px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillStyle = 'black';
+                        ctx.strokeStyle = 'white';
+                        ctx.lineWidth = 2;
+                        const x = canvas.width / 2, y = canvas.height - 150;
+                        const metrics = ctx.measureText(textToDraw);
+                        ctx.fillRect(x - metrics.width/2 - 10, y - 35, metrics.width + 20, 45);
+                        ctx.fillStyle = 'white';
+                        ctx.fillText(textToDraw, x, y);
+                    }
 
                     const elapsed = (Date.now() - startTime) / 1000;
                     progressCb(elapsed / duration);
@@ -644,7 +743,6 @@
             });
         }
 
-        // Init
         showView('dashboard');
     </script>
 </body>
