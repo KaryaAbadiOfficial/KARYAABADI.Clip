@@ -137,7 +137,6 @@ html, body {
   gap: 8px;
 }
 
-/* Upload Zone */
 .upload-zone {
   border: 2px dashed var(--border-light);
   border-radius: 12px;
@@ -154,16 +153,8 @@ html, body {
   justify-content: center;
 }
 
-.upload-zone:hover {
-  border-color: var(--accent-3);
-  background: rgba(255, 45, 117, 0.03);
-}
-
-.upload-zone.dragging {
-  border-color: var(--accent-3);
-  background: rgba(255, 45, 117, 0.08);
-  transform: scale(1.02);
-}
+.upload-zone:hover { border-color: var(--accent-3); background: rgba(255, 45, 117, 0.03); }
+.upload-zone.dragging { border-color: var(--accent-3); background: rgba(255, 45, 117, 0.08); transform: scale(1.02); }
 
 .upload-icon {
   width: 60px;
@@ -177,15 +168,10 @@ html, body {
   color: var(--text-dim);
 }
 
-.upload-zone:hover .upload-icon {
-  background: var(--accent-3);
-  color: white;
-}
-
+.upload-zone:hover .upload-icon { background: var(--accent-3); color: white; }
 .upload-text h3 { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
 .upload-text p { font-size: 13px; color: var(--text-faint); }
 
-/* Video Preview */
 .video-wrapper {
   position: relative;
   width: 100%;
@@ -198,285 +184,99 @@ html, body {
   justify-content: center;
 }
 
-.video-wrapper video {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
+.video-wrapper video { width: 100%; height: 100%; object-fit: contain; }
 
 .video-overlay {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(4px);
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 11px;
-  font-weight: 600;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  position: absolute; top: 12px; left: 12px;
+  background: rgba(0,0,0,0.7); backdrop-filter: blur(4px);
+  padding: 6px 12px; border-radius: 6px;
+  font-size: 11px; font-weight: 600; color: white;
+  display: flex; align-items: center; gap: 6px;
 }
 
-/* Controls */
-.control-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+.control-group { display: flex; flex-direction: column; gap: 8px; }
+.control-label { font-size: 12px; font-weight: 600; color: var(--text-dim); text-transform: uppercase; }
 
-.control-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-dim);
-  text-transform: uppercase;
-}
-
-.aspect-control {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
+.aspect-control { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .aspect-btn {
-  background: var(--bg-3);
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  padding: 10px;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  background: var(--bg-3); border: 1px solid var(--border); color: var(--text-dim);
+  padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
-
 .aspect-btn i { font-size: 16px; }
+.aspect-btn:hover { border-color: var(--border-light); color: var(--text); }
+.aspect-btn.active { background: rgba(255, 45, 117, 0.1); border-color: var(--accent-3); color: var(--accent-3); }
 
-.aspect-btn:hover {
-  border-color: var(--border-light);
-  color: var(--text);
-}
-
-.aspect-btn.active {
-  background: rgba(255, 45, 117, 0.1);
-  border-color: var(--accent-3);
-  color: var(--accent-3);
-}
-
-/* Buttons */
 .btn {
-  padding: 14px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  border: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.2s;
-  width: 100%;
+  padding: 14px 20px; border-radius: 8px; font-weight: 600; font-size: 14px;
+  cursor: pointer; border: none; display: flex; align-items: center; justify-content: center;
+  gap: 8px; transition: all 0.2s; width: 100%;
 }
 
-.btn-primary {
-  background: linear-gradient(135deg, var(--accent-3), var(--accent-2));
-  color: white;
-  box-shadow: 0 4px 12px rgba(255, 45, 117, 0.2);
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 45, 117, 0.35);
-}
-
-.btn-primary:disabled {
-  background: var(--bg-4);
-  color: var(--text-faint);
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-}
-
-.btn-secondary {
-  background: var(--bg-3);
-  color: var(--text);
-  border: 1px solid var(--border-light);
-}
-
+.btn-primary { background: linear-gradient(135deg, var(--accent-3), var(--accent-2)); color: white; box-shadow: 0 4px 12px rgba(255, 45, 117, 0.2); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255, 45, 117, 0.35); }
+.btn-primary:disabled { background: var(--bg-4); color: var(--text-faint); cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-secondary { background: var(--bg-3); color: var(--text); border: 1px solid var(--border-light); }
 .btn-secondary:hover { background: var(--bg-4); }
 
-/* Analysis Steps */
-.steps {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
+.steps { display: flex; flex-direction: column; gap: 10px; }
 .step {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: var(--bg-2);
-  border-radius: 8px;
-  border: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px; padding: 12px;
+  background: var(--bg-2); border-radius: 8px; border: 1px solid var(--border);
   transition: all 0.3s;
 }
-
-.step.active {
-  border-color: var(--accent-3);
-  background: rgba(255, 45, 117, 0.05);
-}
-
-.step.done {
-  border-color: var(--success);
-  background: rgba(0, 217, 126, 0.05);
-}
-
+.step.active { border-color: var(--accent-3); background: rgba(255, 45, 117, 0.05); }
+.step.done { border-color: var(--success); background: rgba(0, 217, 126, 0.05); }
 .step-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: var(--bg-4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  color: var(--text-dim);
-  flex-shrink: 0;
+  width: 32px; height: 32px; border-radius: 50%; background: var(--bg-4);
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  color: var(--text-dim); flex-shrink: 0;
 }
-
 .step.active .step-icon { background: var(--accent-3); color: white; }
 .step.done .step-icon { background: var(--success); color: white; }
-
 .step-info { flex: 1; }
 .step-name { font-size: 13px; font-weight: 600; }
 .step-status { font-size: 11px; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
 
-/* Timeline Visualization */
 .timeline-viz {
-  height: 60px;
-  background: var(--bg-2);
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  align-items: flex-end;
-  padding: 2px;
+  height: 60px; background: var(--bg-2); border-radius: 8px; border: 1px solid var(--border);
+  position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 2px;
 }
-
 .timeline-bar {
-  flex: 1;
-  background: var(--bg-4);
-  margin: 0 1px;
-  border-radius: 2px;
-  transition: all 0.2s;
-  position: relative;
-  min-height: 4px;
+  flex: 1; background: var(--bg-4); margin: 0 1px; border-radius: 2px;
+  transition: all 0.2s; position: relative; min-height: 4px;
 }
+.timeline-bar.selected { background: linear-gradient(180deg, var(--accent), var(--accent-2)); box-shadow: 0 0 8px var(--accent-glow); }
+.timeline-bar.slowmo { background: linear-gradient(180deg, var(--warning), var(--accent-3)); box-shadow: 0 0 8px rgba(255, 184, 0, 0.5); }
 
-.timeline-bar.selected {
-  background: linear-gradient(180deg, var(--accent), var(--accent-2));
-  box-shadow: 0 0 8px var(--accent-glow);
-}
-
-.timeline-bar.slowmo {
-  background: linear-gradient(180deg, var(--warning), var(--accent-3));
-  box-shadow: 0 0 8px rgba(255, 184, 0, 0.5);
-}
-
-/* Result */
-.result-container {
-  display: none;
-  flex-direction: column;
-  gap: 16px;
-}
-
+.result-container { display: none; flex-direction: column; gap: 16px; }
 .result-container.active { display: flex; }
 
-/* Loading Spinner */
-.spinner {
-  width: 16px;
-  height: 16px;
-  border: 2px solid transparent;
-  border-top-color: white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
+.spinner { width: 16px; height: 16px; border: 2px solid transparent; border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* Toast */
-.toast-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
+.toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
 .toast {
-  background: var(--bg-3);
-  border: 1px solid var(--border);
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-  animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  min-width: 250px;
+  background: var(--bg-3); border: 1px solid var(--border); padding: 12px 16px;
+  border-radius: 8px; font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4); animation: slideIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); min-width: 250px;
 }
-
-.toast.success { border-color: var(--success); }
-.toast.success i { color: var(--success); }
-.toast.error { border-color: var(--danger); }
-.toast.error i { color: var(--danger); }
-.toast.info { border-color: var(--accent-3); }
-.toast.info i { color: var(--accent-3); }
-
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
+.toast.success { border-color: var(--success); } .toast.success i { color: var(--success); }
+.toast.error { border-color: var(--danger); } .toast.error i { color: var(--danger); }
+.toast.info { border-color: var(--accent-3); } .toast.info i { color: var(--accent-3); }
+@keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
 
 .hidden { display: none !important; }
 
 .scanning-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
+  position: absolute; top: 0; left: 0; width: 100%; height: 2px;
   background: linear-gradient(90deg, transparent, var(--accent-3), transparent);
-  animation: scan 2s linear infinite;
-  z-index: 10;
+  animation: scan 2s linear infinite; z-index: 10;
 }
+@keyframes scan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
 
-@keyframes scan {
-  0% { top: 0; }
-  50% { top: 100%; }
-  100% { top: 0; }
-}
-
-.legend {
-  display: flex;
-  gap: 12px;
-  font-size: 10px;
-  color: var(--text-dim);
-}
+.legend { display: flex; gap: 12px; font-size: 10px; color: var(--text-dim); }
 .legend-item { display: flex; align-items: center; gap: 4px; }
 .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
 .legend-dot.normal { background: var(--accent); }
@@ -491,15 +291,13 @@ html, body {
       <div class="logo-icon"><i class="fas fa-bolt"></i></div>
       <span class="logo-text">ANIME CLIPPER AI</span>
     </div>
-    <div class="badge"><i class="fas fa-rocket"></i> Turbo Action Engine v5.0</div>
+    <div class="badge"><i class="fas fa-rocket"></i> Turbo Action Engine v5.1</div>
   </header>
 
   <div class="main-grid">
     <!-- LEFT: INPUT -->
     <div class="panel">
-      <div class="panel-title">
-        <i class="fas fa-upload"></i> Sumber Anime & Setting
-      </div>
+      <div class="panel-title"><i class="fas fa-upload"></i> Sumber Anime & Setting</div>
       
       <div id="uploadArea">
         <div class="upload-zone" id="dropzone">
@@ -522,26 +320,12 @@ html, body {
       <div class="control-group">
         <span class="control-label">Aspect Ratio & Crop (HD Output)</span>
         <div class="aspect-control">
-          <button class="aspect-btn active" data-ratio="16/9" data-w="1280" data-h="720">
-            <i class="fas fa-rectangle-wide"></i>
-            <span>16:9 HD</span>
-          </button>
-          <button class="aspect-btn" data-ratio="9/16" data-w="720" data-h="1280">
-            <i class="fas fa-mobile-screen"></i>
-            <span>9:16 HD</span>
-          </button>
-          <button class="aspect-btn" data-ratio="1/1" data-w="800" data-h="800">
-            <i class="fas fa-square"></i>
-            <span>1:1 HD</span>
-          </button>
-          <button class="aspect-btn" data-ratio="4/5" data-w="864" data-h="1080">
-            <i class="fas fa-rectangle-portrait"></i>
-            <span>4:5 HD</span>
-          </button>
+          <button class="aspect-btn active" data-ratio="16/9" data-w="1280" data-h="720"><i class="fas fa-rectangle-wide"></i><span>16:9 HD</span></button>
+          <button class="aspect-btn" data-ratio="9/16" data-w="720" data-h="1280"><i class="fas fa-mobile-screen"></i><span>9:16 HD</span></button>
+          <button class="aspect-btn" data-ratio="1/1" data-w="800" data-h="800"><i class="fas fa-square"></i><span>1:1 HD</span></button>
+          <button class="aspect-btn" data-ratio="4/5" data-w="864" data-h="1080"><i class="fas fa-rectangle-portrait"></i><span>4:5 HD</span></button>
         </div>
-        <p style="font-size: 11px; color: var(--text-faint); margin-top: 4px;">
-          * Target 30 Detik. Langsung ke action. Momen epik otomatis Slow Motion.
-        </p>
+        <p style="font-size: 11px; color: var(--text-faint); margin-top: 4px;">* Target 30 Detik. Langsung ke action. Momen epik otomatis Slow Motion.</p>
       </div>
 
       <div class="steps">
@@ -555,7 +339,7 @@ html, body {
         <div class="step" id="step2">
           <div class="step-icon"><i class="fas fa-forward"></i></div>
           <div class="step-info">
-            <div class="step-name">2. Turbo Analysis (8x Speed)</div>
+            <div class="step-name">2. Turbo Analysis</div>
             <div class="step-status" id="step2Status">Scan visual & audio cepat</div>
           </div>
         </div>
@@ -564,6 +348,13 @@ html, body {
           <div class="step-info">
             <div class="step-name">3. Action Cut 30s + Slow Mo</div>
             <div class="step-status" id="step3Status">Menyusun momen aksi terbaik</div>
+          </div>
+        </div>
+        <div class="step" id="step4">
+          <div class="step-icon"><i class="fas fa-film"></i></div>
+          <div class="step-info">
+            <div class="step-name">4. Render HD</div>
+            <div class="step-status" id="step4Status">Render & Encoding</div>
           </div>
         </div>
       </div>
@@ -576,9 +367,7 @@ html, body {
     <!-- RIGHT: OUTPUT -->
     <div class="panel">
       <div class="scanning-line hidden" id="scanningLine"></div>
-      <div class="panel-title">
-        <i class="fas fa-film"></i> Hasil Edit (30 Detik)
-      </div>
+      <div class="panel-title"><i class="fas fa-film"></i> Hasil Edit (30 Detik)</div>
 
       <div id="emptyState">
         <div class="upload-zone" style="cursor: default;">
@@ -627,7 +416,9 @@ const state = {
   chunks: [],
   aspectRatio: '16/9',
   canvasWidth: 1280,
-  canvasHeight: 720
+  canvasHeight: 720,
+  audioCtx: null,
+  mediaElementSource: null
 };
 
 const dropzone = document.getElementById('dropzone');
@@ -685,6 +476,7 @@ function handleFile(file) {
     return;
   }
   state.file = file;
+  if (state.videoUrl) URL.revokeObjectURL(state.videoUrl);
   state.videoUrl = URL.createObjectURL(file);
   
   videoPlayer.src = state.videoUrl;
@@ -717,10 +509,13 @@ async function startAutoCut() {
   resultContainer.classList.remove('active');
   document.getElementById('scanningLine').classList.remove('hidden');
   
+  // Reset steps
+  for(let i=2; i<=4; i++) setStepStatus(i, null, '');
+  
   try {
     setStepStatus(2, 'active', 'Memulai turbo analisis...');
     await analyzeVideoTurbo();
-    setStepStatus(2, 'done', `Selesai dalam hitungan detik!`);
+    setStepStatus(2, 'done', `Selesai!`);
     
     setStepStatus(3, 'active', 'Memilih aksi terbaik...');
     selectActionMoments();
@@ -745,7 +540,7 @@ async function startAutoCut() {
   }
 }
 
-// TURBO ANALYZER: Play video at 8x speed and sample frames
+// TURBO ANALYZER FIXED: Using requestAnimationFrame + Anti-Stall
 async function analyzeVideoTurbo() {
   return new Promise(async (resolve) => {
     const video = videoPlayer;
@@ -760,64 +555,74 @@ async function analyzeVideoTurbo() {
     
     state.analysisData = [];
     let prevFrame = null;
-    let lastT = 0;
+    let lastT = -1;
+    let stallCounter = 0;
+    let lastCurrentTime = 0;
+
+    try {
+      await video.play();
+    } catch(e) {
+      console.error("Play error", e);
+      resolve();
+      return;
+    }
 
     function processFrame() {
       const currentT = video.currentTime;
       if (currentT - lastT < 0.1) return; // Sample every ~0.1s
       
       lastT = currentT;
-      ctx.drawImage(video, 0, 0, w, h);
-      const frame = ctx.getImageData(0, 0, w, h).data;
-      let diff = 0;
-      
-      if (prevFrame) {
-        for (let i = 0; i < frame.length; i += 4) {
-          diff += Math.abs(frame[i] - prevFrame[i]) + Math.abs(frame[i+1] - prevFrame[i+1]) + Math.abs(frame[i+2] - prevFrame[i+2]);
+      if (video.readyState >= 2) {
+        ctx.drawImage(video, 0, 0, w, h);
+        const frame = ctx.getImageData(0, 0, w, h).data;
+        let diff = 0;
+        
+        if (prevFrame) {
+          for (let i = 0; i < frame.length; i += 4) {
+            diff += Math.abs(frame[i] - prevFrame[i]) + Math.abs(frame[i+1] - prevFrame[i+1]) + Math.abs(frame[i+2] - prevFrame[i+2]);
+          }
+          diff = diff / (w * h * 3 * 255) * 100;
         }
-        diff = diff / (w * h * 3 * 255) * 100;
-      }
-      prevFrame = frame;
+        prevFrame = frame;
 
-      // Action score: Emphasize large visual differences (fast movement)
-      // Ignore audio here because 8x playback messes up audio pitch.
-      // We rely purely on high visual diff to detect action.
-      const score = Math.pow(diff, 1.5); 
-      state.analysisData.push({ time: currentT, score });
-      
-      document.getElementById('step2Status').textContent = `Turbo scan... ${(currentT/video.duration*100).toFixed(0)}%`;
+        const score = Math.pow(diff, 1.5); 
+        state.analysisData.push({ time: currentT, score });
+        
+        document.getElementById('step2Status').textContent = `Turbo scan... ${Math.min(100, (currentT/video.duration*100)).toFixed(0)}%`;
+      }
     }
 
-    // Use requestVideoFrameCallback if available (very efficient)
-    if (video.requestVideoFrameCallback) {
-      const onFrame = (now, metadata) => {
-        processFrame();
-        if (metadata.mediaTime < video.duration - 0.1) {
-          video.requestVideoFrameCallback(onFrame);
-        } else {
+    function checkFrame() {
+      if (video.ended || video.currentTime >= video.duration - 0.1) {
+        video.pause();
+        video.playbackRate = 1;
+        resolve();
+        return;
+      }
+
+      // Anti-Stall Protection
+      if (video.currentTime === lastCurrentTime) {
+        stallCounter++;
+        if (stallCounter > 150) { // ~2.5 seconds of no progress
+          console.warn("Video stalled during analysis, forcing completion...");
           video.pause();
           video.playbackRate = 1;
           resolve();
+          return;
         }
-      };
-      video.requestVideoFrameCallback(onFrame);
-      await video.play();
-    } else {
-      // Fallback for browsers without rVFC
-      const interval = setInterval(() => {
-        processFrame();
-        if (video.ended) {
-          clearInterval(interval);
-          video.playbackRate = 1;
-          resolve();
-        }
-      }, 50);
-      await video.play();
+      } else {
+        stallCounter = 0;
+        lastCurrentTime = video.currentTime;
+      }
+
+      processFrame();
+      requestAnimationFrame(checkFrame);
     }
+
+    requestAnimationFrame(checkFrame);
   });
 }
 
-// ACTION SELECTOR: Directly pick high-motion chunks
 function selectActionMoments() {
   const targetDuration = 30;
   const segmentLength = 1.5; 
@@ -832,7 +637,6 @@ function selectActionMoments() {
     
     const avgScore = windowSlice.reduce((a, b) => a + b.score, 0) / windowSlice.length;
     
-    // Reject low-score (boring) segments completely
     if (avgScore > 5) { 
       windows.push({
         start: startT,
@@ -844,22 +648,17 @@ function selectActionMoments() {
     }
   }
 
-  // Sort by score to find absolute best moments for Slow Mo
   const sortedByScore = [...windows].sort((a, b) => b.score - a.score);
   
-  // Mark top 2 highest scored segments as Slow Motion (0.4x)
   const slowMoCount = Math.min(2, sortedByScore.length);
   for (let i = 0; i < slowMoCount; i++) {
     sortedByScore[i].speed = 0.4;
-    sortedByScore[i].outDuration = segmentLength / 0.4; // 3.75s
+    sortedByScore[i].outDuration = segmentLength / 0.4;
   }
 
-  // Select segments until we reach ~30s output duration
   const selected = [];
   let totalOutDuration = 0;
   
-  // Re-sort by time to pick chronologically, but we need to pick the best ones.
-  // Better approach: Sort by score, take top N until 30s is reached, then sort by time.
   sortedByScore.forEach(win => {
     if (totalOutDuration < targetDuration) {
       selected.push(win);
@@ -867,9 +666,7 @@ function selectActionMoments() {
     }
   });
 
-  // Sort the final selection back by time
   selected.sort((a, b) => a.start - b.start);
-  
   state.selectedSegments = selected;
 }
 
@@ -900,7 +697,6 @@ function renderTimelineViz() {
   }
 }
 
-// Canvas Crop Math (Object-fit: Cover)
 function drawImageCover(ctx, video, x, y, w, h, zoom = 1) {
   const vRatio = video.videoWidth / video.videoHeight;
   const dRatio = w / h;
@@ -928,18 +724,18 @@ async function renderResult() {
     canvas.height = state.canvasHeight;
     const ctx = canvas.getContext('2d');
     
-    // Setup Audio
-    const audioCtx = new AudioContext();
-    const source = audioCtx.createMediaElementSource(sourceVideo);
-    const dest = audioCtx.createMediaStreamDestination();
-    source.connect(dest);
-    source.connect(audioCtx.destination);
+    // Setup Audio (Safe initialization to prevent crash on multiple runs)
+    if (!state.audioCtx) {
+      state.audioCtx = new AudioContext();
+      state.mediaElementSource = state.audioCtx.createMediaElementSource(sourceVideo);
+    }
+    const dest = state.audioCtx.createMediaStreamDestination();
+    state.mediaElementSource.connect(dest);
+    state.mediaElementSource.connect(state.audioCtx.destination);
     
-    // Setup Canvas Stream (30 FPS)
     const stream = canvas.captureStream(30);
     stream.addTrack(dest.stream.getAudioTracks()[0]);
     
-    // Setup HD Recorder (8 Mbps for high quality)
     state.chunks = [];
     let recorderOptions = { mimeType: 'video/webm;codecs=vp9', videoBitsPerSecond: 8000000 };
     if (!MediaRecorder.isTypeSupported(recorderOptions.mimeType)) {
@@ -967,7 +763,6 @@ async function renderResult() {
       sourceVideo.currentTime = seg.start;
       await new Promise(r => sourceVideo.addEventListener('seeked', r, { once: true }));
       
-      // Set playback speed (Slow motion or normal)
       sourceVideo.playbackRate = seg.speed;
       await sourceVideo.play();
       
@@ -985,11 +780,9 @@ async function renderResult() {
           ctx.fillStyle = '#000';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
           
-          // Add cinematic zoom if slow motion
           const zoomFactor = seg.speed < 1 ? 1.15 : 1.0;
           drawImageCover(ctx, sourceVideo, 0, 0, canvas.width, canvas.height, zoomFactor);
           
-          // Add slight vignette for epic feel during slow-mo
           if (seg.speed < 1) {
             const grad = ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.height/3, canvas.width/2, canvas.height/2, canvas.height/1.2);
             grad.addColorStop(0, 'rgba(0,0,0,0)');
@@ -1004,7 +797,7 @@ async function renderResult() {
       });
       
       totalElapsed += seg.outDuration;
-      document.getElementById('step4Status').textContent = `Render HD... ${(totalElapsed/totalTargetDuration*100).toFixed(0)}%`;
+      document.getElementById('step4Status').textContent = `Render HD... ${Math.min(100, (totalElapsed/totalTargetDuration*100)).toFixed(0)}%`;
     }
 
     sourceVideo.muted = true;
