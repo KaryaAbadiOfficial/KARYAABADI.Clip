@@ -318,7 +318,6 @@
         }
 
         // --- FAST AUDIO WAVEFORM INTELLIGENCE ---
-        // Tidak menggunakan AI berat, hanya membaca amplitude gelombang audio (cepat & instan)
         async function analyzeAudioFast(file) {
             const arrayBuffer = await file.arrayBuffer();
             const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -328,6 +327,10 @@
             const data = decoded.getChannelData(0);
             const sampleRate = decoded.sampleRate;
             const duration = decoded.duration;
+            
+            if (data.length === 0) {
+                return { duration: duration || 10, normE: new Array(100).fill(0.1) };
+            }
             
             // Sampling energy setiap 100ms
             const block = Math.floor(sampleRate * 0.1);
@@ -365,9 +368,16 @@
                 // Buat teks dinamis (muncul saat ada suara)
                 const transcript = [];
                 let wordIdx = 0;
+                let clipAvgEnergy = 0;
+                let energyCount = 0;
+                
                 for (let t = start; t < end; t += 1.5) {
                     const idx = Math.floor(t * 10); // Index energy (100ms = 0.1s)
+                    if (idx >= normE.length) break;
+                    
                     const localEnergy = normE.slice(idx, idx + 15).reduce((a, b) => a + b, 0) / 15;
+                    clipAvgEnergy += localEnergy;
+                    energyCount++;
                     
                     if (localEnergy > 0.15) { // Threshold suara terdengar
                         transcript.push({
@@ -379,10 +389,12 @@
                     }
                 }
                 
+                clipAvgEnergy = energyCount > 0 ? clipAvgEnergy / energyCount : 0.1;
+                
                 clips.push({
                     id: id,
                     title: `Momen Penting #${id} (${targetSize}s)`,
-                    score: 80 + Math.floor(localEnergy * 20) || 85,
+                    score: Math.min(99, Math.floor(80 + clipAvgEnergy * 20)),
                     start: start,
                     end: end,
                     transcript: transcript,
